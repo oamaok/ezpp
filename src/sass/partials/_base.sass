@@ -1,0 +1,33 @@
+*
+  margin: 0
+  padding: 0
+  outline: 0
+  color: #444
+  font-family: 'Exo 2'
+  box-sizing: border-box
+
+html
+  font-size: 18px
+
+body
+  background-color: #000
+  clear: both
+
+h1,h2,h3,h4
+  color: #f7f7f7
+  font-family: 'Exo 2'
+  margin-bottom: 0.5em
+  font-weight: 700
+
+.container
+  width: 30em
+  background-image: url('../../assets/background.png')
+  // For preloading
+  &>*
+    transition: 0.2s all ease-out
+  &>.spinner
+    opacity: 0
+  &.preloading>*
+    opacity: 0
+  &.preloading>.spinner
+    opacity: 1

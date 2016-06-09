@@ -1,0 +1,52 @@
+@mixin mod-badge($mod)
+  &.mod-#{$mod}
+    label::before
+      background-image: url('../../assets/mod-badges/' + $mod + '.png')
+
+.mods
+  transform: translateZ(1px)
+
+.mod
+  padding-top: 0.5em
+  position: relative
+  width: 25%
+  float: left
+  text-align: center
+  [type="checkbox"]
+    position: absolute
+    opacity: 0
+  label
+    display: inline-block
+    cursor: pointer
+    font-weight: 600
+    user-select: none
+    transition: all 0.1s ease-out
+    &:hover::before
+      opacity: 0.7
+      filter: none
+  label::before
+    margin: 0 auto
+    transition: all 0.1s ease-out
+    content: ' '
+    display: inline-block
+    width: 92px
+    height: 68px
+    transform: scale(0.8)
+    opacity: 0.5
+    filter: grayscale(100%)
+    background-repeat: no-repeat
+  [type="checkbox"]:checked+label
+    color: #29b
+    transform: scale(1.08)
+    &::before
+      transform: scale(0.9091) rotate(10deg)
+      opacity: 1
+      filter: none
+  @include mod-badge('dt')
+  @include mod-badge('ez')
+  @include mod-badge('fl')
+  @include mod-badge('hd')
+  @include mod-badge('hr')
+  @include mod-badge('ht')
+  @include mod-badge('nf')
+  @include mod-badge('so')

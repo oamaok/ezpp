@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href='https://fonts.googleapis.com/css?family=Exo+2:400,600' rel='stylesheet' type='text/css'>
+</head>
+<body>
+<div class="container preloading" id="container">
+  <div class="spinner">
+  </div>
+  <div class="header" id="header">
+    <span id="title"></span>
+  </div>
+  <div class="numerics">
+    <div class="numeric">
+      <label for="accuracy">Accuracy</label>
+      <input type="text" id="accuracy" value="100.0" pattern="">
+    </div>
+    <div class="numeric">
+      <label for="combo">Combo<span class="hint">(empty = FC)</span></label>
+      <input type="text" id="combo" value="" >
+    </div>
+    <div class="numeric">
+      <label for="misses">Misses</label>
+      <input type="text" id="misses" value="0">
+    </div>
+  </div>
+  <div class="mods">
+    <div class="mod mod-hd">
+      <input type="checkbox" id="mod-hd" value="8">
+      <label for="mod-hd">Hidden</label>
+    </div>
+    <div class="mod mod-hr">
+      <input type="checkbox" id="mod-hr" value="16">
+      <label for="mod-hr">HardRock</label>
+    </div>
+    <div class="mod mod-dt">
+      <input type="checkbox" id="mod-dt" value="64">
+      <label for="mod-dt">DoubleTime</label>
+    </div>
+    <div class="mod mod-fl">
+      <input type="checkbox" id="mod-fl" value="1024">
+      <label for="mod-fl">Flashlight</label>
+    </div>
+    <div class="mod mod-ez">
+      <input type="checkbox" id="mod-ez" value="2">
+      <label for="mod-ez">Easy</label>
+    </div>
+    <div class="mod mod-ht">
+      <input type="checkbox" id="mod-ht" value="128">
+      <label for="mod-ht">HalfTime</label>
+    </div>
+    <div class="mod mod-nf">
+      <input type="checkbox" id="mod-nf" value="1">
+      <label for="mod-nf">NoFail</label>
+    </div>
+    <div class="mod mod-so">
+      <input type="checkbox" id="mod-so" value="4096">
+      <label for="mod-so">SpunOut</label>
+    </div>
+  </div>
+  <div class="btn-wrapper">
+    <button class="btn" id="calc-btn">Calculate!</button>
+  </div>
+  <div class="result hidden" id="result"></div>
+</div>
+<script src="popup.js"></script>
+</body>
+</html>
