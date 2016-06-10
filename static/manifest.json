@@ -2,13 +2,17 @@
   "manifest_version": 2,
   "name": "ezpp!",
   "description": "",
-  "version": "1.2.0",
+  "version": "1.2.1",
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
   "background": {
     "scripts": ["background.js"],
     "persistent": false
   },
   "page_action": {
-    "default_icon": "icon.png",
+    "default_icon": "icon48.png",
     "default_popup": "popup.html"
   },
   "permissions": [
