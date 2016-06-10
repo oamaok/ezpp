@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "ezpp!",
   "description": "",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "background": {
     "scripts": ["background.js"],
     "persistent": false
@@ -12,7 +12,7 @@
     "default_popup": "popup.html"
   },
   "permissions": [
-    "tabs", "activeTab",
+    "tabs",
     "https://*.ppy.sh/",
     "http://*.ppy.sh/"
   ]

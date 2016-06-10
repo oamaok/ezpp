@@ -2,7 +2,7 @@
 require('../sass/main.sass');
 
 // Other imports
-import osuParser from 'osu-parser-web';
+import OsuParser from 'osu-parser-web';
 import {PPCalculator, Beatmap} from 'osu-pp-calculator';
 
 const containerElement = document.getElementById('container');
@@ -24,6 +24,7 @@ let pageInfo = {
 };
 
 let cleanBeatmap = null;
+let debounceTimeout = null;
 
 // Init the extension.
 chrome.tabs.query({
@@ -50,12 +51,11 @@ chrome.tabs.query({
 
     // Check for 'Updated' text instead of 'Qualified' or 'Ranked'
     pageInfo.isUnranked = !!html.match('<td width=0%>\nSubmitted:<br/>\nUpdated:\n</td>');
-    console.log(pageInfo.isUnranked);
 
     return fetch(`https://osu.ppy.sh/osu/${pageInfo.beatmapId}`);
   })
   .then(res => res.text())
-  .then(osuParser.parseContent)
+  .then(OsuParser.parseContent)
   .then(beatmap => {
     cleanBeatmap = beatmap;
     
@@ -68,8 +68,8 @@ chrome.tabs.query({
 
     return new Promise(resolve => {
       cover.onload = () => resolve(cover);
-      cover.onerror = () => resolve(cover);
-      cover.onabort = () => resolve(cover);
+      cover.onerror = () => resolve();
+      cover.onabort = () => resolve();
     });
   })
   .then(onReady);
@@ -80,7 +80,8 @@ const onReady = (cover) => {
   containerElement.classList.toggle('preloading', false);
 
   // Set header background
-  headerElement.style.backgroundImage = `url('${cover.src}')`;
+  if (cover)
+    headerElement.style.backgroundImage = `url('${cover.src}')`;
 
   // Set header text
   titleElement.innerText = `${cleanBeatmap.Artist} - ${cleanBeatmap.Title} [${cleanBeatmap.Version}]`;
@@ -90,27 +91,36 @@ const onReady = (cover) => {
     if (evt.keyCode == 13)
       calculate();
   });
-  calculateElement.addEventListener('click', calculate);
 
-  // Hide the result div if the form is fiddled with
-  const hide = () => resultElement.classList.toggle('hidden', true);
-  Array.from(modifierElements).forEach(modElement => modElement.addEventListener('click', hide));
-  accuracyElement.addEventListener('keydown', hide);
-  comboElement.addEventListener('keydown', hide);
-  missesElement.addEventListener('keydown', hide);
+  // Recalculate the result div if the form is fiddled with
+  Array.from(modifierElements).forEach(
+    modElement => modElement.addEventListener('click', debounce)
+  );
+  accuracyElement.addEventListener('keydown', debounce);
+  comboElement.addEventListener('keydown', debounce);
+  missesElement.addEventListener('keydown', debounce);
 
+  calculate();
+};
+
+const debounce = () => {
+  resultElement.classList.toggle('hidden', true);
+
+  if (debounceTimeout)
+    clearTimeout(debounceTimeout);
+
+  debounceTimeout = setTimeout(calculate, 300);
 };
 
 const calculate = () => {
-  resultElement.classList.toggle('hidden', true);
   // Bitwise OR the mods together
   const modifiers = Array.from(modifierElements).reduce((num, element) => (
     num | (element.checked ? parseInt(element.value) : 0)
   ), 0);
 
   const accuracy = parseFloat(accuracyElement.value) || 100;
-  const combo = parseInt(comboElement.value) || 0;
-  const misses = parseInt(missesElement.value) || 0;
+  const combo = parseInt(comboElement.value) || undefined;
+  const misses = parseInt(missesElement.value) || undefined;
 
   const beatmap = Beatmap.fromOsuParserObject(cleanBeatmap);
   const pp = PPCalculator.calculate(beatmap, accuracy, modifiers, combo, misses);
