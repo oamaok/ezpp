@@ -66,6 +66,9 @@ chrome.tabs.query({
   promise.then(res => res.text())
   .then(OsuParser.parseContent)
   .then(beatmap => {
+    // Support old beatmap
+    beatmap.Mode = beatmap.Mode || 0;
+
     cleanBeatmap = beatmap;
     
     // Preload beatmap cover
