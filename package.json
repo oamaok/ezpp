@@ -22,7 +22,8 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "webpack -w",
+    "release": "rm -rf dist/ ezpp.zip && webpack -p && zip -jr ezpp.zip dist/*"
   },
   "repository": {
     "type": "git",
