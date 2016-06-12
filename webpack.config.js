@@ -40,10 +40,10 @@ module.exports = {
       compress: { warnings: false }
     }),
     new CopyWebpackPlugin([
-      { context: './static/', from: '**/*', to: './dist/'}
+      { context: './src/static/', from: '**/*', to: './dist/'}
     ])
   ] : [new CopyWebpackPlugin([
-      { context: './static/', from: '**/*', to: './dist/'}
+      { context: './src/static/', from: '**/*', to: './dist/'}
     ])],
   postcss: () => [autoprefixer],
   resolve: {

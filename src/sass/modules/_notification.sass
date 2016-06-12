@@ -1,0 +1,25 @@
+.notification
+  position: absolute
+  z-index: 2
+  box-shadow: 0 1px 4px rgba(0,0,0,.6)
+  box-sizing: border-box
+  height: 3em
+  padding: 0.8em 1em
+  width: 100%
+  transition: 0.2s all ease-out
+  overflow: hidden
+  background-image: url('../../assets/button-bg.svg')
+  background-color: #fc2
+  background-size: cover
+  color: #fff
+  font-weight: 600
+  font-size: 1.2em
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75)
+  &.hidden
+    padding: 0 1em 0 1em
+    height: 0
+  .message
+    float: left
+  .clear
+    float: right
+    cursor: pointer

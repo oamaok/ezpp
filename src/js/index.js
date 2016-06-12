@@ -1,6 +1,9 @@
 // Include styles
 require('../sass/main.sass');
 
+// Include other js files
+require('./notifications.js');
+
 // Other imports
 import OsuParser from 'osu-parser-web';
 import {PPCalculator, Beatmap} from 'osu-pp-calculator';
@@ -105,6 +108,27 @@ const onReady = (cover) => {
   accuracyElement.addEventListener('keydown', debounce);
   comboElement.addEventListener('keydown', debounce);
   missesElement.addEventListener('keydown', debounce);
+
+  // Disable mods if their counterpart gets activated
+  Array.from(modifierElements).forEach(
+    modElement => modElement.addEventListener('click', evt => {
+      // Ugly, but works
+      switch (evt.target.id) {
+      case 'mod-hr':
+        Array.from(modifierElements).find(e => e.id == 'mod-ez').checked = false;
+        break;
+      case 'mod-ez':
+        Array.from(modifierElements).find(e => e.id == 'mod-hr').checked = false;
+        break;
+      case 'mod-ht':
+        Array.from(modifierElements).find(e => e.id == 'mod-dt').checked = false;
+        break;
+      case 'mod-dt':
+        Array.from(modifierElements).find(e => e.id == 'mod-ht').checked = false;
+        break;
+      }
+    })
+  );
 
   calculate();
 };
