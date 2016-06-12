@@ -18,6 +18,11 @@ const missesElement = document.getElementById('misses');
 const resultElement = document.getElementById('result');
 const errorElement = document.getElementById('error');
 
+if (__FIREFOX__) {
+  containerElement.classList.toggle('firefox', true);
+  document.documentElement.classList.toggle('firefox', true);
+}
+
 let pageInfo = {
   isOldSite: null,
   isBeatmap: null,

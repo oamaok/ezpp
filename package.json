@@ -1,7 +1,7 @@
 {
   "name": "ezpp!",
-  "version": "1.2.6",
-  "description": "Chrome extension fro calculating pp!",
+  "version": "1.2.7",
+  "description": "Browser extension for calculating pp!",
   "main": "src/js/index.js",
   "dependencies": {
     "autoprefixer": "^6.3.6",
@@ -23,8 +23,10 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "webpack -w",
-    "release": "rm -rf dist/ ezpp.zip && webpack -p && zip -jr ezpp.zip dist/*"
+    "dev-chrome": "BUILD_CHROME=1 webpack -w",
+    "dev-firefox": "BUILD_FF=1 webpack -w",
+    "release-chrome": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_CHROME=1 webpack -p && zip -jr ezpp.zip dist/*",
+    "release-firefox": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_FF=1 webpack -p && zip -jr ezpp.xpi dist/*"
   },
   "repository": {
     "type": "git",

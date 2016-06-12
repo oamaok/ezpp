@@ -2,14 +2,18 @@
   "manifest_version": 2,
   "name": "ezpp!",
   "description": "Directly calculate pp for a beatmap in your browser.",
-  "version": "1.2.6",
+  "version": "1.2.7",
   "icons": {
     "48": "icon48.png",
     "128": "icon128.png"
   },
+  "applications": {
+    "gecko": {
+      "id": "ezpp@oamaok.github.io"
+    }
+  },
   "background": {
-    "scripts": ["background.js"],
-    "persistent": false
+    "scripts": ["background.js"]
   },
   "page_action": {
     "default_icon": "icon48.png",
