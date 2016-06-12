@@ -28,10 +28,14 @@ h1,h2,h3,h4
   background-image: url('../../assets/background.png')
   // For preloading
   &>*
-    transition: 0.2s all ease-out
+    transition: 0.2s opacity ease-out
   &>.spinner
     opacity: 0
   &.preloading>*
     opacity: 0
   &.preloading>.spinner
     opacity: 1
+  &.error>*
+    filter: grayscale(1) blur(2px)
+  &.error>.error-message
+    filter: grayscale(0)

@@ -17,6 +17,7 @@ const accuracyElement = document.getElementById('accuracy');
 const comboElement = document.getElementById('combo');
 const missesElement = document.getElementById('misses');
 const resultElement = document.getElementById('result');
+const errorElement = document.getElementById('error');
 
 let pageInfo = {
   isOldSite: null,
@@ -70,7 +71,10 @@ chrome.tabs.query({
   .then(OsuParser.parseContent)
   .then(beatmap => {
     // Support old beatmap
-    beatmap.Mode = beatmap.Mode || 0;
+    beatmap.Mode = beatmap.Mode || '0';
+
+    if (beatmap.Mode !== '0')
+      throw Error('Unsupported gamemode :(');
 
     cleanBeatmap = beatmap;
     
@@ -87,7 +91,8 @@ chrome.tabs.query({
       cover.onabort = () => resolve();
     });
   })
-  .then(onReady);
+  .then(onReady)
+  .catch(displayError);
 });
 
 const onReady = (cover) => {
@@ -152,8 +157,20 @@ const calculate = () => {
   const combo = parseInt(comboElement.value) || undefined;
   const misses = parseInt(missesElement.value) || undefined;
 
-  const beatmap = Beatmap.fromOsuParserObject(cleanBeatmap);
-  const pp = PPCalculator.calculate(beatmap, accuracy, modifiers, combo, misses);
-  resultElement.innerText = `That's about ${Math.round(pp)}pp.`;
-  resultElement.classList.toggle('hidden', false);
+  try {
+    // These two can throw errors, let's be careful!
+    const beatmap = Beatmap.fromOsuParserObject(cleanBeatmap);
+    const pp = PPCalculator.calculate(beatmap, accuracy, modifiers, combo, misses);
+
+    resultElement.innerText = `That's about ${Math.round(pp)}pp.`;
+    resultElement.classList.toggle('hidden', false);
+  } catch (err) {
+    displayError(err);
+  }
+};
+
+const displayError = (message) => {
+  errorElement.innerText = message;
+  containerElement.classList.toggle('error', true);
+  containerElement.classList.toggle('preloading', false);
 };
