@@ -1,0 +1,29 @@
+.error-message
+  display: none
+.error>.error-message
+  display: inline-block
+  position: absolute
+  z-index: 2
+  height: 100%
+  width: 100%
+  .message
+    margin: auto
+    position: absolute
+    top: 0
+    left: 0
+    right: 0
+    bottom: 0
+    box-shadow: 0 1px 4px rgba(0,0,0,.6)
+    height: fit-content
+    padding: 1em
+    width: 100%
+    transition: 0.2s all ease-out
+    overflow: hidden
+    background-image: url('../../assets/button-bg.svg')
+    background-color: #b00
+    background-size: cover
+    color: #fff
+    font-weight: 600
+    font-size: 1.5em
+    text-align: center
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75)

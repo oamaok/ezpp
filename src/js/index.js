@@ -12,7 +12,6 @@ const containerElement = document.getElementById('container');
 const headerElement = document.getElementById('header');
 const titleElement = document.getElementById('title');
 const modifierElements = document.querySelectorAll('.mod>input');
-const calculateElement = document.getElementById('calc-btn');
 const accuracyElement = document.getElementById('accuracy');
 const comboElement = document.getElementById('combo');
 const missesElement = document.getElementById('misses');
