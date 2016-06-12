@@ -7,12 +7,16 @@
   box-sizing: border-box
 
 html
-  font-size: 18px
   color: #444
+  &.firefox
+    overflow: hidden
 
 body
   background-color: #000
   clear: both
+
+.firefox>body
+  overflow: hidden
 
 h1,h2,h3,h4
   color: #f7f7f7
@@ -24,6 +28,7 @@ h1,h2,h3,h4
   clear: both
 
 .container
+  font-size: 14px
   width: 30em
   background-image: url('../../assets/background.png')
   // For preloading
@@ -39,3 +44,4 @@ h1,h2,h3,h4
     filter: grayscale(1) blur(2px)
   &.error>.error-message
     filter: grayscale(0)
+

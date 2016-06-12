@@ -4,6 +4,11 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 // Check for production flag
 const PROD = process.argv.indexOf('-p') !== -1;
 
+var definePlugin = new webpack.DefinePlugin({
+  __CHROME__: JSON.stringify(JSON.parse(process.env.BUILD_CHROME || 'true')),
+  __FIREFOX__: JSON.stringify(JSON.parse(process.env.BUILD_FF || 'false'))
+});
+
 module.exports = {
   entry: './src/js/index.js',
   output: {
@@ -41,10 +46,11 @@ module.exports = {
     }),
     new CopyWebpackPlugin([
       { context: './src/static/', from: '**/*', to: './dist/'}
-    ])
+    ]),
+    definePlugin
   ] : [new CopyWebpackPlugin([
       { context: './src/static/', from: '**/*', to: './dist/'}
-    ])],
+    ]), definePlugin],
   postcss: () => [autoprefixer],
   resolve: {
     extensions: ['', '.js']
