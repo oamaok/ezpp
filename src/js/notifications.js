@@ -2,6 +2,9 @@ const manifest = require('json!../static/manifest.json');
 
 const notificationElement = document.getElementById('notification');
 const notificationClearElement = document.getElementById('notification-clear');
+const versionElement = document.getElementById('version');
+
+versionElement.innerText = 'v' + manifest.version;
 
 // Version change detection
 chrome.storage.local.get(['version', 'displayNotification'], items => {
