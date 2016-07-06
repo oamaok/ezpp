@@ -1,10 +1,11 @@
-const manifest = require('json!../static/manifest.json');
+
+const manifest = require('../static/manifest.json');
 
 const notificationElement = document.getElementById('notification');
 const notificationClearElement = document.getElementById('notification-clear');
 const versionElement = document.getElementById('version');
 
-versionElement.innerText = 'v' + manifest.version;
+versionElement.innerText = `v${manifest.version}`;
 
 // Version change detection
 chrome.storage.local.get(['version', 'displayNotification'], items => {
@@ -13,16 +14,16 @@ chrome.storage.local.get(['version', 'displayNotification'], items => {
   if (!items.version) {
     chrome.storage.local.set({
       version: manifest.version,
-      displayNotification: false
+      displayNotification: false,
     });
     return;
   }
 
   // Update detected, show notification and set the version
-  if (items.version != manifest.version) {
+  if (items.version !== manifest.version) {
     chrome.storage.local.set({
       version: manifest.version,
-      displayNotification: true
+      displayNotification: true,
     });
     notificationElement.classList.toggle('hidden', false);
   }
@@ -33,10 +34,10 @@ chrome.storage.local.get(['version', 'displayNotification'], items => {
 });
 
 // Clear the notification
-notificationClearElement.addEventListener('click', evt => {
+notificationClearElement.addEventListener('click', () => {
   chrome.storage.local.set({
-    displayNotification: false
+    displayNotification: false,
   });
-  
+
   notificationElement.classList.toggle('hidden', true);
 });

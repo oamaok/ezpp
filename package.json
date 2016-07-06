@@ -21,12 +21,21 @@
     "url-loader": "^0.5.7",
     "webpack": "^1.13.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "babel-eslint": "^6.1.0",
+    "eslint": "^3.0.1",
+    "eslint-config-airbnb": "^9.0.1",
+    "eslint-plugin-import": "^1.10.2",
+    "eslint-plugin-jsx-a11y": "^1.5.5",
+    "eslint-plugin-react": "^5.2.2"
+  },
   "scripts": {
-    "dev-chrome": "BUILD_CHROME=1 webpack -w",
-    "dev-firefox": "BUILD_FF=1 webpack -w",
-    "release-chrome": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_CHROME=1 webpack -p && zip -jr ezpp.zip dist/*",
-    "release-firefox": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_FF=1 webpack -p && zip -jr ezpp.xpi dist/*"
+    "dev-chrome": "BUILD_CHROME=1 NODE_ENV=development webpack -w",
+    "dev-firefox": "BUILD_FF=1 NODE_ENV=development webpack -w",
+    "release-chrome": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_CHROME=1 NODE_ENV=production webpack -p && zip -jr ezpp.zip dist/*",
+    "release-firefox": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_FF=1 NODE_ENV=production webpack -p && zip -jr ezpp.xpi dist/*",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix ."
   },
   "repository": {
     "type": "git",
