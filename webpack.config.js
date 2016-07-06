@@ -34,23 +34,26 @@ const pluginsFirefox = pluginsCommon;
 let plugins = [];
 
 if (PROD) {
-  plugins = CHROME ? pluginsChrome : pluginsFirefox;
+  plugins = plugins.concat(CHROME ? pluginsChrome : pluginsFirefox);
 } else {
-  plugins = [
+  plugins = plugins.concat([
     new CopyWebpackPlugin([{
       context: './src/static/',
       from: '**/*',
       to: './dist/',
     }]),
     definePlugin,
-  ];
+  ]);
 }
 
 module.exports = {
-  entry: './src/js/index.js',
+  entry: {
+    popup: './src/js/index.js',
+    changelog: './src/js/changelog.js',
+  },
   output: {
     path: __dirname,
-    filename: './dist/popup.js',
+    filename: './dist/[name].js',
   },
   module: {
     loaders: [
@@ -66,7 +69,7 @@ module.exports = {
         test: /\.json$/, loader: 'json',
       },
       {
-        test: /\.sass$/, loaders: ['style', 'css', 'postcss', 'sass'],
+        test: /\.s[ac]ss$/, loaders: ['style', 'css', 'postcss', 'sass'],
       },
       {
         test: /\.(png|svg)$/, loader: 'url-loader',
