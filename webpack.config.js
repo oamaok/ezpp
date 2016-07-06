@@ -3,11 +3,48 @@ const autoprefixer = require('autoprefixer');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 // Check for production flag
 const PROD = process.argv.indexOf('-p') !== -1;
+const CHROME = !!process.env.BUILD_CHROME;
 
 const definePlugin = new webpack.DefinePlugin({
   __CHROME__: JSON.stringify(JSON.parse(process.env.BUILD_CHROME || 'true')),
   __FIREFOX__: JSON.stringify(JSON.parse(process.env.BUILD_FF || 'false')),
 });
+
+
+const pluginsCommon = [
+  new webpack.DefinePlugin({
+    'process.env': {
+      'NODE_ENV': JSON.stringify('production'),
+    },
+  }),
+  new CopyWebpackPlugin([
+    { context: './src/static/', from: '**/*', to: './dist/' },
+  ]),
+  definePlugin,
+];
+
+const pluginsChrome = pluginsCommon.concat([
+  new webpack.optimize.UglifyJsPlugin({
+    compress: { warnings: false },
+  }),
+]);
+
+const pluginsFirefox = pluginsCommon;
+
+let plugins = [];
+
+if (PROD) {
+  plugins = CHROME ? pluginsChrome : pluginsFirefox;
+} else {
+  plugins = [
+    new CopyWebpackPlugin([{
+      context: './src/static/',
+      from: '**/*',
+      to: './dist/',
+    }]),
+    definePlugin,
+  ];
+}
 
 module.exports = {
   entry: './src/js/index.js',
@@ -36,24 +73,7 @@ module.exports = {
       },
     ],
   },
-  // Only enable minification and NODE_ENV modifications
-  // when launched with -p
-  plugins: PROD ? [
-    new webpack.DefinePlugin({
-      'process.env': {
-        'NODE_ENV': JSON.stringify('production'),
-      },
-    }),
-    new webpack.optimize.UglifyJsPlugin({
-      compress: { warnings: false },
-    }),
-    new CopyWebpackPlugin([
-      { context: './src/static/', from: '**/*', to: './dist/' },
-    ]),
-    definePlugin,
-  ] : [new CopyWebpackPlugin([
-      { context: './src/static/', from: '**/*', to: './dist/' },
-  ]), definePlugin],
+  plugins,
   postcss: () => [autoprefixer],
   resolve: {
     extensions: ['', '.js'],
