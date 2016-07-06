@@ -78,7 +78,7 @@ const calculate = () => {
 const debounce = evt => {
   // Only allow number, decimal marker and backspace
   const allowedKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', 'Backspace'];
-  if (allowedKeys.indexOf(evt.key) === -1) {
+  if (evt.key && allowedKeys.indexOf(evt.key) === -1) {
     evt.preventDefault();
     return;
   }
