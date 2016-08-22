@@ -1,6 +1,6 @@
 {
   "name": "ezpp!",
-  "version": "1.2.9",
+  "version": "1.2.10",
   "description": "Browser extension for calculating pp!",
   "main": "src/js/index.js",
   "dependencies": {
@@ -14,7 +14,7 @@
     "json-loader": "^0.5.4",
     "node-sass": "^3.7.0",
     "osu-parser-web": "git+https://github.com/oamaok/osu-parser-web.git",
-    "osu-pp-calculator": "^0.1.4",
+    "osu-pp-calculator": "^0.1.6",
     "postcss-loader": "^0.9.1",
     "sass-loader": "^3.2.0",
     "showdown": "^1.4.2",
@@ -31,10 +31,10 @@
     "eslint-plugin-react": "^5.2.2"
   },
   "scripts": {
-    "dev-chrome": "BUILD_CHROME=1 NODE_ENV=development webpack -w",
-    "dev-firefox": "BUILD_FF=1 NODE_ENV=development webpack -w",
-    "release-chrome": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_CHROME=1 NODE_ENV=production webpack -p && zip -jr ezpp.zip dist/*",
-    "release-firefox": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_FF=1 NODE_ENV=production webpack -p && zip -jr ezpp.xpi dist/*",
+    "dev:chrome": "BUILD_CHROME=1 NODE_ENV=development webpack -w",
+    "dev:firefox": "BUILD_FF=1 NODE_ENV=development webpack -w",
+    "release:chrome": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_CHROME=1 NODE_ENV=production webpack -p && zip -jr ezpp.zip dist/*",
+    "release:firefox": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_FF=1 NODE_ENV=production webpack -p && zip -jr ezpp.xpi dist/*",
     "lint": "eslint .",
     "lint:fix": "eslint --fix ."
   },

@@ -181,9 +181,9 @@ chrome.tabs.query({
     cleanBeatmap = beatmap;
 
     // Support old beatmap
-    cleanBeatmap.Mode = cleanBeatmap.Mode || '0';
+    cleanBeatmap.Mode = Number(cleanBeatmap.Mode || 0);
 
-    if (cleanBeatmap.Mode !== '0') {
+    if (cleanBeatmap.Mode !== 0) {
       throw Error('Unsupported gamemode :(');
     }
 
