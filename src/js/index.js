@@ -144,7 +144,9 @@ chrome.tabs.query({
   lastFocusedWindow: true, // In the current window
 }, tabs => {
   const url = tabs[0].url;
-  const match = url.toLowerCase().match(/^https?:\/\/(osu|new).ppy.sh\/([bs])\/(\d+)#?(\d+)?/);
+  const match = url
+    .toLowerCase()
+    .match(/^https?:\/\/(osu|new).ppy.sh\/([bs]|beatmapsets)\/(\d+)#?(osu\/\d+)?/);
   pageInfo.isOldSite = match[1] === 'osu';
   pageInfo.isBeatmap = match[2] === 'b';
   const id = match[3];
@@ -171,7 +173,7 @@ chrome.tabs.query({
     });
   } else {
     pageInfo.beatmapSetId = match[3];
-    pageInfo.beatmapId = match[4];
+    pageInfo.beatmapId = match[4].substr(4);
     promise = fetch(`https://osu.ppy.sh/osu/${pageInfo.beatmapId}`);
   }
 
