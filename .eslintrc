@@ -13,7 +13,8 @@
   },
   "globals": {
     "__FIREFOX__": true,
-    "__CHROME__": true
+    "__CHROME__": true,
+    "_gaq": true
   },
   "rules": {
     "semi": 2,

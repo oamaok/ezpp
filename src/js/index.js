@@ -2,7 +2,8 @@
 require('../sass/main.sass');
 
 // Include other js files
-require('./notifications.js');
+require('./notifications');
+require('./analytics');
 
 // Other imports
 import OsuParser from 'osu-parser-web';
@@ -68,6 +69,9 @@ const calculate = () => {
     const beatmap = Beatmap.fromOsuParserObject(cleanBeatmap);
     const pp = PPCalculator.calculate(beatmap, accuracy, modifiers, combo, misses);
 
+    // Track results
+    _gaq.push(['_trackEvent', pageInfo.beatmapId, 'calculated']);
+
     resultElement.innerText = `That's about ${Math.round(pp)}pp.`;
     resultElement.classList.toggle('hidden', false);
   } catch (err) {
@@ -130,7 +134,6 @@ const onReady = (cover) => {
           Array.from(modifierElements).find(e => e.id === 'mod-ht').checked = false;
           break;
         default:
-          throw new Error('Unexpected modifier id!');
       }
     })
   );
