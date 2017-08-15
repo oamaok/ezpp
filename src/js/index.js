@@ -17,7 +17,7 @@ const accuracyElement = document.getElementById('accuracy');
 const comboElement = document.getElementById('combo');
 const missesElement = document.getElementById('misses');
 const resultElement = document.getElementById('result');
-// const errorElement = document.getElementById('error');
+const errorElement = document.getElementById('error');
 
 if (__FIREFOX__) {
   containerElement.classList.toggle('firefox', true);
@@ -38,23 +38,24 @@ let debounceTimeout = null;
 const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
 
 // TODO: Add error logging to remote server?
-const displayError = (/* message */) => {
+const displayError = (error) => {
+  errorElement.innerText = error.message;
   containerElement.classList.toggle('error', true);
   containerElement.classList.toggle('preloading', false);
 };
 
 const calculate = () => {
+  // Wait until the user writes proper value
+  if (!accuracyElement.value.length) {
+    return;
+  }
+
   // Bitwise OR the mods together
   const modifiers = Array.from(modifierElements).reduce((num, element) => (
     num | (element.checked ? parseInt(element.value) : 0)
   ), 0);
 
   const maxCombo = cleanBeatmap.maxCombo;
-
-  // Wait until the user writes proper value
-  if (!accuracyElement.value.length) {
-    return;
-  }
 
   const accuracy = clamp(parseFloat(accuracyElement.value), 0, 100);
   const combo = clamp(parseInt(comboElement.value) || maxCombo, 0, maxCombo);
@@ -193,7 +194,7 @@ chrome.tabs.query({
     cleanBeatmap.Mode = Number(cleanBeatmap.Mode || 0);
 
     if (cleanBeatmap.Mode !== 0) {
-      throw Error('Unsupported gamemode :(');
+      throw Error('Unsupported gamemode!');
     }
 
     // Preload beatmap cover
