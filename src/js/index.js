@@ -167,7 +167,7 @@ chrome.tabs.query({
 
       pageInfo.beatmapId = pageInfo.isBeatmap
         ? id
-        : html.match(/class='beatmapTab active' href='\/b\/(\d+)/)[1];
+        : html.match(/class=["']beatmapTab active["'] href=["']\/b\/(\d+)/)[1];
 
       // Check for 'Updated' text instead of 'Qualified' or 'Ranked'
       pageInfo.isUnranked = !!html.match('<td width=0%>\nSubmitted:<br/>\nUpdated:\n</td>');

@@ -20,7 +20,7 @@
     "showdown": "^1.4.2",
     "style-loader": "^0.13.1",
     "url-loader": "^0.5.7",
-    "webpack": "^1.13.1"
+    "webpack": "^1.15.0"
   },
   "devDependencies": {
     "babel-eslint": "^6.1.0",

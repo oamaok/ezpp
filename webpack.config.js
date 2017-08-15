@@ -1,6 +1,8 @@
 const webpack = require('webpack');
 const autoprefixer = require('autoprefixer');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const path = require('path');
+
 // Check for production flag
 const PROD = process.argv.indexOf('-p') !== -1;
 const CHROME = !!process.env.BUILD_CHROME;
@@ -48,8 +50,8 @@ if (PROD) {
 
 module.exports = {
   entry: {
-    popup: './src/js/index.js',
-    changelog: './src/js/changelog.js',
+    popup: path.resolve(__dirname, 'src/js/index.js'),
+    changelog: path.resolve(__dirname, 'src/js/changelog.js'),
   },
   output: {
     path: __dirname,
@@ -58,18 +60,13 @@ module.exports = {
   module: {
     loaders: [
       {
-        test: /\.js$/,
-        loader: 'babel-loader',
-        exclude: /^node_modules/,
-        query: {
-          presets: ['es2015'],
-        },
+        test: /\.js$/, loader: 'babel-loader',
       },
       {
-        test: /\.json$/, loader: 'json',
+        test: /\.json$/, loader: 'json-loader',
       },
       {
-        test: /\.s[ac]ss$/, loaders: ['style', 'css', 'postcss', 'sass'],
+        test: /\.s[ac]ss$/, loaders: ['style-loader', 'css-loader', 'sass-loader'],
       },
       {
         test: /\.(png|svg)$/, loader: 'url-loader',
@@ -79,6 +76,6 @@ module.exports = {
   plugins,
   postcss: () => [autoprefixer],
   resolve: {
-    extensions: ['', '.js'],
+    extensions: ['', '.js', '.sass', '.scss'],
   },
 };
