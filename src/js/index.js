@@ -17,7 +17,7 @@ const accuracyElement = document.getElementById('accuracy');
 const comboElement = document.getElementById('combo');
 const missesElement = document.getElementById('misses');
 const resultElement = document.getElementById('result');
-const errorElement = document.getElementById('error');
+// const errorElement = document.getElementById('error');
 
 if (__FIREFOX__) {
   containerElement.classList.toggle('firefox', true);
@@ -37,8 +37,8 @@ let debounceTimeout = null;
 
 const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
 
-const displayError = (message) => {
-  errorElement.innerText = message;
+// TODO: Add error logging to remote server?
+const displayError = (/* message */) => {
   containerElement.classList.toggle('error', true);
   containerElement.classList.toggle('preloading', false);
 };
@@ -150,9 +150,13 @@ chrome.tabs.query({
   const match = url
     .toLowerCase()
     .match(/^https?:\/\/(osu|new).ppy.sh\/([bs]|beatmapsets)\/(\d+)#?(osu\/\d+)?/);
-  pageInfo.isOldSite = match[1] === 'osu';
+  pageInfo.isOldSite = match[2] !== 'beatmapsets';
+
+  // This value is only used for the old site.
   pageInfo.isBeatmap = match[2] === 'b';
+
   const id = match[3];
+
 
   let promise = null;
 
