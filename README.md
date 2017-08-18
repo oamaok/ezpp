@@ -1,6 +1,6 @@
 # ezpp!
 
-ezpp! is a chrome extension which allows you to calculate pp
+ezpp! is a browser extension which allows you to calculate pp
 values for a beatmap without manually downloading the beatmap.
 
 ## Prerequisities
@@ -31,7 +31,7 @@ To build a production version of the package, run `npm run build:chrome`.
 
  - Run `npm run start:firefox`. This will create `dist` directory inside the directory containing the extension.
  - Open up Firefox and navigate to `about:debugging`.
- - Click the `Load Temporary Add-on` button and select any file in the previously mentioned directory
+ - Click the `Load Temporary Add-on` button and select any file in the previously mentioned directory.
  - The extension is now ready to go!
 
 All the changes made are compiled automatically as long as the `npm run start:firefox` script is running.
