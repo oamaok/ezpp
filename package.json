@@ -1,26 +1,26 @@
 {
   "name": "ezpp!",
-  "version": "1.2.15",
+  "version": "1.3.0",
   "description": "Browser extension for calculating pp!",
   "main": "src/js/index.js",
   "dependencies": {
     "autoprefixer": "^6.3.6",
     "babel-core": "^6.9.1",
-    "babel-loader": "^6.2.4",
+    "babel-loader": "^7.1.1",
     "babel-preset-es2015": "^6.9.0",
     "copy-webpack-plugin": "^3.0.1",
-    "css-loader": "^0.23.1",
-    "file-loader": "^0.8.5",
-    "json-loader": "^0.5.4",
+    "css-loader": "^0.28.5",
+    "extract-text-webpack-plugin": "^3.0.0",
+    "html-webpack-plugin": "^2.30.1",
     "node-sass": "^3.7.0",
     "osu-parser-web": "git+https://github.com/oamaok/osu-parser-web.git",
     "osu-pp-calculator": "^0.1.6",
-    "postcss-loader": "^0.9.1",
-    "sass-loader": "^3.2.0",
-    "showdown": "^1.4.2",
-    "style-loader": "^0.13.1",
-    "url-loader": "^0.5.7",
-    "webpack": "^1.15.0"
+    "sass-loader": "^6.0.6",
+    "showdown": "^1.7.2",
+    "style-loader": "^0.18.2",
+    "uglifyjs-webpack-plugin": "^0.4.6",
+    "url-loader": "^0.5.9",
+    "webpack": "^3.5.5"
   },
   "devDependencies": {
     "babel-eslint": "^6.1.0",
@@ -31,10 +31,10 @@
     "eslint-plugin-react": "^5.2.2"
   },
   "scripts": {
-    "dev:chrome": "BUILD_CHROME=1 NODE_ENV=development webpack -w",
-    "dev:firefox": "BUILD_FF=1 NODE_ENV=development webpack -w",
-    "release:chrome": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_CHROME=1 NODE_ENV=production webpack -p && zip -jr ezpp.zip dist/*",
-    "release:firefox": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_FF=1 NODE_ENV=production webpack -p && zip -jr ezpp.xpi dist/*",
+    "start:chrome": "BUILD_CHROME=1 NODE_ENV=development webpack --config webpack.development.config.js -w",
+    "start:firefox": "BUILD_FF=1 NODE_ENV=development webpack --config webpack.development.config.js -w",
+    "build:chrome": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_CHROME=1 NODE_ENV=production webpack --config webpack.production.config.js && zip -jr ezpp.zip dist/*",
+    "build:firefox": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_FF=1 NODE_ENV=production webpack --config webpack.production.config.js && zip -jr ezpp.xpi dist/*",
     "lint": "eslint .",
     "lint:fix": "eslint --fix ."
   },

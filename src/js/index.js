@@ -1,11 +1,6 @@
-// Include styles
-require('../sass/main.sass');
-
-// Include other js files
 require('./notifications');
 require('./analytics');
 
-// Other imports
 import OsuParser from 'osu-parser-web';
 import { PPCalculator, Beatmap } from 'osu-pp-calculator';
 

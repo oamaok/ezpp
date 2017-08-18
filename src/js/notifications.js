@@ -1,4 +1,3 @@
-
 const manifest = require('../static/manifest.json');
 
 const notificationElement = document.getElementById('notification');
