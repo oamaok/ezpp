@@ -1,3 +1,5 @@
+@import 'fonts';
+
 .markdown-body {
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
@@ -699,7 +701,7 @@ body, html {
 }
 
 body {
-  background-image: url('https://new.ppy.sh/images/backgrounds/page-light.png');
+  background-image: url('../../assets/page-light.png');
 }
 
 #markdown{

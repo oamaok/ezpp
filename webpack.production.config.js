@@ -31,7 +31,7 @@ module.exports = {
         test: /\.s[ac]ss$/, loader: ExtractTextPlugin.extract('css-loader!sass-loader'),
       },
       {
-        test: /\.(png|svg)$/, loader: 'url-loader',
+        test: /\.(png|svg|woff2)$/, loader: 'url-loader',
       },
     ],
   },
@@ -65,7 +65,13 @@ module.exports = {
         comments: false,
         beautify: true,
       },
-      compress: false,
+      compress: {
+        dead_code: true,
+        properties: true,
+        evaluate: true,
+        booleans: true,
+        loops: true,
+      },
     }),
   ],
 

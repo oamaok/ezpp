@@ -7,10 +7,10 @@ const versionElement = document.getElementById('version');
 versionElement.innerText = `v${manifest.version}`;
 
 // Version change detection
-chrome.storage.local.get(['version', 'displayNotification'], items => {
+chrome.storage.local.get(['version', 'displayNotification'], ({ version, displayNotification }) => {
   // First time using the extension, set the version
   // but don't display notifications
-  if (!items.version) {
+  if (!version) {
     chrome.storage.local.set({
       version: manifest.version,
       displayNotification: false,
@@ -19,7 +19,7 @@ chrome.storage.local.get(['version', 'displayNotification'], items => {
   }
 
   // Update detected, show notification and set the version
-  if (items.version !== manifest.version) {
+  if (version !== manifest.version) {
     chrome.storage.local.set({
       version: manifest.version,
       displayNotification: true,
@@ -27,7 +27,7 @@ chrome.storage.local.get(['version', 'displayNotification'], items => {
     notificationElement.classList.toggle('hidden', false);
   }
 
-  if (items.displayNotification) {
+  if (displayNotification) {
     notificationElement.classList.toggle('hidden', false);
   }
 });
