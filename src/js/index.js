@@ -88,7 +88,10 @@ const debounce = evt => {
   debounceTimeout = setTimeout(calculate, 500);
 };
 
+
 const forceValidMods = (mod) => {
+  // Disable mods if their counterpart gets activated
+  // Not exactly elegant, but works
   switch(mod) {
     case 'mod-hr':
       Array.from(modifierElements).find(e => e.id === 'mod-ez').checked = false;
@@ -132,25 +135,45 @@ const onReady = (cover) => {
 
   // Disable mods if their counterpart gets activated
   Array.from(modifierElements).forEach(
-    modElement => modElement.addEventListener('click', evt => {
-      // Ugly, but works
-      switch (evt.target.id) {
-        case 'mod-hr':
-          Array.from(modifierElements).find(e => e.id === 'mod-ez').checked = false;
-          break;
-        case 'mod-ez':
-          Array.from(modifierElements).find(e => e.id === 'mod-hr').checked = false;
-          break;
-        case 'mod-ht':
-          Array.from(modifierElements).find(e => e.id === 'mod-dt').checked = false;
-          break;
-        case 'mod-dt':
-          Array.from(modifierElements).find(e => e.id === 'mod-ht').checked = false;
-          break;
-        default:
-      }
-    })
+    modElement => modElement.addEventListener('click', forceValidMods(event.target.id))
   );
+
+  // Change mods according to osu keyboard shortcuts
+  window.addEventListener('keydown', (u, evt) => {
+    let mod;
+    switch (String.fromCharCode(evt.keyCode)) {
+      case 'q':
+        mod = 'mod-ez';
+        break;
+      case 'w':
+        mod = 'mod-nf';
+        break;
+      case 'e':
+        mod = 'mod-ht';
+        break;
+      case 'a':
+        mod = 'mod-hr';
+        break;
+      case 'd':
+        mod = 'mod-dt';
+        break;
+      case 'f':
+        mod = 'mod-hd';
+        break;
+      case 'g':
+        mod = 'mod-fl';
+        break;
+      case 'c':
+        mod = 'mod-so';
+        break;
+      default:
+        return;
+    }
+    Array.from(modifierElements).find(e => e.id === mod).checked = true;
+    forceValidMods(mod);
+    calculate();
+  }
+);
 
   calculate();
 };
