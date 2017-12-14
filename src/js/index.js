@@ -88,6 +88,24 @@ const debounce = evt => {
   debounceTimeout = setTimeout(calculate, 500);
 };
 
+const forceValidMods = (mod) => {
+  switch(mod) {
+    case 'mod-hr':
+      Array.from(modifierElements).find(e => e.id === 'mod-ez').checked = false;
+      break;
+    case 'mod-ez':
+      Array.from(modifierElements).find(e => e.id === 'mod-hr').checked = false;
+      break;
+    case 'mod-ht':
+      Array.from(modifierElements).find(e => e.id === 'mod-dt').checked = false;
+      break;
+    case 'mod-dt':
+      Array.from(modifierElements).find(e => e.id === 'mod-ht').checked = false;
+      break;
+    default:
+  }
+}
+
 const onReady = (cover) => {
   // Display content since we're done loading all the stuff.
   containerElement.classList.toggle('preloading', false);
