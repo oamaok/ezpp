@@ -27,6 +27,17 @@ const pageInfo = {
   isUnranked: null,
 };
 
+const keyToMod = {
+  'Q': 'mod-ez',
+  'W': 'mod-nf',
+  'E': 'mod-ht',
+  'A': 'mod-hr',
+  'D': 'mod-dt',
+  'F': 'mod-hd',
+  'G': 'mod-fl',
+  'C': 'mod-so',
+};
+
 let cleanBeatmap = null;
 let debounceTimeout = null;
 
@@ -88,6 +99,27 @@ const debounce = evt => {
   debounceTimeout = setTimeout(calculate, 500);
 };
 
+
+const forceValidMods = (mod) => {
+  // Disable mods if their counterpart gets activated
+  // Not exactly elegant, but works
+  switch (mod) {
+    case 'mod-hr':
+      Array.from(modifierElements).find(e => e.id === 'mod-ez').checked = false;
+      break;
+    case 'mod-ez':
+      Array.from(modifierElements).find(e => e.id === 'mod-hr').checked = false;
+      break;
+    case 'mod-ht':
+      Array.from(modifierElements).find(e => e.id === 'mod-dt').checked = false;
+      break;
+    case 'mod-dt':
+      Array.from(modifierElements).find(e => e.id === 'mod-ht').checked = false;
+      break;
+    default:
+  }
+};
+
 const onReady = (cover) => {
   // Display content since we're done loading all the stuff.
   containerElement.classList.toggle('preloading', false);
@@ -114,25 +146,18 @@ const onReady = (cover) => {
 
   // Disable mods if their counterpart gets activated
   Array.from(modifierElements).forEach(
-    modElement => modElement.addEventListener('click', evt => {
-      // Ugly, but works
-      switch (evt.target.id) {
-        case 'mod-hr':
-          Array.from(modifierElements).find(e => e.id === 'mod-ez').checked = false;
-          break;
-        case 'mod-ez':
-          Array.from(modifierElements).find(e => e.id === 'mod-hr').checked = false;
-          break;
-        case 'mod-ht':
-          Array.from(modifierElements).find(e => e.id === 'mod-dt').checked = false;
-          break;
-        case 'mod-dt':
-          Array.from(modifierElements).find(e => e.id === 'mod-ht').checked = false;
-          break;
-        default:
-      }
-    })
+    modElement => modElement.addEventListener('click', evt => forceValidMods(evt.target.id))
   );
+
+  // Change mods according to osu keyboard shortcuts
+  window.onkeyup = evt => {
+    const mod = keyToMod[String.fromCharCode(evt.keyCode)];
+    if (!mod) return;
+    Array.from(modifierElements).find(e => e.id === mod).checked =
+    !(Array.from(modifierElements).find(e => e.id === mod).checked);
+    forceValidMods(mod);
+    calculate();
+  };
 
   calculate();
 };
