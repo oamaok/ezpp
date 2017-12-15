@@ -27,6 +27,17 @@ const pageInfo = {
   isUnranked: null,
 };
 
+const keyToMod = {
+  'Q': 'mod-ez',
+  'W': 'mod-nf',
+  'E': 'mod-ht',
+  'A': 'mod-hr',
+  'D': 'mod-dt',
+  'F': 'mod-hd',
+  'G': 'mod-fl',
+  'C': 'mod-so',
+};
+
 let cleanBeatmap = null;
 let debounceTimeout = null;
 
@@ -92,7 +103,7 @@ const debounce = evt => {
 const forceValidMods = (mod) => {
   // Disable mods if their counterpart gets activated
   // Not exactly elegant, but works
-  switch(mod) {
+  switch (mod) {
     case 'mod-hr':
       Array.from(modifierElements).find(e => e.id === 'mod-ez').checked = false;
       break;
@@ -107,7 +118,7 @@ const forceValidMods = (mod) => {
       break;
     default:
   }
-}
+};
 
 const onReady = (cover) => {
   // Display content since we're done loading all the stuff.
@@ -135,45 +146,18 @@ const onReady = (cover) => {
 
   // Disable mods if their counterpart gets activated
   Array.from(modifierElements).forEach(
-    modElement => modElement.addEventListener('click', forceValidMods(event.target.id))
+    modElement => modElement.addEventListener('click', evt => forceValidMods(evt.target.id))
   );
 
   // Change mods according to osu keyboard shortcuts
-  window.addEventListener('keydown', (u, evt) => {
-    let mod;
-    switch (String.fromCharCode(evt.keyCode)) {
-      case 'q':
-        mod = 'mod-ez';
-        break;
-      case 'w':
-        mod = 'mod-nf';
-        break;
-      case 'e':
-        mod = 'mod-ht';
-        break;
-      case 'a':
-        mod = 'mod-hr';
-        break;
-      case 'd':
-        mod = 'mod-dt';
-        break;
-      case 'f':
-        mod = 'mod-hd';
-        break;
-      case 'g':
-        mod = 'mod-fl';
-        break;
-      case 'c':
-        mod = 'mod-so';
-        break;
-      default:
-        return;
-    }
-    Array.from(modifierElements).find(e => e.id === mod).checked = true;
+  window.onkeyup = evt => {
+    const mod = keyToMod[String.fromCharCode(evt.keyCode)];
+    if (!mod) return;
+    Array.from(modifierElements).find(e => e.id === mod).checked =
+    !(Array.from(modifierElements).find(e => e.id === mod).checked);
     forceValidMods(mod);
     calculate();
-  }
-);
+  };
 
   calculate();
 };
