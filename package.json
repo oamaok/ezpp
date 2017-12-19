@@ -30,8 +30,8 @@
   "scripts": {
     "start:chrome": "BUILD_CHROME=1 NODE_ENV=development webpack --config webpack.development.config.js -w",
     "start:firefox": "BUILD_FF=1 NODE_ENV=development webpack --config webpack.development.config.js -w",
-    "build:chrome": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_CHROME=1 NODE_ENV=production webpack --config webpack.production.config.js && zip -jr ezpp.zip dist/*",
-    "build:firefox": "rm -rf dist/ ezpp.zip ezpp.xpi && BUILD_FF=1 NODE_ENV=production webpack --config webpack.production.config.js && zip -jr ezpp.xpi dist/*",
+    "build:chrome": "rm -rf build/ ezpp.zip ezpp.xpi && BUILD_CHROME=1 NODE_ENV=production webpack --config webpack.production.config.js && zip -jr ezpp.zip build/* && rm -rf build/",
+    "build:firefox": "rm -rf build/ ezpp.zip ezpp.xpi && BUILD_FF=1 NODE_ENV=production webpack --config webpack.production.config.js && zip -jr ezpp.xpi build/* && rm -rf build/",
     "lint": "eslint .",
     "lint:fix": "eslint --fix ."
   },

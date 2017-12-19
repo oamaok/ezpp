@@ -14,7 +14,7 @@ module.exports = {
 
   output: {
     publicPath: '',
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'build'),
     filename: '[name].js',
   },
 
@@ -37,12 +37,6 @@ module.exports = {
 
   plugins: [
     new ExtractTextPlugin('[name].css'),
-
-    new webpack.DefinePlugin({
-      'process.env': {
-        'NODE_ENV': JSON.stringify('production'),
-      },
-    }),
 
     new CopyWebpackPlugin([
       {
