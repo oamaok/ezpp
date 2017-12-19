@@ -1,6 +1,5 @@
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 
 module.exports = {
@@ -14,7 +13,7 @@ module.exports = {
 
   output: {
     publicPath: '',
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'build'),
     filename: '[name].js',
   },
 
@@ -36,16 +35,10 @@ module.exports = {
   },
 
   plugins: [
-    new HtmlWebpackPlugin({
-      template: './src/static/popup.html',
-      filename: 'popup.html',
-      inject: 'body',
-    }),
-
     new CopyWebpackPlugin([{
       context: './src/static/',
       from: '**/*',
-      to: './dist/',
+      to: './',
     }]),
 
     new webpack.DefinePlugin({

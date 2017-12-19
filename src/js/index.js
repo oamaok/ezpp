@@ -1,13 +1,13 @@
-require('./notifications');
-require('./analytics');
-
 import OsuParser from 'osu-parser-web';
 import { PPCalculator, Beatmap } from 'osu-pp-calculator';
+
+require('./notifications');
+require('./analytics');
 
 const containerElement = document.getElementById('container');
 const headerElement = document.getElementById('header');
 const titleElement = document.getElementById('title');
-const modifierElements = document.querySelectorAll('.mod>input');
+const modifierElements = [...document.querySelectorAll('.mod>input')];
 const accuracyElement = document.getElementById('accuracy');
 const comboElement = document.getElementById('combo');
 const missesElement = document.getElementById('misses');
@@ -18,6 +18,17 @@ if (__FIREFOX__) {
   containerElement.classList.toggle('firefox', true);
   document.documentElement.classList.toggle('firefox', true);
 }
+
+const keyModMap = {
+  'Q': 'mod-ez',
+  'W': 'mod-nf',
+  'E': 'mod-ht',
+  'A': 'mod-hr',
+  'D': 'mod-dt',
+  'F': 'mod-hd',
+  'G': 'mod-fl',
+  'C': 'mod-so',
+};
 
 const pageInfo = {
   isOldSite: null,
@@ -46,11 +57,11 @@ const calculate = () => {
   }
 
   // Bitwise OR the mods together
-  const modifiers = Array.from(modifierElements).reduce((num, element) => (
+  const modifiers = modifierElements.reduce((num, element) => (
     num | (element.checked ? parseInt(element.value) : 0)
   ), 0);
 
-  const maxCombo = cleanBeatmap.maxCombo;
+  const { maxCombo } = cleanBeatmap;
 
   const accuracy = clamp(parseFloat(accuracyElement.value), 0, 100);
   const combo = clamp(parseInt(comboElement.value) || maxCombo, 0, maxCombo);
@@ -75,17 +86,25 @@ const calculate = () => {
   }
 };
 
-const debounce = evt => {
-  // Only allow number, decimal marker and backspace
-  const allowedKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', 'Backspace'];
-  if (evt.key && allowedKeys.indexOf(evt.key) === -1) {
-    evt.preventDefault();
-    return;
-  }
-
+const debounce = () => {
   resultElement.classList.toggle('hidden', true);
   clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(calculate, 500);
+};
+
+const opposingModifiers = [
+  ['mod-hr', 'mod-ez'],
+  ['mod-ht', 'mod-dt'],
+];
+
+const toggleOpposingModifiers = (mod) => {
+  opposingModifiers.forEach((mods) => {
+    const index = mods.indexOf(mod);
+    if (index !== -1) {
+      const name = mods[1 - index];
+      modifierElements.find(({ id }) => id === name).checked = false;
+    }
+  });
 };
 
 const onReady = (cover) => {
@@ -101,38 +120,42 @@ const onReady = (cover) => {
   const title = `${cleanBeatmap.Artist} - ${cleanBeatmap.Title} [${cleanBeatmap.Version}]`;
   titleElement.innerText = title;
 
-  // Recalculate the result div if the form is fiddled with
-  Array.from(modifierElements).forEach(
-    modElement => modElement.addEventListener('click', debounce)
-  );
-  accuracyElement.addEventListener('keydown', debounce);
-  comboElement.addEventListener('keydown', debounce);
-  missesElement.addEventListener('keydown', debounce);
+  modifierElements.forEach((modElement) => {
+    modElement.addEventListener('click', ({ target }) => {
+      toggleOpposingModifiers(target.id);
+      debounce();
+    });
+  });
+
+  window.addEventListener('keydown', ({ key }) => {
+    const mod = keyModMap[key.toUpperCase()];
+
+    if (mod) {
+      const element = modifierElements.find(({ id }) => id === mod);
+      element.checked = !element.checked;
+
+      toggleOpposingModifiers(mod);
+      debounce();
+    }
+  });
+
+  const debounceWithFilter = (evt) => {
+    // Only allow number, decimal marker and backspace
+    const allowedKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', 'Backspace'];
+    if (evt.key && allowedKeys.indexOf(evt.key) === -1) {
+      evt.preventDefault();
+      return;
+    }
+
+    debounce();
+  };
+
+  accuracyElement.addEventListener('keydown', debounceWithFilter);
+  comboElement.addEventListener('keydown', debounceWithFilter);
+  missesElement.addEventListener('keydown', debounceWithFilter);
 
   // Set the combo to the max combo by default
   comboElement.value = cleanBeatmap.maxCombo;
-
-  // Disable mods if their counterpart gets activated
-  Array.from(modifierElements).forEach(
-    modElement => modElement.addEventListener('click', evt => {
-      // Ugly, but works
-      switch (evt.target.id) {
-        case 'mod-hr':
-          Array.from(modifierElements).find(e => e.id === 'mod-ez').checked = false;
-          break;
-        case 'mod-ez':
-          Array.from(modifierElements).find(e => e.id === 'mod-hr').checked = false;
-          break;
-        case 'mod-ht':
-          Array.from(modifierElements).find(e => e.id === 'mod-dt').checked = false;
-          break;
-        case 'mod-dt':
-          Array.from(modifierElements).find(e => e.id === 'mod-ht').checked = false;
-          break;
-        default:
-      }
-    })
-  );
 
   calculate();
 };
@@ -141,8 +164,8 @@ const onReady = (cover) => {
 chrome.tabs.query({
   active: true, // Select active tabs
   lastFocusedWindow: true, // In the current window
-}, tabs => {
-  const url = tabs[0].url;
+}, (tabs) => {
+  const { url } = tabs[0];
   const match = url
     .toLowerCase()
     .match(/^https?:\/\/(osu|new).ppy.sh\/([bs]|beatmapsets)\/(\d+)#?(osu\/\d+)?/);
@@ -159,21 +182,21 @@ chrome.tabs.query({
   if (pageInfo.isOldSite) {
     // For the old (current) version of the site ID values must be found from the page source.
     promise = fetch(url)
-    .then(res => res.text())
-    .then(html => {
-      pageInfo.beatmapSetId = pageInfo.isBeatmap
-        ? html.match(/beatmap-rating-graph\.php\?s=(\d+)/)[1]
-        : id;
+      .then(res => res.text())
+      .then((html) => {
+        pageInfo.beatmapSetId = pageInfo.isBeatmap
+          ? html.match(/beatmap-rating-graph\.php\?s=(\d+)/)[1]
+          : id;
 
-      pageInfo.beatmapId = pageInfo.isBeatmap
-        ? id
-        : html.match(/class=["']beatmapTab active["'] href=["']\/b\/(\d+)/)[1];
+        pageInfo.beatmapId = pageInfo.isBeatmap
+          ? id
+          : html.match(/class=["']beatmapTab active["'] href=["']\/b\/(\d+)/)[1];
 
-      // Check for 'Updated' text instead of 'Qualified' or 'Ranked'
-      pageInfo.isUnranked = !!html.match('<td width=0%>\nSubmitted:<br/>\nUpdated:\n</td>');
+        // Check for 'Updated' text instead of 'Qualified' or 'Ranked'
+        pageInfo.isUnranked = !!html.match('<td width=0%>\nSubmitted:<br/>\nUpdated:\n</td>');
 
-      return fetch(`https://osu.ppy.sh/osu/${pageInfo.beatmapId}`);
-    });
+        return fetch(`https://osu.ppy.sh/osu/${pageInfo.beatmapId}`);
+      });
   } else {
     pageInfo.beatmapSetId = match[3];
     pageInfo.beatmapId = match[4].substr(4);
@@ -181,30 +204,30 @@ chrome.tabs.query({
   }
 
   promise.then(res => res.text())
-  .then(OsuParser.parseContent)
-  .then(beatmap => {
-    cleanBeatmap = beatmap;
+    .then(OsuParser.parseContent)
+    .then((beatmap) => {
+      cleanBeatmap = beatmap;
 
-    // Support old beatmap
-    cleanBeatmap.Mode = Number(cleanBeatmap.Mode || 0);
+      // Support old beatmap
+      cleanBeatmap.Mode = Number(cleanBeatmap.Mode || 0);
 
-    if (cleanBeatmap.Mode !== 0) {
-      throw Error('Unsupported gamemode!');
-    }
+      if (cleanBeatmap.Mode !== 0) {
+        throw Error('Unsupported gamemode!');
+      }
 
-    // Preload beatmap cover
-    const coverUrl = pageInfo.isUnranked
-      ? `https://b.ppy.sh/thumb/${pageInfo.beatmapSetId}l.jpg`
-      : `https://assets.ppy.sh//beatmaps/${pageInfo.beatmapSetId}/covers/cover.jpg`;
-    const cover = new Image();
-    cover.src = coverUrl;
+      // Preload beatmap cover
+      const coverUrl = pageInfo.isUnranked
+        ? `https://b.ppy.sh/thumb/${pageInfo.beatmapSetId}l.jpg`
+        : `https://assets.ppy.sh//beatmaps/${pageInfo.beatmapSetId}/covers/cover.jpg`;
+      const cover = new Image();
+      cover.src = coverUrl;
 
-    return new Promise(resolve => {
-      cover.onload = () => resolve(cover);
-      cover.onerror = () => resolve();
-      cover.onabort = () => resolve();
-    });
-  })
-  .then(onReady)
-  .catch(displayError);
+      return new Promise((resolve) => {
+        cover.onload = () => resolve(cover);
+        cover.onerror = () => resolve();
+        cover.onabort = () => resolve();
+      });
+    })
+    .then(onReady)
+    .catch(displayError);
 });

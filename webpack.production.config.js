@@ -1,7 +1,6 @@
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const path = require('path');
 
 module.exports = {
@@ -56,22 +55,6 @@ module.exports = {
     new webpack.DefinePlugin({
       __CHROME__: JSON.stringify(JSON.parse(process.env.BUILD_CHROME || true)),
       __FIREFOX__: JSON.stringify(JSON.parse(process.env.BUILD_FF || false)),
-    }),
-
-    new UglifyJsPlugin({
-      ie8: false,
-      mangle: false,
-      output: {
-        comments: false,
-        beautify: true,
-      },
-      compress: {
-        dead_code: true,
-        properties: true,
-        evaluate: true,
-        booleans: true,
-        loops: true,
-      },
     }),
   ],
 

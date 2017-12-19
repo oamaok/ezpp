@@ -9,7 +9,8 @@
     }
   },
   "env": {
-    "webextensions": true
+    "webextensions": true,
+    "browser": true,
   },
   "globals": {
     "__FIREFOX__": true,
