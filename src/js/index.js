@@ -1,5 +1,4 @@
-import OsuParser from 'osu-parser-web';
-import { PPCalculator, Beatmap } from 'osu-pp-calculator';
+import ojsama from 'ojsama';
 
 require('./notifications');
 require('./analytics');
@@ -61,7 +60,7 @@ const calculate = () => {
     num | (element.checked ? parseInt(element.value) : 0)
   ), 0);
 
-  const { maxCombo } = cleanBeatmap;
+  const maxCombo = cleanBeatmap.max_combo();
 
   const accuracy = clamp(parseFloat(accuracyElement.value), 0, 100);
   const combo = clamp(parseInt(comboElement.value) || maxCombo, 0, maxCombo);
@@ -71,19 +70,20 @@ const calculate = () => {
   comboElement.value = combo;
   missesElement.value = misses;
 
-  try {
-    // These two can throw errors, let's be careful!
-    const beatmap = Beatmap.fromOsuParserObject(cleanBeatmap);
-    const pp = PPCalculator.calculate(beatmap, accuracy, modifiers, combo, misses);
+  const stars = new ojsama.diff().calc({ map: cleanBeatmap, mods: modifiers });
 
-    // Track results
-    _gaq.push(['_trackEvent', pageInfo.beatmapId, 'calculated']);
+  const pp = ojsama.ppv2({
+    stars,
+    combo,
+    nmiss: misses,
+    acc_percent: accuracy,
+  });
 
-    resultElement.innerText = `That's about ${Math.round(pp)}pp.`;
-    resultElement.classList.toggle('hidden', false);
-  } catch (err) {
-    displayError(err);
-  }
+  // Track results
+  _gaq.push(['_trackEvent', pageInfo.beatmapId, 'calculated']);
+
+  resultElement.innerText = `That's about ${Math.round(pp.total)}pp.`;
+  resultElement.classList.toggle('hidden', false);
 };
 
 const debounce = () => {
@@ -117,7 +117,7 @@ const onReady = (cover) => {
   }
 
   // Set header text
-  const title = `${cleanBeatmap.Artist} - ${cleanBeatmap.Title} [${cleanBeatmap.Version}]`;
+  const title = `${cleanBeatmap.artist} - ${cleanBeatmap.title} [${cleanBeatmap.version}]`;
   titleElement.innerText = title;
 
   modifierElements.forEach((modElement) => {
@@ -204,14 +204,14 @@ chrome.tabs.query({
   }
 
   promise.then(res => res.text())
-    .then(OsuParser.parseContent)
-    .then((beatmap) => {
-      cleanBeatmap = beatmap;
+    .then(raw => new ojsama.parser().feed(raw))
+    .then(({ map }) => {
+      cleanBeatmap = map;
 
-      // Support old beatmap
-      cleanBeatmap.Mode = Number(cleanBeatmap.Mode || 0);
+      // Support old beatmaps
+      cleanBeatmap.mode = Number(cleanBeatmap.mode || 0);
 
-      if (cleanBeatmap.Mode !== 0) {
+      if (cleanBeatmap.mode !== 0) {
         throw Error('Unsupported gamemode!');
       }
 
