@@ -21,6 +21,7 @@
     "semi": 2,
     "new-cap": 0,
     "radix": 0,
+    "no-bitwise": 0,
     "no-case-declarations": 0,
     "quote-props": 0,
     "react/prop-types": 0,

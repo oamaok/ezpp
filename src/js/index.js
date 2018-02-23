@@ -79,8 +79,10 @@ const calculate = () => {
     acc_percent: accuracy,
   });
 
+  const analyticsString = `${pageInfo.beatmapId}__${modifiers}__${accuracy}__${combo}__${misses}`;
+
   // Track results
-  _gaq.push(['_trackEvent', pageInfo.beatmapId, 'calculated']);
+  _gaq.push(['_trackEvent', analyticsString, 'calculated']);
 
   resultElement.innerText = `That's about ${Math.round(pp.total)}pp.`;
   resultElement.classList.toggle('hidden', false);
@@ -141,8 +143,8 @@ const onReady = (cover) => {
 
   const debounceWithFilter = (evt) => {
     // Only allow number, decimal marker and backspace
-    const allowedKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', 'Backspace'];
-    if (evt.key && allowedKeys.indexOf(evt.key) === -1) {
+    const allowedKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', 'Backspace', 'ArrowLeft', 'ArrowRight'];
+    if (evt.key && !allowedKeys.includes(evt.key)) {
       evt.preventDefault();
       return;
     }
