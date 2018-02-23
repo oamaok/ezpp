@@ -82,7 +82,7 @@ const calculate = () => {
   const analyticsString = `${pageInfo.beatmapId}__${modifiers}__${accuracy}__${combo}__${misses}`;
 
   // Track results
-  _gaq.push(['_trackEvent', analyticsString, 'calculated']);
+  _gaq.push(['_trackEvent', 'calculate', analyticsString]);
 
   resultElement.innerText = `That's about ${Math.round(pp.total)}pp.`;
   resultElement.classList.toggle('hidden', false);
