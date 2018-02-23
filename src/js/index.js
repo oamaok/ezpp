@@ -149,7 +149,10 @@ const onReady = (cover) => {
       return;
     }
 
-    debounce();
+    const navKeys = ['ArrowLeft', 'ArrowRight'];
+    if (!navKeys.includes(evt.key)) {
+      debounce();
+    }
   };
 
   accuracyElement.addEventListener('keydown', debounceWithFilter);
