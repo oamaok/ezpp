@@ -165,6 +165,8 @@ const onReady = (cover) => {
   calculate();
 };
 
+const fetchBeatmap = id => fetch(`https://osu.ppy.sh/osu/${id}`);
+
 // Init the extension.
 chrome.tabs.query({
   active: true, // Select active tabs
@@ -186,26 +188,32 @@ chrome.tabs.query({
 
   if (pageInfo.isOldSite) {
     // For the old (current) version of the site ID values must be found from the page source.
-    promise = fetch(url)
+    promise = fetch(url, { credentials: 'include' })
       .then(res => res.text())
       .then((html) => {
-        pageInfo.beatmapSetId = pageInfo.isBeatmap
-          ? html.match(/beatmap-rating-graph\.php\?s=(\d+)/)[1]
-          : id;
 
-        pageInfo.beatmapId = pageInfo.isBeatmap
-          ? id
-          : html.match(/class=["']beatmapTab active["'] href=["']\/b\/(\d+)/)[1];
+        const setIdMatch = html.match(/beatmap-rating-graph\.php\?s=(\d+)/);
+        const beatmapIdMatch = html.match(/class=["']beatmapTab active["'] href=["']\/b\/(\d+)/);
+
+        if (!setIdMatch || !beatmapIdMatch) {
+          return Promise.reject(new Error(`
+            ezpp! is experiencing some issues related to the new osu! website rollout.
+            Please use the new look for the extenstion to work. Sorry for the inconvenience.
+          `));
+        }
+
+        pageInfo.beatmapSetId = pageInfo.isBeatmap ? setIdMatch[1] : id;
+        pageInfo.beatmapId = pageInfo.isBeatmap ? id : beatmapIdMatch[1];
 
         // Check for 'Updated' text instead of 'Qualified' or 'Ranked'
         pageInfo.isUnranked = !!html.match('<td width=0%>\nSubmitted:<br/>\nUpdated:\n</td>');
 
-        return fetch(`https://osu.ppy.sh/osu/${pageInfo.beatmapId}`);
+        return fetchBeatmap(pageInfo.beatmapId);
       });
   } else {
     pageInfo.beatmapSetId = match[3];
     pageInfo.beatmapId = match[4].substr(4);
-    promise = fetch(`https://osu.ppy.sh/osu/${pageInfo.beatmapId}`);
+    promise = fetchBeatmap(pageInfo.beatmapId);
   }
 
   promise.then(res => res.text())

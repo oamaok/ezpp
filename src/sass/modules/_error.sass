@@ -2,7 +2,10 @@
   display: none
 
 .error>.error-message
-  display: inline-block
+  display: flex
+  flex-direction: column
+  justify-content: center
+  align-items: center
   position: absolute
   z-index: 2
   height: 100%
@@ -15,9 +18,7 @@
   font-weight: 600
   font-size: 1.5em
   padding: 2em
-  text-align: center
 
   .frown
-    margin-top: 1em
     font-size: 4em
     margin-bottom: 0.5em
