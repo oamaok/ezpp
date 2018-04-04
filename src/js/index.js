@@ -3,6 +3,15 @@ import ojsama from 'ojsama';
 require('./notifications');
 require('./analytics');
 
+// Track errors with GA
+window.addEventListener('error', (error) => {
+  _gaq.push([
+    '_trackEvent',
+    'error',
+    JSON.stringify(error, Object.getOwnPropertyNames(error)),
+  ]);
+});
+
 const containerElement = document.getElementById('container');
 const headerElement = document.getElementById('header');
 const titleElement = document.getElementById('title');
@@ -79,7 +88,7 @@ const calculate = () => {
     acc_percent: accuracy,
   });
 
-  const analyticsString = `${pageInfo.beatmapId}__${modifiers}__${accuracy}__${combo}__${misses}`;
+  const analyticsString = [pageInfo.beatmapId, modifiers, accuracy, combo, misses].join('__');
 
   // Track results
   _gaq.push(['_trackEvent', 'calculate', analyticsString]);
