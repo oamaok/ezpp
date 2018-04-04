@@ -183,8 +183,7 @@ chrome.tabs.query({
 }, (tabs) => {
   const { url } = tabs[0];
   const match = url
-    .toLowerCase()
-    .match(/^https?:\/\/(osu|new).ppy.sh\/([bs]|beatmapsets)\/(\d+)#?(osu\/\d+)?/);
+    .match(/^https?:\/\/(osu|new).ppy.sh\/([bs]|beatmapsets)\/(\d+)(\/#osu\/\d+)?/i);
   pageInfo.isOldSite = match[2] !== 'beatmapsets';
 
   // This value is only used for the old site.
@@ -221,7 +220,7 @@ chrome.tabs.query({
       });
   } else {
     pageInfo.beatmapSetId = match[3];
-    pageInfo.beatmapId = match[4].substr(4);
+    pageInfo.beatmapId = match[4].substr(6);
     promise = fetchBeatmap(pageInfo.beatmapId);
   }
 
