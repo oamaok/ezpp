@@ -1,14 +1,14 @@
 {
   "name": "ezpp!",
-  "version": "1.4.7",
+  "version": "1.4.8",
   "description": "Browser extension for calculating pp!",
   "main": "src/js/index.js",
   "dependencies": {
     "autoprefixer": "^6.3.6",
-    "babel-core": "^6.9.1",
-    "babel-eslint": "^6.1.0",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^6.1.2",
     "babel-loader": "^7.1.1",
-    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-env": "^1.7.0",
     "copy-webpack-plugin": "^3.0.1",
     "css-loader": "^0.28.5",
     "eslint": "^4.13.1",
@@ -19,12 +19,12 @@
     "extract-text-webpack-plugin": "^3.0.0",
     "html-webpack-plugin": "^2.30.1",
     "node-sass": "^3.7.0",
-    "ojsama": "^1.0.11",
+    "ojsama": "^1.0.17",
     "sass-loader": "^6.0.6",
     "showdown": "^1.7.2",
     "style-loader": "^0.18.2",
     "url-loader": "^0.5.9",
-    "webpack": "^3.5.5"
+    "webpack": "^3.12.0"
   },
   "scripts": {
     "start:chrome": "BUILD_CHROME=1 NODE_ENV=development webpack --config webpack.development.config.js -w",

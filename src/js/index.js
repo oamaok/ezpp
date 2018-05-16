@@ -71,11 +71,10 @@ const calculate = () => {
 
   const maxCombo = cleanBeatmap.max_combo();
 
-  const accuracy = clamp(parseFloat(accuracyElement.value), 0, 100);
+  const accuracy = clamp(parseFloat(accuracyElement.value.replace(',', '.')), 0, 100);
   const combo = clamp(parseInt(comboElement.value) || maxCombo, 0, maxCombo);
   const misses = clamp(parseInt(missesElement.value) || 0, 0, maxCombo);
 
-  accuracyElement.value = accuracy;
   comboElement.value = combo;
   missesElement.value = misses;
 
@@ -152,7 +151,7 @@ const onReady = (cover) => {
 
   const debounceWithFilter = (evt) => {
     // Only allow number, decimal marker and backspace
-    const allowedKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', 'Backspace', 'ArrowLeft', 'ArrowRight'];
+    const allowedKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', ',', 'Backspace', 'ArrowLeft', 'ArrowRight'];
     if (evt.key && !allowedKeys.includes(evt.key)) {
       evt.preventDefault();
       return;

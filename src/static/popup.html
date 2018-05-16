@@ -20,12 +20,14 @@
     <div class="clear" id="notification-clear"><i class="material-icons">clear</i></div>
   </div>
   <div class="header" id="header">
-    <span id="title"></span>
+    <div class="gradient">
+      <span id="title"></span>
+    </div>
   </div>
   <div class="numerics">
     <div class="numeric">
       <label for="accuracy">Accuracy</label>
-      <input type="text" id="accuracy" value="100.0" pattern="">
+      <input type="text" id="accuracy" value="100.0" maxlength="5" pattern="">
     </div>
     <div class="numeric">
       <label for="combo">Combo<span class="hint">(empty = FC)</span></label>
