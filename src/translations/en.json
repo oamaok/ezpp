@@ -1,0 +1,17 @@
+{
+  "error-occured": "An error prevented the extension from working properly: ",
+  "version-update-message": "You are now using ezpp!",
+  "changelog": "changelog",
+  "accuracy": "Accuracy",
+  "combo": "Combo",
+  "empty-fc": "(empty = FC)",
+  "misses": "Misses",
+  "mod-hidden": "Hidden",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "DoubleTime",
+  "mod-flashlight": "Flashlight",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Easy",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut"
+}

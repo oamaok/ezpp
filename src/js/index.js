@@ -1,7 +1,8 @@
 import ojsama from 'ojsama';
 
-require('./notifications');
 require('./analytics');
+require('./notifications');
+require('./translations');
 
 // Track errors with GA
 window.addEventListener('error', (error) => {
