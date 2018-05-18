@@ -7,6 +7,10 @@ values for a beatmap without manually downloading the beatmap.
 
  - Node.js, NPM
 
+## Translating
+
+All translation efforst are warmly welcome! The base English translations can be found [here](https://github.com/oamaok/ezpp/blob/master/src/translations/en.json). After translating the file you should also add relevant information to [this file](https://github.com/oamaok/ezpp/blob/master/src/js/translations.js#L1-L14). If you are unsure on how to edit the files, feel free to [raise an issue](https://github.com/oamaok/ezpp/issues/new) or ask away in the pull request.
+
 ## Developing
 
 Setup after cloning the repository:
@@ -46,4 +50,4 @@ Firefox: [Install from addons.mozilla.org](https://addons.mozilla.org/en-US/fire
 
 ## License
 
-[GNU AFFERO GENERAL PUBLIC LICENSE](https://github.com/oamaok/ezpp/blob/master/LICENSE)
+[MIT](https://github.com/oamaok/ezpp/blob/master/LICENSE)
