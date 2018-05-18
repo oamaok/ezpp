@@ -1,10 +1,11 @@
-const manifest = require('../static/manifest.json');
+import manifest from '../static/manifest.json';
+import { getTranslation } from './translations';
 
 const notificationElement = document.getElementById('notification');
 const notificationClearElement = document.getElementById('notification-clear');
 const versionElement = document.getElementById('version');
 
-versionElement.innerText = `v${manifest.version}`;
+versionElement.innerText = getTranslation('version-update-message', manifest.version);
 
 // Version change detection
 chrome.storage.local.get(
@@ -41,6 +42,7 @@ chrome.storage.local.get(
       notificationElement.classList.toggle('hidden', false);
     }
 
+      notificationElement.classList.toggle('hidden', false);
     const dayAfterUpdate = updatedAt + 24 * 60 * 60 * 1000;
 
     // Display the notification for max 24h

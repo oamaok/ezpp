@@ -1,6 +1,6 @@
 {
   "error-occured": "An error prevented the extension from working properly: ",
-  "version-update-message": "You are now using ezpp!",
+  "version-update-message": "You are now using ezpp! v{0}",
   "changelog": "changelog",
   "accuracy": "Accuracy",
   "combo": "Combo",

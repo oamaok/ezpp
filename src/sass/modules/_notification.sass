@@ -3,8 +3,7 @@
   z-index: 2
   box-shadow: 0 1px 4px rgba(0,0,0,.6)
   box-sizing: border-box
-  height: 3em
-  padding: 0.8em 1em
+  padding: 0.8em 3em 0.8em 1em
   width: 100%
   transition: 0.2s all ease-out
   overflow: hidden
@@ -21,5 +20,10 @@
   .message
     float: left
   .clear
-    float: right
+    position: absolute
+    right: 1em
+    top: 50%
+    transform: translateY(-50%)
     cursor: pointer
+    &:hover
+      color: #29b

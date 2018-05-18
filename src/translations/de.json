@@ -1,6 +1,6 @@
 {
   "error-occured": "Ein Fehler verhindert die Erweiterung ordnungsgemäß zu funtionieren: ",
-  "version-update-message": "Sie benutzen jetzt ezpp!",
+  "version-update-message": "Sie benutzen jetzt ezpp! v{0}",
   "changelog": "Änderungsprotokoll",
   "accuracy": "Genauigkeit",
   "combo": "Combo",

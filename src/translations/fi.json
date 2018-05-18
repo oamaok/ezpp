@@ -1,6 +1,6 @@
 {
   "error-occured": "Virhe esti lisäosaa toimimasta: ",
-  "version-update-message": "Käytät nyt ezpp! versiota ",
+  "version-update-message": "Käytät nyt ezpp! versiota v{0}",
   "changelog": "muutosloki",
   "accuracy": "Tarkkuus",
   "combo": "Combo",

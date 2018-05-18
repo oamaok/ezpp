@@ -2,11 +2,13 @@ import ojsama from 'ojsama';
 import { setLanguage, getTranslation } from './translations';
 
 require('./analytics');
-require('./notifications');
 require('./settings');
 
 chrome.storage.local.get(['language'], ({ language }) => {
   setLanguage(language || 'en');
+
+  // Notifications must be initialized after language has been set.
+  require('./notifications');
 });
 
 // Track errors with GA
