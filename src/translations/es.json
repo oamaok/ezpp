@@ -1,0 +1,21 @@
+{
+  "error-occured": "Un error ha impedido que la extensión funcione apropiadamente: ",
+  "version-update-message": "¡Ahora estás usando ezpp!",
+  "changelog": "registro de cambios",
+  "accuracy": "Precisión",
+  "combo": "Combo",
+  "empty-fc": "(vacío = FC)",
+  "misses": "Fallos",
+  "mod-hidden": "Hidden",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "DoubleTime",
+  "mod-flashlight": "Flashlight",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Easy",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut",
+  "language": "Idioma",
+  "settings": "Ajustes",
+  "analytics": "Envía datos anónimos de análisis",
+  "result": "Eso es más o menos {0}pp."
+}
