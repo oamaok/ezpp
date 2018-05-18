@@ -1,0 +1,45 @@
+.settings
+  height: 100%
+  width: 100%
+  position: absolute
+  left: 100%
+  margin-left: 2px
+  top: 0
+  transition: 0.2s all ease-out
+  background-image: url('../../assets/background.png')
+  color: #444
+
+  padding: 1em
+  border-left: 8px solid #29b
+
+  #close-settings
+    position: absolute
+    top: 0
+    right: 0
+    padding: 0.5em
+    border: 0
+    color: #444
+    background: none
+
+
+  h1
+    color: #444
+    margin-bottom: 1em
+
+  .setting
+    margin-bottom: 1em
+    padding-bottom: 1em
+    border-bottom: 2px solid #ccc
+    label
+      margin-right: 0.5em
+
+    input[type=checkbox]
+      position: relative
+      top: 0.1em
+
+  .changelog
+    color: #29b
+
+  &.open
+    left: 0
+    margin-left: 0px

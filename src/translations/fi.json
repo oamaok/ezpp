@@ -1,0 +1,21 @@
+{
+  "error-occured": "Virhe esti lisäosaa toimimasta: ",
+  "version-update-message": "Käytät nyt ezpp! versiota ",
+  "changelog": "muutosloki",
+  "accuracy": "Tarkkuus",
+  "combo": "Combo",
+  "empty-fc": "(tyhjä = FC)",
+  "misses": "Hudit",
+  "mod-hidden": "Hidden",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "DoubleTime",
+  "mod-flashlight": "Flashlight",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Easy",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut",
+  "language": "Kieli",
+  "settings": "Asetukset",
+  "analytics": "Lähetä anonyymiä analytiikkaa",
+  "result": "Suunnilleen {0}pp."
+}

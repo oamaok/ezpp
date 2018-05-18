@@ -1,8 +1,13 @@
 import ojsama from 'ojsama';
+import { setLanguage, getTranslation } from './translations';
 
 require('./analytics');
 require('./notifications');
-require('./translations');
+require('./settings');
+
+chrome.storage.local.get(['language'], ({ language }) => {
+  setLanguage(language || 'en');
+});
 
 // Track errors with GA
 window.addEventListener('error', (error) => {
@@ -93,7 +98,7 @@ const calculate = () => {
   // Track results
   _gaq.push(['_trackEvent', 'calculate', analyticsString]);
 
-  resultElement.innerText = `That's about ${Math.round(pp.total)}pp.`;
+  resultElement.innerText = getTranslation('result', Math.round(pp.total));
   resultElement.classList.toggle('hidden', false);
 };
 
@@ -199,7 +204,6 @@ chrome.tabs.query({
     promise = fetch(url, { credentials: 'include' })
       .then(res => res.text())
       .then((html) => {
-
         const setIdMatch = html.match(/beatmap-rating-graph\.php\?s=(\d+)/);
         const beatmapIdMatch = html.match(/class=["']beatmapTab active["'] href=["']\/b\/(\d+)/);
 

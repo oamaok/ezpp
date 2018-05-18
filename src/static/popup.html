@@ -6,8 +6,7 @@
 </head>
 <body>
 <div class="container preloading" id="container">
-  <div class="spinner">
-  </div>
+  <div class="spinner"></div>
   <div class="error-message">
     <div class="frown">:(</div>
     <span data-t="error-occured"></span>
@@ -22,6 +21,9 @@
   </div>
   <div class="header" id="header">
     <div class="gradient">
+      <button id="open-settings">
+        <i class="material-icons">settings</i>
+      </button>
       <span id="title"></span>
     </div>
   </div>
@@ -77,6 +79,21 @@
   </div>
   <div class="result-wrapper">
     <div class="result hidden" id="result"></div>
+  </div>
+  <div class="settings" id="settings">
+    <button id="close-settings">
+      <i class="material-icons">clear</i>
+    </button>
+    <h1 data-t="settings"></h1>
+    <div class="setting">
+      <label data-t="language"></label>
+      <select id="language-selector"></select>
+    </div>
+    <div class="setting">
+      <label data-t="analytics"></label>
+      <input type="checkbox" id="analytics-toggle">
+    </div>
+    <a target="_blank" class="changelog" href="changelog.html" data-t="changelog"></a>
   </div>
 </div>
 <script type="text/javascript" src="popup.js"></script>
