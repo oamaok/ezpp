@@ -16,7 +16,7 @@ export const languages = {
   'en': 'English',
   'fi': 'Suomi (Finnish)',
   'de': 'Deutsch (German)',
-  'en': 'Spanish (España)',
+  'en': 'Spanish (Spain)',
 };
 
 let currentLanguage = 'en';
