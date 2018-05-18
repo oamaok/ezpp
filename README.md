@@ -21,19 +21,19 @@ npm install
 
 ### Chromium-based browsers
 
- - Run `npm run start:chrome`. This will create `dist` directory inside the directory containing the extension.
+ - Run `npm run start:chrome`. This will create `build` directory inside the directory containing the extension.
  - Open up Chrome and navigate to `chrome://extensions`.
  - Enable `Developer mode`.
- - Click the `Load unpacked extension...` button and select the previously mentioned  `dist` directory. 
+ - Click the `Load unpacked` button and select the previously mentioned `build` directory. 
  - The extension is now ready to go!
 
-All the changes made are compiled automatically as long as the `npm run start:chrome` script is running. The extension reloads scripts and styles every time you refresh the `chrome://extensions` page.
+All the changes made are compiled automatically as long as the `npm run start:chrome` script is running.
 
 To build a production version of the package, run `npm run build:chrome`.
 
 ### Firefox
 
- - Run `npm run start:firefox`. This will create `dist` directory inside the directory containing the extension.
+ - Run `npm run start:firefox`. This will create `build` directory inside the directory containing the extension.
  - Open up Firefox and navigate to `about:debugging`.
  - Click the `Load Temporary Add-on` button and select any file in the previously mentioned directory.
  - The extension is now ready to go!
