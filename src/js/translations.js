@@ -13,7 +13,7 @@ const languageMap = {
 export const languages = {
   'en': 'English',
   'fi': 'Suomi (Finnish)',
-  'de': 'Deutsch (German)'
+  'de': 'Deutsch (German)',
 };
 
 let currentLanguage = 'en';
