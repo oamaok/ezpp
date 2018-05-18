@@ -1,0 +1,21 @@
+{
+  "error-occured": "Ein Fehler verhindert die Erweiterung ordnungsgemäß zu funtionieren: ",
+  "version-update-message": "Sie benutzen jetzt ezpp!",
+  "changelog": "Änderungsprotokoll",
+  "accuracy": "Genauigkeit",
+  "combo": "Combo",
+  "empty-fc": "(leer = FC)",
+  "misses": "Verfehlt",
+  "mod-hidden": "Hidden",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "DoubleTime",
+  "mod-flashlight": "Flashlight",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Easy",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut",
+  "language": "Sprache",
+  "settings": "Einstellungen",
+  "analytics": "Sende anonyme analytische Daten",
+  "result": "Das sind ungefähr {0}pp."
+}

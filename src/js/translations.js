@@ -1,16 +1,19 @@
 import en from '../translations/en.json';
 import fi from '../translations/fi.json';
+import de from '../translations/de.json';
 
 const languageSelector = document.getElementById('language-selector');
 
 const languageMap = {
   fi,
   en,
+  de,
 };
 
 export const languages = {
   'en': 'English',
   'fi': 'Suomi (Finnish)',
+  'de': 'Deutsch (German)'
 };
 
 let currentLanguage = 'en';
