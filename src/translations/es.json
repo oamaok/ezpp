@@ -1,6 +1,6 @@
 {
   "error-occured": "Un error ha impedido que la extensión funcione apropiadamente: ",
-  "version-update-message": "Ahora estás usando ezpp",
+  "version-update-message": "Ahora estás usando ezpp! v{0}",
   "changelog": "registro de cambios",
   "accuracy": "Precisión",
   "combo": "Combo",
