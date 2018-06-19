@@ -7,6 +7,14 @@ const versionElement = document.getElementById('version');
 
 versionElement.innerText = getTranslation('version-update-message', manifest.version);
 
+function clearNotification() {
+  chrome.storage.local.set({
+    displayNotification: false,
+  });
+
+  notificationElement.classList.toggle('hidden', true);
+}
+
 // Version change detection
 chrome.storage.local.get(
   [
@@ -42,20 +50,17 @@ chrome.storage.local.get(
       notificationElement.classList.toggle('hidden', false);
     }
 
-    const dayAfterUpdate = updatedAt + 24 * 60 * 60 * 1000;
+    if (displayNotification) {
+      notificationElement.classList.toggle('hidden', false);
+    }
 
     // Display the notification for max 24h
-    if (displayNotification && dayAfterUpdate < now) {
-      notificationElement.classList.toggle('hidden', false);
+    const dayAfterUpdate = updatedAt + 24 * 60 * 60 * 1000;
+    if (dayAfterUpdate < now) {
+      clearNotification();
     }
   },
 );
 
 // Clear the notification
-notificationClearElement.addEventListener('click', () => {
-  chrome.storage.local.set({
-    displayNotification: false,
-  });
-
-  notificationElement.classList.toggle('hidden', true);
-});
+notificationClearElement.addEventListener('click', clearNotification);
