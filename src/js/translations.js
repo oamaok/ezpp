@@ -20,17 +20,7 @@ export const languages = {
 };
 
 let currentLanguage = 'en';
-
-export function setLanguage(language) {
-  currentLanguage = language;
-  languageSelector.value = language;
-  chrome.storage.local.set({ language });
-
-  [...document.querySelectorAll('[data-t]')].forEach((element) => {
-    const translationKey = element.getAttribute('data-t');
-    element.innerText = languageMap[language][translationKey];
-  });
-}
+const setterHooks = [];
 
 export function getTranslation(translationKey, ...args) {
   const template = languageMap[currentLanguage][translationKey];
@@ -39,6 +29,40 @@ export function getTranslation(translationKey, ...args) {
 
   return args.reduce(
     (str, arg, index) => str.replace(new RegExp(`\\{${index}\\}`, 'g'), arg),
-    template
+    template,
   );
+}
+
+export function createTextSetter(element, translationKey, property = 'innerText') {
+  if (setterHooks.some(hook => hook.element === element)) {
+    throw new Error('This element already has a text setter');
+  }
+
+  const hook = {
+    element, translationKey, property, args: [],
+  };
+
+  setterHooks.push(hook);
+
+  return function setText(...args) {
+    hook.args = args;
+    element[property] = getTranslation(translationKey, ...args);
+  };
+}
+
+export function setLanguage(language) {
+  currentLanguage = language;
+  languageSelector.value = language;
+  chrome.storage.local.set({ language });
+
+  setterHooks.forEach(({
+    element, translationKey, property, args,
+  }) => {
+    element[property] = getTranslation(translationKey, ...args);
+  });
+
+  [...document.querySelectorAll('[data-t]')].forEach((element) => {
+    const translationKey = element.getAttribute('data-t');
+    element.innerText = languageMap[language][translationKey];
+  });
 }

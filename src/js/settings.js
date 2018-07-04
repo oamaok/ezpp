@@ -30,5 +30,6 @@ Object.keys(languages).forEach((language) => {
 });
 
 languageSelector.addEventListener('change', (evt) => {
+  _gaq.push(['_trackEvent', 'language', evt.target.value]);
   setLanguage(evt.target.value);
 });

@@ -1,24 +1,24 @@
 import ojsama from 'ojsama';
-import { setLanguage, getTranslation } from './translations';
+import { setLanguage, createTextSetter } from './translations';
 
 require('./analytics');
 require('./settings');
+require('./notifications');
 
 chrome.storage.local.get(['language'], ({ language }) => {
   setLanguage(language || 'en');
-
-  // Notifications must be initialized after language has been set.
-  require('./notifications');
 });
 
-// Track errors with GA
-window.addEventListener('error', (error) => {
+const trackError = (error) => {
   _gaq.push([
     '_trackEvent',
     'error',
-    JSON.stringify(error, Object.getOwnPropertyNames(error)),
+    JSON.stringify(error, ['message', 'arguments', 'type', 'name', 'stack']),
   ]);
-});
+};
+
+// Track errors with GA
+window.addEventListener('error', trackError);
 
 const containerElement = document.getElementById('container');
 const headerElement = document.getElementById('header');
@@ -29,6 +29,8 @@ const comboElement = document.getElementById('combo');
 const missesElement = document.getElementById('misses');
 const resultElement = document.getElementById('result');
 const errorElement = document.getElementById('error');
+
+const setResultText = createTextSetter(resultElement, 'result');
 
 if (__FIREFOX__) {
   containerElement.classList.toggle('firefox', true);
@@ -61,6 +63,7 @@ const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
 
 // TODO: Add error logging to remote server?
 const displayError = (error) => {
+  trackError(error);
   errorElement.innerText = error.message;
   containerElement.classList.toggle('error', true);
   containerElement.classList.toggle('preloading', false);
@@ -100,7 +103,7 @@ const calculate = () => {
   // Track results
   _gaq.push(['_trackEvent', 'calculate', analyticsString]);
 
-  resultElement.innerText = getTranslation('result', Math.round(pp.total));
+  setResultText(Math.round(pp.total));
   resultElement.classList.toggle('hidden', false);
 };
 

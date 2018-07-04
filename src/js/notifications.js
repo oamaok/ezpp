@@ -1,11 +1,11 @@
 import manifest from '../static/manifest.json';
-import { getTranslation } from './translations';
+import { createTextSetter } from './translations';
 
 const notificationElement = document.getElementById('notification');
 const notificationClearElement = document.getElementById('notification-clear');
 const versionElement = document.getElementById('version');
 
-versionElement.innerText = getTranslation('version-update-message', manifest.version);
+const setVersionText = createTextSetter(versionElement, 'version-update-message');
 
 function clearNotification() {
   chrome.storage.local.set({
@@ -14,6 +14,10 @@ function clearNotification() {
 
   notificationElement.classList.toggle('hidden', true);
 }
+
+// Clear the notification
+notificationClearElement.addEventListener('click', clearNotification);
+
 
 // Version change detection
 chrome.storage.local.get(
@@ -27,6 +31,8 @@ chrome.storage.local.get(
     displayNotification,
     updatedAt = 0,
   }) => {
+    setVersionText(manifest.version);
+
     const now = new Date().getTime();
 
     // First time using the extension, set the version
@@ -61,6 +67,3 @@ chrome.storage.local.get(
     }
   },
 );
-
-// Clear the notification
-notificationClearElement.addEventListener('click', clearNotification);
