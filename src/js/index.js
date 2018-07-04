@@ -70,41 +70,45 @@ const displayError = (error) => {
 };
 
 const calculate = () => {
-  // Wait until the user writes proper value
-  if (!accuracyElement.value.length) {
-    return;
+  try {
+    // Wait until the user writes proper value
+    if (!accuracyElement.value.length) {
+      return;
+    }
+
+    // Bitwise OR the mods together
+    const modifiers = modifierElements.reduce((num, element) => (
+      num | (element.checked ? parseInt(element.value) : 0)
+    ), 0);
+
+    const maxCombo = cleanBeatmap.max_combo();
+
+    const accuracy = clamp(parseFloat(accuracyElement.value.replace(',', '.')), 0, 100);
+    const combo = clamp(parseInt(comboElement.value) || maxCombo, 0, maxCombo);
+    const misses = clamp(parseInt(missesElement.value) || 0, 0, maxCombo);
+
+    comboElement.value = combo;
+    missesElement.value = misses;
+
+    const stars = new ojsama.diff().calc({ map: cleanBeatmap, mods: modifiers });
+
+    const pp = ojsama.ppv2({
+      stars,
+      combo,
+      nmiss: misses,
+      acc_percent: accuracy,
+    });
+
+    const analyticsString = [pageInfo.beatmapId, modifiers, accuracy, combo, misses].join('__');
+
+    // Track results
+    _gaq.push(['_trackEvent', 'calculate', analyticsString]);
+
+    setResultText(Math.round(pp.total));
+    resultElement.classList.toggle('hidden', false);
+  } catch (error) {
+    displayError(error);
   }
-
-  // Bitwise OR the mods together
-  const modifiers = modifierElements.reduce((num, element) => (
-    num | (element.checked ? parseInt(element.value) : 0)
-  ), 0);
-
-  const maxCombo = cleanBeatmap.max_combo();
-
-  const accuracy = clamp(parseFloat(accuracyElement.value.replace(',', '.')), 0, 100);
-  const combo = clamp(parseInt(comboElement.value) || maxCombo, 0, maxCombo);
-  const misses = clamp(parseInt(missesElement.value) || 0, 0, maxCombo);
-
-  comboElement.value = combo;
-  missesElement.value = misses;
-
-  const stars = new ojsama.diff().calc({ map: cleanBeatmap, mods: modifiers });
-
-  const pp = ojsama.ppv2({
-    stars,
-    combo,
-    nmiss: misses,
-    acc_percent: accuracy,
-  });
-
-  const analyticsString = [pageInfo.beatmapId, modifiers, accuracy, combo, misses].join('__');
-
-  // Track results
-  _gaq.push(['_trackEvent', 'calculate', analyticsString]);
-
-  setResultText(Math.round(pp.total));
-  resultElement.classList.toggle('hidden', false);
 };
 
 const debounce = () => {
