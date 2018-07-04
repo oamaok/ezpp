@@ -7,10 +7,12 @@ const languageSelector = document.getElementById('language-selector');
 const analyticsToggle = document.getElementById('analytics-toggle');
 
 settingsOpenButton.addEventListener('click', () => {
+  _gaq.push(['_trackEvent', 'settings', 'open']);
   settingsContainer.classList.toggle('open', true);
 });
 
 settingsCloseButton.addEventListener('click', () => {
+  _gaq.push(['_trackEvent', 'settings', 'close']);
   settingsContainer.classList.toggle('open', false);
 });
 
