@@ -1,4 +1,5 @@
 import ojsama from 'ojsama';
+import manifest from '../static/manifest.json';
 import { setLanguage, createTextSetter } from './translations';
 
 require('./analytics');
@@ -9,11 +10,31 @@ chrome.storage.local.get(['language'], ({ language }) => {
   setLanguage(language || 'en');
 });
 
+// Set after the extension initializes, used for additional error information.
+let currentUrl = null;
+
 const trackError = (error) => {
+  const report = {
+    version: manifest.version,
+    url: currentUrl,
+
+    error: {
+      message: error.message,
+      arguments: error.arguments,
+      type: error.type,
+      name: error.name,
+      stack: error.stack,
+    },
+
+    navigator: {
+      userAgent: window.navigator.userAgent,
+    },
+  };
+
   _gaq.push([
     '_trackEvent',
     'error',
-    JSON.stringify(error, ['message', 'arguments', 'type', 'name', 'stack']),
+    JSON.stringify(report),
   ]);
 };
 
@@ -61,7 +82,6 @@ let debounceTimeout = null;
 
 const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
 
-// TODO: Add error logging to remote server?
 const displayError = (error) => {
   trackError(error);
   errorElement.innerText = error.message;
@@ -166,7 +186,7 @@ const onReady = (cover) => {
 
   const debounceWithFilter = (evt) => {
     // Only allow number, decimal marker and backspace
-    const allowedKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', ',', 'Backspace', 'ArrowLeft', 'ArrowRight'];
+    const allowedKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', ',', 'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight'];
     if (evt.key && !allowedKeys.includes(evt.key)) {
       evt.preventDefault();
       return;
@@ -196,6 +216,7 @@ chrome.tabs.query({
   lastFocusedWindow: true, // In the current window
 }, (tabs) => {
   const { url } = tabs[0];
+  currentUrl = url;
   const match = url
     .match(/^https?:\/\/(osu|new).ppy.sh\/([bs]|beatmapsets)\/(\d+)\/?(#osu\/\d+)?/i);
   pageInfo.isOldSite = match[2] !== 'beatmapsets';

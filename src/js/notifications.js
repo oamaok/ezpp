@@ -18,7 +18,6 @@ function clearNotification() {
 // Clear the notification
 notificationClearElement.addEventListener('click', clearNotification);
 
-
 // Version change detection
 chrome.storage.local.get(
   [
