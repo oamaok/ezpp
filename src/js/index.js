@@ -13,7 +13,15 @@ chrome.storage.local.get(['language'], ({ language }) => {
 // Set after the extension initializes, used for additional error information.
 let currentUrl = null;
 
+// TODO: Add to translations
+const UNSUPPORTED_GAMEMODE = 'Unsupported gamemode!';
+
 const trackError = (error) => {
+  // Don't report unsupported gamemode errors.
+  if (error.message === UNSUPPORTED_GAMEMODE) {
+    return;
+  }
+
   const report = {
     version: manifest.version,
     url: currentUrl,
@@ -225,8 +233,6 @@ chrome.tabs.query({
   pageInfo.isBeatmap = match[2] === 'b';
 
   const id = match[3];
-
-
   let promise = null;
 
   if (pageInfo.isOldSite) {
@@ -267,7 +273,7 @@ chrome.tabs.query({
       cleanBeatmap.mode = Number(cleanBeatmap.mode || 0);
 
       if (cleanBeatmap.mode !== 0) {
-        throw Error('Unsupported gamemode!');
+        throw Error(UNSUPPORTED_GAMEMODE);
       }
 
       // Preload beatmap cover
