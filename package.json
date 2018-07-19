@@ -35,8 +35,7 @@
     "build:chrome": "cross-env BUILD_CHROME=1 npm run build && zip -jr ezpp-chrome.zip build/* && rm -rf build/",
     "build:firefox": "cross-env BUILD_FF=1 npm run build && zip -jr ezpp-firefox.zip build/* && rm -rf build/",
     "build:all": "rm -f build-chrome.zip build-firefox.zip && npm run build:chrome && npm run build:firefox",
-    "lint": "eslint .",
-    "lint:fix": "eslint --fix ."
+    "lint": "eslint --fix ."
   },
   "repository": {
     "type": "git",

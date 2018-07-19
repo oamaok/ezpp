@@ -6,17 +6,47 @@ require('./analytics');
 require('./settings');
 require('./notifications');
 
-chrome.storage.local.get(['language'], ({ language }) => {
-  setLanguage(language || 'en');
-});
+const FETCH_ATTEMPTS = 3;
+const UNSUPPORTED_GAMEMODE = 'Unsupported gamemode!'; // TODO: Add to translations
+const BEATMAP_URL_REGEX = /^https?:\/\/(osu|new).ppy.sh\/([bs]|beatmapsets)\/(\d+)\/?(#osu\/\d+)?/i;
+
+const containerElement = document.getElementById('container');
+const headerElement = document.getElementById('header');
+const titleElement = document.getElementById('title');
+const modifierElements = [...document.querySelectorAll('.mod>input')];
+const accuracyElement = document.getElementById('accuracy');
+const comboElement = document.getElementById('combo');
+const missesElement = document.getElementById('misses');
+const resultElement = document.getElementById('result');
+const errorElement = document.getElementById('error');
+
+const setResultText = createTextSetter(resultElement, 'result');
 
 // Set after the extension initializes, used for additional error information.
 let currentUrl = null;
+let cleanBeatmap = null;
+let debounceTimeout = null;
 
-// TODO: Add to translations
-const UNSUPPORTED_GAMEMODE = 'Unsupported gamemode!';
+const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
 
-const trackError = (error) => {
+function getCalculationSettings() {
+  // Bitwise OR the mods together
+  const modifiers = modifierElements.reduce((num, element) => (
+    num | (element.checked ? parseInt(element.value) : 0)
+  ), 0);
+
+  const maxCombo = cleanBeatmap.max_combo();
+
+  const accuracy = clamp(parseFloat(accuracyElement.value.replace(',', '.')), 0, 100);
+  const combo = clamp(parseInt(comboElement.value) || maxCombo, 0, maxCombo);
+  const misses = clamp(parseInt(missesElement.value) || 0, 0, maxCombo);
+
+  return {
+    modifiers, accuracy, combo, misses,
+  };
+}
+
+function trackError(error) {
   // Don't report unsupported gamemode errors.
   if (error.message === UNSUPPORTED_GAMEMODE) {
     return;
@@ -25,6 +55,7 @@ const trackError = (error) => {
   const report = {
     version: manifest.version,
     url: currentUrl,
+    calculationSettings: getCalculationSettings(),
 
     error: {
       message: error.message,
@@ -44,27 +75,19 @@ const trackError = (error) => {
     'error',
     JSON.stringify(report),
   ]);
-};
+}
 
 // Track errors with GA
 window.addEventListener('error', trackError);
-
-const containerElement = document.getElementById('container');
-const headerElement = document.getElementById('header');
-const titleElement = document.getElementById('title');
-const modifierElements = [...document.querySelectorAll('.mod>input')];
-const accuracyElement = document.getElementById('accuracy');
-const comboElement = document.getElementById('combo');
-const missesElement = document.getElementById('misses');
-const resultElement = document.getElementById('result');
-const errorElement = document.getElementById('error');
-
-const setResultText = createTextSetter(resultElement, 'result');
 
 if (__FIREFOX__) {
   containerElement.classList.toggle('firefox', true);
   document.documentElement.classList.toggle('firefox', true);
 }
+
+chrome.storage.local.get(['language'], ({ language }) => {
+  setLanguage(language || 'en');
+});
 
 const keyModMap = {
   'Q': 'mod-ez',
@@ -85,35 +108,23 @@ const pageInfo = {
   isUnranked: null,
 };
 
-let cleanBeatmap = null;
-let debounceTimeout = null;
-
-const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
-
-const displayError = (error) => {
+function displayError(error) {
   trackError(error);
   errorElement.innerText = error.message;
   containerElement.classList.toggle('error', true);
   containerElement.classList.toggle('preloading', false);
-};
+}
 
-const calculate = () => {
+function calculate() {
   try {
     // Wait until the user writes proper value
     if (!accuracyElement.value.length) {
       return;
     }
 
-    // Bitwise OR the mods together
-    const modifiers = modifierElements.reduce((num, element) => (
-      num | (element.checked ? parseInt(element.value) : 0)
-    ), 0);
-
-    const maxCombo = cleanBeatmap.max_combo();
-
-    const accuracy = clamp(parseFloat(accuracyElement.value.replace(',', '.')), 0, 100);
-    const combo = clamp(parseInt(comboElement.value) || maxCombo, 0, maxCombo);
-    const misses = clamp(parseInt(missesElement.value) || 0, 0, maxCombo);
+    const {
+      modifiers, accuracy, combo, misses,
+    } = getCalculationSettings();
 
     comboElement.value = combo;
     missesElement.value = misses;
@@ -137,20 +148,20 @@ const calculate = () => {
   } catch (error) {
     displayError(error);
   }
-};
+}
 
-const debounce = () => {
+function debounce() {
   resultElement.classList.toggle('hidden', true);
   clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(calculate, 500);
-};
+}
 
 const opposingModifiers = [
   ['mod-hr', 'mod-ez'],
   ['mod-ht', 'mod-dt'],
 ];
 
-const toggleOpposingModifiers = (mod) => {
+function toggleOpposingModifiers(mod) {
   opposingModifiers.forEach((mods) => {
     const index = mods.indexOf(mod);
     if (index !== -1) {
@@ -158,9 +169,9 @@ const toggleOpposingModifiers = (mod) => {
       modifierElements.find(({ id }) => id === name).checked = false;
     }
   });
-};
+}
 
-const onReady = (cover) => {
+function onReady(cover) {
   // Display content since we're done loading all the stuff.
   containerElement.classList.toggle('preloading', false);
 
@@ -180,7 +191,7 @@ const onReady = (cover) => {
     });
   });
 
-  window.addEventListener('keydown', ({ key }) => {
+  window.addEventListener('keydown', ({ key = '' }) => {
     const mod = keyModMap[key.toUpperCase()];
 
     if (mod) {
@@ -192,7 +203,7 @@ const onReady = (cover) => {
     }
   });
 
-  const debounceWithFilter = (evt) => {
+  function debounceWithFilter(evt) {
     // Only allow number, decimal marker and backspace
     const allowedKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', ',', 'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight'];
     if (evt.key && !allowedKeys.includes(evt.key)) {
@@ -204,7 +215,7 @@ const onReady = (cover) => {
     if (!navKeys.includes(evt.key)) {
       debounce();
     }
-  };
+  }
 
   accuracyElement.addEventListener('keydown', debounceWithFilter);
   comboElement.addEventListener('keydown', debounceWithFilter);
@@ -214,57 +225,67 @@ const onReady = (cover) => {
   comboElement.value = cleanBeatmap.maxCombo;
 
   calculate();
-};
+}
 
-const fetchBeatmap = id => fetch(`https://osu.ppy.sh/osu/${id}`);
+const fetchBeatmapById = id => fetch(`https://osu.ppy.sh/osu/${id}`, { credentials: 'include' }).then(res => res.text());
 
-// Init the extension.
-chrome.tabs.query({
-  active: true, // Select active tabs
-  lastFocusedWindow: true, // In the current window
-}, (tabs) => {
-  const { url } = tabs[0];
-  currentUrl = url;
-  const match = url
-    .match(/^https?:\/\/(osu|new).ppy.sh\/([bs]|beatmapsets)\/(\d+)\/?(#osu\/\d+)?/i);
+function fetchBeatmapByUrl(url) {
+  const match = url.match(BEATMAP_URL_REGEX);
   pageInfo.isOldSite = match[2] !== 'beatmapsets';
 
   // This value is only used for the old site.
   pageInfo.isBeatmap = match[2] === 'b';
 
   const id = match[3];
-  let promise = null;
 
-  if (pageInfo.isOldSite) {
-    // For the old (current) version of the site ID values must be found from the page source.
-    promise = fetch(url, { credentials: 'include' })
-      .then(res => res.text())
-      .then((html) => {
-        const setIdMatch = html.match(/beatmap-rating-graph\.php\?s=(\d+)/);
-        const beatmapIdMatch = html.match(/class=["']beatmapTab active["'] href=["']\/b\/(\d+)/);
-
-        if (!setIdMatch || !beatmapIdMatch) {
-          return Promise.reject(new Error(`
-            ezpp! is experiencing some issues related to the new osu! website rollout.
-            Please use the new look for the extenstion to work. Sorry for the inconvenience.
-          `));
-        }
-
-        pageInfo.beatmapSetId = pageInfo.isBeatmap ? setIdMatch[1] : id;
-        pageInfo.beatmapId = pageInfo.isBeatmap ? id : beatmapIdMatch[1];
-
-        // Check for 'Updated' text instead of 'Qualified' or 'Ranked'
-        pageInfo.isUnranked = !!html.match('<td width=0%>\nSubmitted:<br/>\nUpdated:\n</td>');
-
-        return fetchBeatmap(pageInfo.beatmapId);
-      });
-  } else {
+  if (!pageInfo.isOldSite) {
     pageInfo.beatmapSetId = match[3];
     pageInfo.beatmapId = match[4].substr(5);
-    promise = fetchBeatmap(pageInfo.beatmapId);
+    return fetchBeatmapById(pageInfo.beatmapId);
   }
 
-  promise.then(res => res.text())
+  // For the old version of the site ID values must be found from the page source.
+  return fetch(url, { credentials: 'include' })
+    .then(res => res.text())
+    .then((html) => {
+      const setIdMatch = html.match(/beatmap-rating-graph\.php\?s=(\d+)/);
+      const beatmapIdMatch = html.match(/class=["']beatmapTab active["'] href=["']\/b\/(\d+)/);
+
+      if (!setIdMatch || !beatmapIdMatch) {
+        return Promise.reject(new Error(`
+          ezpp! is experiencing some issues related to the new osu! website rollout.
+          Please use the new look for the extenstion to work. Sorry for the inconvenience.
+        `));
+      }
+
+      pageInfo.beatmapSetId = pageInfo.isBeatmap ? setIdMatch[1] : id;
+      pageInfo.beatmapId = pageInfo.isBeatmap ? id : beatmapIdMatch[1];
+
+      // Check for 'Updated' text instead of 'Qualified' or 'Ranked'
+      pageInfo.isUnranked = !!html.match('<td width=0%>\nSubmitted:<br/>\nUpdated:\n</td>');
+
+      return fetchBeatmapById(pageInfo.beatmapId);
+    });
+}
+
+let fetchAttemptsLeft = FETCH_ATTEMPTS;
+
+const attemptToFetchBeatmap = url => fetchBeatmapByUrl(url).catch((error) => {
+  // Retry fetching until no attempts are left.
+  if (fetchAttemptsLeft--) return attemptToFetchBeatmap(url);
+
+  throw error;
+});
+
+// Init the extension.
+chrome.tabs.query({
+  active: true, // Select active tabs
+  lastFocusedWindow: true, // In the current window
+}, ([tab]) => {
+  const { url } = tab;
+  currentUrl = url;
+
+  attemptToFetchBeatmap(url)
     .then(raw => new ojsama.parser().feed(raw))
     .then(({ map }) => {
       cleanBeatmap = map;
@@ -277,11 +298,10 @@ chrome.tabs.query({
       }
 
       // Preload beatmap cover
-      const coverUrl = pageInfo.isUnranked
+      const cover = new Image();
+      cover.src = pageInfo.isUnranked
         ? `https://b.ppy.sh/thumb/${pageInfo.beatmapSetId}l.jpg`
         : `https://assets.ppy.sh//beatmaps/${pageInfo.beatmapSetId}/covers/cover.jpg`;
-      const cover = new Image();
-      cover.src = coverUrl;
 
       return new Promise((resolve) => {
         cover.onload = () => resolve(cover);
