@@ -27,6 +27,25 @@ let currentUrl = null;
 let cleanBeatmap = null;
 let debounceTimeout = null;
 
+const keyModMap = {
+  'Q': 'mod-ez',
+  'W': 'mod-nf',
+  'E': 'mod-ht',
+  'A': 'mod-hr',
+  'D': 'mod-dt',
+  'F': 'mod-hd',
+  'G': 'mod-fl',
+  'C': 'mod-so',
+};
+
+const pageInfo = {
+  isOldSite: null,
+  isBeatmap: null,
+  beatmapSetId: null,
+  beatmapId: null,
+  isUnranked: null,
+};
+
 const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
 
 function getCalculationSettings() {
@@ -35,7 +54,8 @@ function getCalculationSettings() {
     num | (element.checked ? parseInt(element.value) : 0)
   ), 0);
 
-  const maxCombo = cleanBeatmap.max_combo();
+  // An error might be reported before the beatmap is loaded.
+  const maxCombo = cleanBeatmap ? cleanBeatmap.max_combo() : -1;
 
   const accuracy = clamp(parseFloat(accuracyElement.value.replace(',', '.')), 0, 100);
   const combo = clamp(parseInt(comboElement.value) || maxCombo, 0, maxCombo);
@@ -56,6 +76,7 @@ function trackError(error) {
     version: manifest.version,
     url: currentUrl,
     calculationSettings: getCalculationSettings(),
+    pageInfo,
 
     error: {
       message: error.message,
@@ -76,37 +97,6 @@ function trackError(error) {
     JSON.stringify(report),
   ]);
 }
-
-// Track errors with GA
-window.addEventListener('error', trackError);
-
-if (__FIREFOX__) {
-  containerElement.classList.toggle('firefox', true);
-  document.documentElement.classList.toggle('firefox', true);
-}
-
-chrome.storage.local.get(['language'], ({ language }) => {
-  setLanguage(language || 'en');
-});
-
-const keyModMap = {
-  'Q': 'mod-ez',
-  'W': 'mod-nf',
-  'E': 'mod-ht',
-  'A': 'mod-hr',
-  'D': 'mod-dt',
-  'F': 'mod-hd',
-  'G': 'mod-fl',
-  'C': 'mod-so',
-};
-
-const pageInfo = {
-  isOldSite: null,
-  isBeatmap: null,
-  beatmapSetId: null,
-  beatmapId: null,
-  isUnranked: null,
-};
 
 function displayError(error) {
   trackError(error);
@@ -150,7 +140,7 @@ function calculate() {
   }
 }
 
-function debounce() {
+function debounceCalculation() {
   resultElement.classList.toggle('hidden', true);
   clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(calculate, 500);
@@ -187,7 +177,7 @@ function onReady(cover) {
   modifierElements.forEach((modElement) => {
     modElement.addEventListener('click', ({ target }) => {
       toggleOpposingModifiers(target.id);
-      debounce();
+      debounceCalculation();
     });
   });
 
@@ -199,11 +189,11 @@ function onReady(cover) {
       element.checked = !element.checked;
 
       toggleOpposingModifiers(mod);
-      debounce();
+      debounceCalculation();
     }
   });
 
-  function debounceWithFilter(evt) {
+  function debounceCalculationWithFilter(evt) {
     // Only allow number, decimal marker and backspace
     const allowedKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', ',', 'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight'];
     if (evt.key && !allowedKeys.includes(evt.key)) {
@@ -213,13 +203,13 @@ function onReady(cover) {
 
     const navKeys = ['ArrowLeft', 'ArrowRight'];
     if (!navKeys.includes(evt.key)) {
-      debounce();
+      debounceCalculation();
     }
   }
 
-  accuracyElement.addEventListener('keydown', debounceWithFilter);
-  comboElement.addEventListener('keydown', debounceWithFilter);
-  missesElement.addEventListener('keydown', debounceWithFilter);
+  accuracyElement.addEventListener('keydown', debounceCalculationWithFilter);
+  comboElement.addEventListener('keydown', debounceCalculationWithFilter);
+  missesElement.addEventListener('keydown', debounceCalculationWithFilter);
 
   // Set the combo to the max combo by default
   comboElement.value = cleanBeatmap.maxCombo;
@@ -275,6 +265,19 @@ const attemptToFetchBeatmap = url => fetchBeatmapByUrl(url).catch((error) => {
   if (fetchAttemptsLeft--) return attemptToFetchBeatmap(url);
 
   throw error;
+});
+
+
+// Track errors with GA
+window.addEventListener('error', trackError);
+
+if (__FIREFOX__) {
+  containerElement.classList.toggle('firefox', true);
+  document.documentElement.classList.toggle('firefox', true);
+}
+
+chrome.storage.local.get(['language'], ({ language }) => {
+  setLanguage(language || 'en');
 });
 
 // Init the extension.

@@ -59,8 +59,8 @@ chrome.storage.local.get(
       notificationElement.classList.toggle('hidden', false);
     }
 
-    // Display the notification for max 24h
-    const dayAfterUpdate = updatedAt + 24 * 60 * 60 * 1000;
+    // Display the notification for max one hour
+    const dayAfterUpdate = updatedAt + 60 * 60 * 1000;
     if (dayAfterUpdate < now) {
       clearNotification();
     }

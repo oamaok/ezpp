@@ -47,6 +47,7 @@ module.exports = {
     ]),
 
     new webpack.DefinePlugin({
+      __DEV__: false,
       __CHROME__: JSON.stringify(JSON.parse(process.env.BUILD_CHROME || true)),
       __FIREFOX__: JSON.stringify(JSON.parse(process.env.BUILD_FF || false)),
     }),

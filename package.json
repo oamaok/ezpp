@@ -42,7 +42,7 @@
     "url": "git+https://github.com/oamaok/ezpp.git"
   },
   "author": "Teemu Pääkkönen <oamaok@gmail.com>",
-  "license": "SEE LICENSE IN ./LICENSE",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/oamaok/ezpp/issues"
   },

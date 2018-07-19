@@ -2,6 +2,12 @@
 
 window._gaq = [];
 
+if (__DEV__) {
+  window._gaq.push = (data) => {
+    console.log('Analytics event:', JSON.stringify(data, null, 2));
+  }
+}
+
 const analyticsToggle = document.getElementById('analytics-toggle');
 
 chrome.storage.local.get(['analytics'], ({ analytics }) => {
@@ -14,7 +20,7 @@ chrome.storage.local.get(['analytics'], ({ analytics }) => {
     })
   }
 
-  const shouldInjectAnalytics = unitialized ? !__FIREFOX__ : analytics;
+  const shouldInjectAnalytics = (unitialized ? !__FIREFOX__ : analytics) && !__DEV__;
 
   analyticsToggle.checked = shouldInjectAnalytics;
 
