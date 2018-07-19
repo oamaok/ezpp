@@ -14,6 +14,7 @@ html
 body
   background-color: #000
   clear: both
+  background-image: url('../../assets/background.png')
 
 .firefox>body
   overflow: hidden
@@ -31,19 +32,14 @@ button
   cursor: pointer
 
 .container
+  position: relative
   font-size: 14px
   width: 30em
-  transform: translateZ(-1px)
-  background-image: url('../../assets/background.png')
+  opacity: 1
   // For preloading
-  &>*
-    transition: 0.2s opacity ease-out
-  &>.spinner
+  transition: 0.2s opacity ease-out
+  &.preloading
     opacity: 0
-  &.preloading>*
-    opacity: 0
-  &.preloading>.spinner
-    opacity: 1
   &.error>*
     filter: grayscale(1) blur(2px)
   &.error>.error-message

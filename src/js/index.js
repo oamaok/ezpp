@@ -229,8 +229,14 @@ function fetchBeatmapByUrl(url) {
   const id = match[3];
 
   if (!pageInfo.isOldSite) {
+    const beatmapId = match[4];
+
+    if (!beatmapId) {
+      return Promise.reject(new Error(UNSUPPORTED_GAMEMODE));
+    }
+
     pageInfo.beatmapSetId = match[3];
-    pageInfo.beatmapId = match[4].substr(5);
+    pageInfo.beatmapId = beatmapId.substr(5);
     return fetchBeatmapById(pageInfo.beatmapId);
   }
 

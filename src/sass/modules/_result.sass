@@ -2,22 +2,22 @@
   height: fit-content
 
 // Firefox doesn't want to resize the extension box after the initial size
-.firefox>.result-wrapper
+.result-wrapper
   height: 5em
   background-image: url('../../assets/button-bg.svg')
-  background-color: #333
+  background-color: #ccc
   background-position: 50% 50%
   background-size: cover
-  box-shadow: inset 0 1px 4px rgba(0,0,0,.6)
+
 .result
   &.hidden
-    height: 0em
-    padding-top: 0em
-  box-shadow: inset 0 1px 4px rgba(0,0,0,.6)
+    top: -2.6em
+  position: relative
+  top: 0
   box-sizing: border-box
   height: 2.5em
   padding-top: 0.5em
-  transition: 0.2s all ease-out
+  transition: 0.25s all ease-out
   overflow: hidden
   background-image: url('../../assets/button-bg.svg')
   background-color: #88b300
@@ -27,6 +27,8 @@
   font-size: 2em
   text-align: center
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75)
+  z-index: 2
+  box-shadow: 0 1px 4px rgba(0,0,0,.8)
 
 .firefox>.result
   box-shadow: inset 0 1px 4px rgba(0,0,0,.6), 0 1px 4px rgba(0,0,0,.6)
