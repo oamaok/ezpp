@@ -19,7 +19,7 @@ export const languages = {
   'fi': 'Suomi (Finnish)',
   'de': 'Deutsch (German)',
   'es': 'Español (Spanish)',
-  'sk': 'Slovenský (Slovakian)',
+  'sk': 'Slovenčina (Slovakian)',
 };
 
 let currentLanguage = 'en';
