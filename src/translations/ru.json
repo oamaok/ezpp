@@ -1,0 +1,21 @@
+{
+  "error-occured": "Ошибка помешала правильной работе расширения: ",
+  "version-update-message": "Вы используете ezpp! v{0}",
+  "changelog": "Список изменений",
+  "accuracy": "Точность",
+  "combo": "Комбо",
+  "empty-fc": "(пусто = FC)",
+  "misses": "Misses",
+  "mod-hidden": "Hidden",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "DoubleTime",
+  "mod-flashlight": "Flashlight",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Easy",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut",
+  "language": "Язык",
+  "settings": "Настройки",
+  "analytics": "Отправлять анонимные данные",
+  "result": "Выходит {0}пп."
+}
