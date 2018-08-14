@@ -3,6 +3,7 @@ import fi from '../translations/fi.json';
 import de from '../translations/de.json';
 import es from '../translations/es.json';
 import sk from '../translations/sk.json';
+import ru from '../translations/ru.json';
 
 const languageSelector = document.getElementById('language-selector');
 
@@ -12,6 +13,7 @@ const languageMap = {
   de,
   es,
   sk,
+  ru,
 };
 
 export const languages = {
@@ -20,6 +22,7 @@ export const languages = {
   'de': 'Deutsch (German)',
   'es': 'Español (Spanish)',
   'sk': 'Slovenčina (Slovakian)',
+  'ru': 'Русский (Russian)',
 };
 
 let currentLanguage = 'en';
