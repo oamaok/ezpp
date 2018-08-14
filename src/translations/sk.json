@@ -1,0 +1,21 @@
+{
+  "error-occured": "Chyba zabránila správnemu fungovaniu rozšírenia: ",
+  "version-update-message": "Teraz používaš ezpp! v{0}",
+  "changelog": "zoznam zmien",
+  "accuracy": "Presnosť",
+  "combo": "Combo",
+  "empty-fc": "(prázdne = FC)",
+  "misses": "Netrafené",
+  "mod-hidden": "Hidden",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "DoubleTime",
+  "mod-flashlight": "Flashlight",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Easy",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut",
+  "language": "Jazyk",
+  "settings": "Nastavenia",
+  "analytics": "Odosielať anonymné analytické údaje",
+  "result": "To je asi {0}pp."
+}

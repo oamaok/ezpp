@@ -2,6 +2,7 @@ import en from '../translations/en.json';
 import fi from '../translations/fi.json';
 import de from '../translations/de.json';
 import es from '../translations/es.json';
+import sk from '../translations/sk.json';
 import ru from '../translations/ru.json';
 
 const languageSelector = document.getElementById('language-selector');
@@ -11,6 +12,7 @@ const languageMap = {
   en,
   de,
   es,
+  sk,
   ru,
 };
 
@@ -19,6 +21,7 @@ export const languages = {
   'fi': 'Suomi (Finnish)',
   'de': 'Deutsch (German)',
   'es': 'Español (Spanish)',
+  'sk': 'Slovenčina (Slovakian)',
   'ru': 'Русский (Russian)',
 };
 
