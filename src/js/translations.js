@@ -25,7 +25,7 @@ export const languages = {
   'es': 'Español (Spanish)',
   'sk': 'Slovenčina (Slovakian)',
   'ru': 'Русский (Russian)',
-  'ro': 'Româna (Romanian)',
+  'ro': 'Română (Romanian)',
 };
 
 let currentLanguage = 'en';
