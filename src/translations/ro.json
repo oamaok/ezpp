@@ -1,0 +1,21 @@
+{
+  "error-occured": "O eroare a împiedicat extensia din a functiona corect: ",
+  "version-update-message": "Folosești ezpp! v{0}",
+  "changelog": "changelog",
+  "accuracy": "Precizie",
+  "combo": "Combo",
+  "empty-fc": "(gol = FC)",
+  "misses": "Ratări",
+  "mod-hidden": "Hidden",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "DoubleTime",
+  "mod-flashlight": "Flashlight",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Easy",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut",
+  "language": "Limbă",
+  "settings": "Setări",
+  "analytics": "Trimite date analytice anonime",
+  "result": "Este cam {0}pp."
+}
