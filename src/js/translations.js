@@ -4,6 +4,7 @@ import de from '../translations/de.json';
 import es from '../translations/es.json';
 import sk from '../translations/sk.json';
 import ru from '../translations/ru.json';
+import ro from '../translations/ro.json';
 
 const languageSelector = document.getElementById('language-selector');
 
@@ -14,6 +15,7 @@ const languageMap = {
   es,
   sk,
   ru,
+  ro,
 };
 
 export const languages = {
@@ -23,6 +25,7 @@ export const languages = {
   'es': 'Español (Spanish)',
   'sk': 'Slovenčina (Slovakian)',
   'ru': 'Русский (Russian)',
+  'ro': 'Română (Romanian)',
 };
 
 let currentLanguage = 'en';
