@@ -7,8 +7,6 @@ import ru from '../translations/ru.json';
 import ro from '../translations/ro.json';
 import fr from '../translations/fr.json';
 
-const languageSelector = document.getElementById('language-selector');
-
 const languageMap = {
   fi,
   en,
@@ -30,6 +28,8 @@ export const languages = {
   'ro': 'Română (Romanian)',
   'fr': 'Français (French)',
 };
+
+const languageSelector = document.getElementById('language-selector');
 
 let currentLanguage = 'en';
 const setterHooks = [];

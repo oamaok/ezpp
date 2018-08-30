@@ -24,7 +24,7 @@ analyticsToggle.addEventListener('change', (evt) => {
   });
 });
 
-Object.keys(languages).forEach((language) => {
+Object.keys(languages).sort().forEach((language) => {
   const option = document.createElement('option');
   option.setAttribute('value', language);
   option.innerText = languages[language];
