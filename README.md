@@ -1,15 +1,25 @@
 # ezpp!
 
-ezpp! is a browser extension which allows you to calculate pp
+ezpp! is a browser extension that allows you to calculate pp
 values for a beatmap without manually downloading the beatmap.
 
 ## Prerequisities
 
- - Node.js, NPM
+Current versions of software used:
+
+```shell
+$ node -v
+v10.8.0
+
+$ npm -v
+6.4.0
+```
+
+Everything should work with older versions of both Node and NPM.
 
 ## Translating
 
-All translation efforst are warmly welcome! The base English translations can be found [here](https://github.com/oamaok/ezpp/blob/master/src/translations/en.json). After translating the file you should also add relevant information to [this file](https://github.com/oamaok/ezpp/blob/master/src/js/translations.js#L1-L14). If you are unsure on how to edit the files, feel free to [raise an issue](https://github.com/oamaok/ezpp/issues/new) or ask away in the pull request.
+All translation efforst are warmly welcome! The base English translations can be found [here](https://github.com/oamaok/ezpp/blob/master/src/translations/en.json). After translating the file you should also add relevant information to [this file](https://github.com/oamaok/ezpp/blob/master/src/js/translations.js#L1-L30). If you are unsure on how to edit the files, feel free to [raise an issue](https://github.com/oamaok/ezpp/issues/new) or ask away in the pull request.
 
 ## Developing
 
@@ -41,6 +51,10 @@ To build a production version of the package, run `npm run build:chrome`.
 All the changes made are compiled automatically as long as the `npm run start:firefox` script is running.
 
 To build a production version of the package, run `npm run build:firefox`.
+
+### Production builds
+
+Run `npm run build:all`. Two files, `ezpp-chrome.zip` and `ezpp-firefox.zip`, are generated.
 
 ## Installing
 
