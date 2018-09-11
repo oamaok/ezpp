@@ -128,10 +128,21 @@ function calculate() {
       acc_percent: accuracy,
     });
 
-    const analyticsString = [pageInfo.beatmapId, modifiers, accuracy, combo, misses].join('__');
+    const { beatmapId } = pageInfo;
+
+    const analyticsData = {
+      version: manifest.version,
+      beatmapId,
+      modifiers,
+      accuracy,
+      combo,
+      misses,
+      stars,
+      pp: pp.total,
+    };
 
     // Track results
-    _gaq.push(['_trackEvent', 'calculate', analyticsString]);
+    _gaq.push(['_trackEvent', 'calculate', JSON.stringify(analyticsData)]);
 
     setResultText(Math.round(pp.total));
     resultElement.classList.toggle('hidden', false);
@@ -244,8 +255,10 @@ function fetchBeatmapByUrl(url) {
   return fetch(url, { credentials: 'include' })
     .then(res => res.text())
     .then((html) => {
-      const setIdMatch = html.match(/beatmap-rating-graph\.php\?s=(\d+)/);
-      const beatmapIdMatch = html.match(/class=["']beatmapTab active["'] href=["']\/b\/(\d+)/);
+      const setIdMatch = html
+        .match(/beatmap-rating-graph\.php\?s=(\d+)/);
+      const beatmapIdMatch = html
+        .match(/class=["']beatmapTab active["'] href=["']\/b\/(\d+)/);
 
       if (!setIdMatch || !beatmapIdMatch) {
         return Promise.reject(new Error(`
@@ -258,20 +271,20 @@ function fetchBeatmapByUrl(url) {
       pageInfo.beatmapId = pageInfo.isBeatmap ? id : beatmapIdMatch[1];
 
       // Check for 'Updated' text instead of 'Qualified' or 'Ranked'
-      pageInfo.isUnranked = !!html.match('<td width=0%>\nSubmitted:<br/>\nUpdated:\n</td>');
+      pageInfo.isUnranked = !!html
+        .match('<td width=0%>\nSubmitted:<br/>\nUpdated:\n</td>');
 
       return fetchBeatmapById(pageInfo.beatmapId);
     });
 }
 
-let fetchAttemptsLeft = FETCH_ATTEMPTS;
+const attemptToFetchBeatmap = (url, attempts) => fetchBeatmapByUrl(url)
+  .catch((error) => {
+    // Retry fetching until no attempts are left.
+    if (attempts) return attemptToFetchBeatmap(url, attempts - 1);
 
-const attemptToFetchBeatmap = url => fetchBeatmapByUrl(url).catch((error) => {
-  // Retry fetching until no attempts are left.
-  if (fetchAttemptsLeft--) return attemptToFetchBeatmap(url);
-
-  throw error;
-});
+    throw error;
+  });
 
 
 // Track errors with GA
@@ -294,7 +307,7 @@ chrome.tabs.query({
   const { url } = tab;
   currentUrl = url;
 
-  attemptToFetchBeatmap(url)
+  attemptToFetchBeatmap(url, FETCH_ATTEMPTS)
     .then(raw => new ojsama.parser().feed(raw))
     .then(({ map }) => {
       cleanBeatmap = map;
