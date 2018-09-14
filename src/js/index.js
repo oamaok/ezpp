@@ -132,12 +132,13 @@ function calculate() {
 
     const analyticsData = {
       version: manifest.version,
-      beatmapId,
-      modifiers,
-      accuracy,
-      combo,
-      misses,
-      pp: pp.total,
+      beatmapId: parseInt(beatmapId),
+      modifiers: parseInt(modifiers),
+      accuracy: parseFloat(accuracy),
+      combo: parseInt(combo),
+      misses: parseInt(misses),
+      stars: parseFloat(stars.total.toFixed(2)),
+      pp: parseFloat(pp.total.toFixed(2)),
     };
 
     // Track results
