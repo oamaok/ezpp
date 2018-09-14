@@ -137,7 +137,6 @@ function calculate() {
       accuracy,
       combo,
       misses,
-      stars,
       pp: pp.total,
     };
 
