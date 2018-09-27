@@ -6,6 +6,7 @@ import sk from '../translations/sk.json';
 import ru from '../translations/ru.json';
 import ro from '../translations/ro.json';
 import fr from '../translations/fr.json';
+import pl from '../translations/pl.json';
 
 const languageMap = {
   fi,
@@ -16,6 +17,7 @@ const languageMap = {
   ru,
   ro,
   fr,
+  pl,
 };
 
 export const languages = {
@@ -27,6 +29,7 @@ export const languages = {
   'ru': 'Русский (Russian)',
   'ro': 'Română (Romanian)',
   'fr': 'Français (French)',
+  'pl': 'Polski (Polish)',
 };
 
 const languageSelector = document.getElementById('language-selector');
