@@ -1,36 +1,9 @@
-import en from '../translations/en.json';
-import fi from '../translations/fi.json';
-import de from '../translations/de.json';
-import es from '../translations/es.json';
-import sk from '../translations/sk.json';
-import ru from '../translations/ru.json';
-import ro from '../translations/ro.json';
-import fr from '../translations/fr.json';
-import pl from '../translations/pl.json';
-
-const languageMap = {
-  fi,
-  en,
-  de,
-  es,
-  sk,
-  ru,
-  ro,
-  fr,
-  pl,
-};
-
-export const languages = {
-  'en': 'English',
-  'fi': 'Suomi (Finnish)',
-  'de': 'Deutsch (German)',
-  'es': 'Español (Spanish)',
-  'sk': 'Slovenčina (Slovakian)',
-  'ru': 'Русский (Russian)',
-  'ro': 'Română (Romanian)',
-  'fr': 'Français (French)',
-  'pl': 'Polski (Polish)',
-};
+export const languages = require('../translations/languages.json');
+export const translations = languages
+  .reduce((acc, lang) => ({
+    ...acc,
+    [lang.code]: require(`../translations/${lang.code}.json`),
+  }), {});
 
 const languageSelector = document.getElementById('language-selector');
 
@@ -38,7 +11,7 @@ let currentLanguage = 'en';
 const setterHooks = [];
 
 export function getTranslation(translationKey, ...args) {
-  const template = languageMap[currentLanguage][translationKey];
+  const template = translations[currentLanguage][translationKey];
 
   if (!args.length) return template;
 
@@ -78,6 +51,6 @@ export function setLanguage(language) {
 
   [...document.querySelectorAll('[data-t]')].forEach((element) => {
     const translationKey = element.getAttribute('data-t');
-    element.innerText = languageMap[language][translationKey];
+    element.innerText = translations[language][translationKey];
   });
 }

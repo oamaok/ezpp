@@ -1,8 +1,8 @@
 {
-  "error-occured": "B³¹d uniemo¿liwi³ poprawne dzia³anie rozszerzenia: ",
-  "version-update-message": "U¿ywasz teraz ezpp! w wersji v{0}",
+  "error-occured": "BÅ‚Ä…d uniemoÅ¼liwiÅ‚ poprawne dziaÅ‚anie rozszerzenia: ",
+  "version-update-message": "UÅ¼ywasz teraz ezpp! w wersji v{0}",
   "changelog": "dziennik zmian",
-  "accuracy": "Celnoœæ",
+  "accuracy": "CelnoÅ›Ä‡",
   "combo": "Combo",
   "empty-fc": "(puste = FC)",
   "misses": "Missy",
@@ -14,8 +14,8 @@
   "mod-easy": "Easy",
   "mod-halftime": "HalfTime",
   "mod-spunout": "SpunOut",
-  "language": "Jêzyk",
+  "language": "JÄ™zyk",
   "settings": "Ustawienia",
-  "analytics": "Wyœlij anonimowe dane analityczne",
-  "result": "To oko³o {0}pp."
+  "analytics": "WyÅ›lij anonimowe dane analityczne",
+  "result": "To okoÅ‚o {0}pp."
 }

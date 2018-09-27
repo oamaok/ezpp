@@ -19,18 +19,22 @@ module.exports = {
   },
 
   module: {
-    loaders: [
+    rules: [
       {
-        test: /\.js$/, loader: 'babel-loader',
+        test: /\.js?$/,
+        exclude: /(node_modules|bower_components)/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
       },
       {
-        test: /\.json$/, loader: 'json-loader',
+        test: /\.s[ac]ss$/, use: ExtractTextPlugin.extract('css-loader!sass-loader'),
       },
       {
-        test: /\.s[ac]ss$/, loader: ExtractTextPlugin.extract('css-loader!sass-loader'),
-      },
-      {
-        test: /\.(png|svg|woff2)$/, loader: 'url-loader',
+        test: /\.(png|svg|woff2)$/, use: 'url-loader',
       },
     ],
   },
