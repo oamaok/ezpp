@@ -1,0 +1,38 @@
+[
+  {
+    "name": "English",
+    "code": "en"
+  },
+  {
+    "name": "Suomi (Finnish)",
+    "code": "fi"
+  },
+  {
+    "name": "Deutsch (German)",
+    "code": "de"
+  },
+  {
+    "name": "Español (Spanish)",
+    "code": "es"
+  },
+  {
+    "name": "Slovenčina (Slovakian)",
+    "code": "sk"
+  },
+  {
+    "name": "Русский (Russian)",
+    "code": "ru"
+  },
+  {
+    "name": "Română (Romanian)",
+    "code": "ro"
+  },
+  {
+    "name": "Français (French)",
+    "code": "fr"
+  },
+  {
+    "name": "Polski (Polish)",
+    "code": "pl"
+  }
+]

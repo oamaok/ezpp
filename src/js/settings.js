@@ -24,10 +24,12 @@ analyticsToggle.addEventListener('change', (evt) => {
   });
 });
 
-Object.keys(languages).sort().forEach((language) => {
+languages
+.sort((a, b) => a.name - b.name)
+.forEach((language) => {
   const option = document.createElement('option');
-  option.setAttribute('value', language);
-  option.innerText = languages[language];
+  option.setAttribute('value', language.code);
+  option.innerText = language.name;
   languageSelector.appendChild(option);
 });
 

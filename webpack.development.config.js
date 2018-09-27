@@ -11,6 +11,8 @@ module.exports = {
     changelog: path.resolve(__dirname, 'src/js/changelog.js'),
   },
 
+  mode: 'development',
+
   output: {
     publicPath: '',
     path: path.resolve(__dirname, 'build'),
@@ -18,21 +20,28 @@ module.exports = {
   },
 
   module: {
-    loaders: [
+    rules: [
       {
-        test: /\.js$/, loader: 'babel-loader',
+        test: /\.js$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
       },
       {
-        test: /\.json$/, loader: 'json-loader',
+        test: /\.s(a|c)ss$/,
+        use: ['style-loader', 'css-loader', 'sass-loader']
       },
       {
-        test: /\.s[ac]ss$/, loaders: ['style-loader', 'css-loader', 'sass-loader'],
+        test: /\.(png|svg|woff2)$/,
+        use: 'url-loader'
       },
-      {
-        test: /\.(png|svg|woff2)$/, loader: 'url-loader',
-      },
-    ],
+    ]
   },
+
+  devtool: 'inline-cheap-source-map',
 
   plugins: [
     new CopyWebpackPlugin([{
