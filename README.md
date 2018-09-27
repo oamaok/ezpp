@@ -19,7 +19,7 @@ Everything should work with older versions of both Node and NPM.
 
 ## Translating
 
-All translation efforst are warmly welcome! The base English translations can be found [here](https://github.com/oamaok/ezpp/blob/master/src/translations/en.json). After translating the file you should also add relevant information to [this file](https://github.com/oamaok/ezpp/blob/master/src/translations/languages.json). If you are unsure on how to edit the files, feel free to [raise an issue](https://github.com/oamaok/ezpp/issues/new) or ask away in the pull request.
+All translation efforst are warmly welcome! The base English translations can be found [here](https://github.com/oamaok/ezpp/blob/master/src/translations/en.json). After translating the file you should also add relevant information to [this file](https://github.com/oamaok/ezpp/blob/master/src/translations/languages.json), where the `code` field should match with the `.json` file you created. If you are unsure on how to edit the files, feel free to [raise an issue](https://github.com/oamaok/ezpp/issues/new) or ask away in the pull request.
 
 ## Developing
 
