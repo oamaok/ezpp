@@ -135,7 +135,6 @@ function calculate() {
     const { beatmapId } = pageInfo;
 
     const analyticsData = {
-      version: manifest.version,
       beatmapId: parseInt(beatmapId),
       modifiers: parseInt(modifiers),
       accuracy: parseFloat(accuracy),
