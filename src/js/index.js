@@ -160,7 +160,7 @@ function calculate() {
 function debounceCalculation(affectsStarRating) {
   resultElement.classList.toggle('hidden', true);
   // Only hide the stars container if the calculation affects star rating
-  difficultyStarsContainer.classList.toggle('hidden', affectsStarRating);
+  if (affectsStarRating) difficultyStarsContainer.classList.toggle('hidden', true);
   clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(calculate, 500);
 }
