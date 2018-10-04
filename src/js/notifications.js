@@ -53,16 +53,16 @@ chrome.storage.local.get(
         displayNotification: true,
       });
       notificationElement.classList.toggle('hidden', false);
-    }
+    } else {
+      // Display the notification for max one hour
+      const dayAfterUpdate = updatedAt + 60 * 60 * 1000;
+      if (dayAfterUpdate < now) {
+        clearNotification();
+      }
 
-    if (displayNotification) {
-      notificationElement.classList.toggle('hidden', false);
-    }
-
-    // Display the notification for max one hour
-    const dayAfterUpdate = updatedAt + 60 * 60 * 1000;
-    if (dayAfterUpdate < now) {
-      clearNotification();
+      if (displayNotification) {
+        notificationElement.classList.toggle('hidden', false);
+      }
     }
   },
 );

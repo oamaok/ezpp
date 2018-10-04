@@ -1,28 +1,33 @@
-.notification
+.notification-wrapper
   position: absolute
   z-index: 2
-  box-shadow: 0 1px 4px rgba(0,0,0,.6)
-  box-sizing: border-box
-  padding: 0.8em 3em 0.8em 1em
   width: 100%
-  transition: 0.2s all ease-out
-  overflow: hidden
-  background-image: url('../../assets/button-bg.svg')
-  background-color: #fc2
-  background-size: cover
-  color: #fff
-  font-weight: 600
-  font-size: 1.2em
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75)
+  padding: 0.5em
+  opacity: 1
+  transition: 0.4s all ease-out
   &.hidden
     transform: translateY(-110%)
-  .message
-    float: left
-  .clear
-    position: absolute
-    right: 1em
-    top: 50%
-    transform: translateY(-50%)
-    cursor: pointer
-    &:hover
-      color: #29b
+    opacity: 0
+
+  .notification
+    box-shadow: 0 1px 4px rgba(0,0,0,.6)
+    box-sizing: border-box
+    padding: 0.5em 3em 0.5em 0.75em
+    margin 1em
+    overflow: hidden
+    background-image: url('../../assets/button-bg.svg')
+    background-color: #fc2
+    background-size: cover
+    color: #fff
+    font-weight: 600
+    font-size: 1.2em
+    border-radius: 2px
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75)
+    .clear
+      position: absolute
+      right: 1em
+      top: 50%
+      transform: translateY(-50%)
+      cursor: pointer
+      &:hover
+        color: #29b
