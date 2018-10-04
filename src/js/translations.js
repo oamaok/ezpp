@@ -1,4 +1,7 @@
+/* eslint-disable global-require */
+/* eslint-disable import/no-dynamic-require */
 export const languages = require('../translations/languages.json');
+
 export const translations = languages
   .reduce((acc, lang) => ({
     ...acc,
@@ -21,6 +24,7 @@ export function getTranslation(translationKey, ...args) {
   );
 }
 
+/* eslint-disable no-param-reassign */
 export function createTextSetter(element, translationKey, property = 'innerText') {
   if (setterHooks.some(hook => hook.element === element)) {
     throw new Error('This element already has a text setter');

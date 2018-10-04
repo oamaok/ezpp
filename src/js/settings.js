@@ -25,13 +25,13 @@ analyticsToggle.addEventListener('change', (evt) => {
 });
 
 languages
-.sort((a, b) => a.name - b.name)
-.forEach((language) => {
-  const option = document.createElement('option');
-  option.setAttribute('value', language.code);
-  option.innerText = language.name;
-  languageSelector.appendChild(option);
-});
+  .sort((a, b) => a.name - b.name)
+  .forEach((language) => {
+    const option = document.createElement('option');
+    option.setAttribute('value', language.code);
+    option.innerText = language.name;
+    languageSelector.appendChild(option);
+  });
 
 languageSelector.addEventListener('change', (evt) => {
   _gaq.push(['_trackEvent', 'language', evt.target.value]);

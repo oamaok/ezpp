@@ -5,7 +5,6 @@
   height: 10em
   position: relative
   border-bottom: 8px solid #b17
-  font-style: italic
 
   .icon-container
     position: absolute
@@ -29,12 +28,44 @@
   .gradient
     height: 100%
     width: 100%
-    padding: 1em
     background: linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.75))
-  span
+  .song-info
+    width: 350px
+    height: 100%
+    padding: 0.5em 1em 1em 1em
     position: absolute
-    font-size: 1.5em
-    font-weight: 700
     color: #fff
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75)
-    bottom: 0.7em
+
+    display: flex
+    flex-direction: column
+    justify-content
+
+    .song-title
+      font-style: italic
+      font-size: 1.5em
+      font-weight: 600
+    .artist
+      font-size: 1.25em
+      font-style: italic
+      flex-grow: 1
+    .difficulty
+      display: flex
+      align-items: center
+      #difficulty-name
+        margin-right: 0.5em
+        font-size: 1.5em
+        font-weight: 600
+      .difficulty-stars
+        display: flex
+        align-items: center
+        color: #fc2
+        transition: 0.1s all ease-out
+        i,span
+          font-weight: 600
+          font-size: 0.8rem
+        i
+          margin-right: 0.1em
+        &.hidden
+          opacity: 0
+

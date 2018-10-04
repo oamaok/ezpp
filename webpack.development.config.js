@@ -26,19 +26,19 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env']
-          }
-        }
+            presets: ['@babel/preset-env'],
+          },
+        },
       },
       {
         test: /\.s(a|c)ss$/,
-        use: ['style-loader', 'css-loader', 'sass-loader']
+        use: ['style-loader', 'css-loader', 'sass-loader'],
       },
       {
         test: /\.(png|svg|woff2)$/,
-        use: 'url-loader'
+        use: 'url-loader',
       },
-    ]
+    ],
   },
 
   devtool: 'inline-cheap-source-map',

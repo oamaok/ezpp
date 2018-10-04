@@ -12,7 +12,11 @@ const BEATMAP_URL_REGEX = /^https?:\/\/(osu|new).ppy.sh\/([bs]|beatmapsets)\/(\d
 
 const containerElement = document.getElementById('container');
 const headerElement = document.getElementById('header');
-const titleElement = document.getElementById('title');
+const titleElement = document.querySelector('.song-title');
+const artistElement = document.querySelector('.artist');
+const difficultyNameElement = document.getElementById('difficulty-name');
+const difficultyStarsElement = document.getElementById('difficulty-stars');
+const difficultyStarsContainer = document.querySelector('.difficulty-stars');
 const modifierElements = [...document.querySelectorAll('.mod>input')];
 const accuracyElement = document.getElementById('accuracy');
 const comboElement = document.getElementById('combo');
@@ -144,15 +148,20 @@ function calculate() {
     // Track results
     _gaq.push(['_trackEvent', 'calculate', JSON.stringify(analyticsData)]);
 
+    difficultyStarsElement.innerText = stars.total.toFixed(2);
+
     setResultText(Math.round(pp.total));
     resultElement.classList.toggle('hidden', false);
+    difficultyStarsContainer.classList.toggle('hidden', false);
   } catch (error) {
     displayError(error);
   }
 }
 
-function debounceCalculation() {
+function debounceCalculation(affectsStarRating) {
   resultElement.classList.toggle('hidden', true);
+  // Only hide the stars container if the calculation affects star rating
+  difficultyStarsContainer.classList.toggle('hidden', affectsStarRating);
   clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(calculate, 500);
 }
@@ -161,6 +170,8 @@ const opposingModifiers = [
   ['mod-hr', 'mod-ez'],
   ['mod-ht', 'mod-dt'],
 ];
+
+const affectStarRating = ['mod-hr', 'mod-ez', 'mod-dt', 'mod-ht'];
 
 function toggleOpposingModifiers(mod) {
   opposingModifiers.forEach((mods) => {
@@ -182,13 +193,14 @@ function onReady(cover) {
   }
 
   // Set header text
-  const title = `${cleanBeatmap.artist} - ${cleanBeatmap.title} [${cleanBeatmap.version}]`;
-  titleElement.innerText = title;
+  titleElement.innerText = cleanBeatmap.title;
+  artistElement.innerText = cleanBeatmap.artist;
+  difficultyNameElement.innerText = cleanBeatmap.version;
 
   modifierElements.forEach((modElement) => {
     modElement.addEventListener('click', ({ target }) => {
       toggleOpposingModifiers(target.id);
-      debounceCalculation();
+      debounceCalculation(affectStarRating.includes(target.id));
     });
   });
 
@@ -200,7 +212,7 @@ function onReady(cover) {
       element.checked = !element.checked;
 
       toggleOpposingModifiers(mod);
-      debounceCalculation();
+      debounceCalculation(false);
     }
   });
 
@@ -214,7 +226,7 @@ function onReady(cover) {
 
     const navKeys = ['ArrowLeft', 'ArrowRight'];
     if (!navKeys.includes(evt.key)) {
-      debounceCalculation();
+      debounceCalculation(false);
     }
   }
 
