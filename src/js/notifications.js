@@ -3,7 +3,7 @@ import { createTextSetter } from './translations';
 
 const notificationElement = document.getElementById('notification');
 const notificationClearElement = document.getElementById('notification-clear');
-const versionElement = document.getElementById('version');
+const versionElement = document.getElementById('notification-version');
 
 const setVersionText = createTextSetter(versionElement, 'version-update-message');
 

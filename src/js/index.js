@@ -12,6 +12,7 @@ const BEATMAP_URL_REGEX = /^https?:\/\/(osu|new).ppy.sh\/([bs]|beatmapsets)\/(\d
 
 const containerElement = document.getElementById('container');
 const headerElement = document.getElementById('header');
+const versionElement = document.querySelector('.version');
 const titleElement = document.querySelector('.song-title');
 const artistElement = document.querySelector('.artist');
 const difficultyNameElement = document.getElementById('difficulty-name');
@@ -25,6 +26,8 @@ const resultElement = document.getElementById('result');
 const errorElement = document.getElementById('error');
 
 const setResultText = createTextSetter(resultElement, 'result');
+
+versionElement.innerText = `ezpp! v${manifest.version}`;
 
 // Set after the extension initializes, used for additional error information.
 let currentUrl = null;

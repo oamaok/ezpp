@@ -5,6 +5,8 @@
   height: 10em
   position: relative
   border-bottom: 8px solid #b17
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75)
+  user-select: none
 
   .icon-container
     position: absolute
@@ -18,8 +20,8 @@
     border: 0
     color: #fff
     background: none
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75)
     transition: all 0.1s ease-out
+    text-shadow: inherit
     &:hover
       color: #29b
 
@@ -29,13 +31,20 @@
     height: 100%
     width: 100%
     background: linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.75))
+  .version
+    padding: 1rem
+    position: absolute
+    bottom: 0
+    right: 0
+    text-align: right
+    color: #7f7f7f
+    font-size: 0.75em
   .song-info
-    width: 350px
+    width: 24em
     height: 100%
     padding: 0.5em 1em 1em 1em
     position: absolute
     color: #fff
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75)
 
     display: flex
     flex-direction: column
