@@ -11,16 +11,16 @@ if (__DEV__) {
 const analyticsToggle = document.getElementById('analytics-toggle');
 
 chrome.storage.local.get(['analytics'], ({ analytics }) => {
-  const unitialized = typeof analytics === 'undefined'
+  const uninitialized = typeof analytics === 'undefined'
 
-  if (unitialized) {
+  if (uninitialized) {
     // Turn analytics off by default on firefox
     chrome.storage.local.set({
       analytics: !__FIREFOX__,
     })
   }
 
-  const shouldInjectAnalytics = (unitialized ? !__FIREFOX__ : analytics) && !__DEV__;
+  const shouldInjectAnalytics = (uninitialized ? !__FIREFOX__ : analytics) && !__DEV__;
 
   analyticsToggle.checked = shouldInjectAnalytics;
 
