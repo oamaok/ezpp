@@ -299,6 +299,30 @@ const attemptToFetchBeatmap = (url, attempts) => fetchBeatmapByUrl(url)
     throw error;
   });
 
+const processBeatmap = (rawBeatmap) => {
+  const { map } = new ojsama.parser().feed(rawBeatmap);
+
+  cleanBeatmap = map;
+
+  // Support old beatmaps
+  cleanBeatmap.mode = Number(cleanBeatmap.mode || 0);
+
+  if (cleanBeatmap.mode !== 0) {
+    throw Error(UNSUPPORTED_GAMEMODE);
+  }
+};
+
+const fetchBeatmapBackground = () =>
+  new Promise((resolve) => {
+    // Preload beatmap cover
+    const cover = new Image();
+    cover.src = pageInfo.isUnranked
+      ? `https://b.ppy.sh/thumb/${pageInfo.beatmapSetId}l.jpg`
+      : `https://assets.ppy.sh//beatmaps/${pageInfo.beatmapSetId}/covers/cover.jpg`;
+    cover.onload = () => resolve(cover);
+    cover.onerror = () => resolve();
+    cover.onabort = () => resolve();
+  });
 
 // Track errors with GA
 window.addEventListener('error', trackError);
@@ -322,27 +346,8 @@ chrome.tabs.query({
 
   Promise.all([
     attemptToFetchBeatmap(url, FETCH_ATTEMPTS)
-      .then(raw => new ojsama.parser().feed(raw))
-      .then(({ map }) => {
-        cleanBeatmap = map;
-
-        // Support old beatmaps
-        cleanBeatmap.mode = Number(cleanBeatmap.mode || 0);
-
-        if (cleanBeatmap.mode !== 0) {
-          throw Error(UNSUPPORTED_GAMEMODE);
-        }
-      }),
-    new Promise((resolve) => {
-      // Preload beatmap cover
-      const cover = new Image();
-      cover.src = pageInfo.isUnranked
-        ? `https://b.ppy.sh/thumb/${pageInfo.beatmapSetId}l.jpg`
-        : `https://assets.ppy.sh//beatmaps/${pageInfo.beatmapSetId}/covers/cover.jpg`;
-      cover.onload = () => resolve(cover);
-      cover.onerror = () => resolve();
-      cover.onabort = () => resolve();
-    }),
+      .then(processBeatmap),
+    fetchBeatmapBackground(),
   ])
     .then(onReady)
     .catch(displayError);
