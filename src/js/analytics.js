@@ -20,6 +20,7 @@ chrome.storage.local.get(['analytics'], ({ analytics }) => {
     })
   }
 
+  // By default don't inject analytics on Firefox. Disables analytics when developing.
   const shouldInjectAnalytics = (uninitialized ? !__FIREFOX__ : analytics) && !__DEV__;
 
   analyticsToggle.checked = shouldInjectAnalytics;

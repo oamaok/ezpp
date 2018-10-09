@@ -53,7 +53,10 @@
         <input type="text" id="accuracy" value="100.0" maxlength="5" pattern="">
       </div>
       <div class="numeric">
-        <label for="combo"><span data-t="combo"></span><span class="hint" data-t="empty-fc"></span></label>
+        <label for="combo">
+          <span data-t="combo"></span>
+        </label>
+        <button class="fc-reset">FC</button>
         <input type="text" id="combo" value="" >
       </div>
       <div class="numeric">
@@ -96,9 +99,7 @@
       </div>
     </div>
   </div>
-  <div class="result-wrapper">
-    <div class="result hidden" id="result"></div>
-  </div>
+  <div class="result" id="result"></div>
   <div class="settings" id="settings">
     <button id="close-settings">
       <i class="material-icons">clear</i>

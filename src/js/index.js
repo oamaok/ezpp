@@ -15,9 +15,9 @@ const headerElement = document.getElementById('header');
 const versionElement = document.querySelector('.version');
 const titleElement = document.querySelector('.song-title');
 const artistElement = document.querySelector('.artist');
+const fcResetButton = document.querySelector('.fc-reset');
 const difficultyNameElement = document.getElementById('difficulty-name');
 const difficultyStarsElement = document.getElementById('difficulty-stars');
-const difficultyStarsContainer = document.querySelector('.difficulty-stars');
 const modifierElements = [...document.querySelectorAll('.mod>input')];
 const accuracyElement = document.getElementById('accuracy');
 const comboElement = document.getElementById('combo');
@@ -32,7 +32,6 @@ versionElement.innerText = `ezpp! v${manifest.version}`;
 // Set after the extension initializes, used for additional error information.
 let currentUrl = null;
 let cleanBeatmap = null;
-let debounceTimeout = null;
 
 const keyModMap = {
   'Q': 'mod-ez',
@@ -112,19 +111,36 @@ function displayError(error) {
   containerElement.classList.toggle('preloading', false);
 }
 
+function debounce(fn, timeout) {
+  let debounceTimeout = null;
+
+  return (...args) => {
+    clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(() => fn(...args), timeout);
+  };
+}
+
+const trackCalculate = (() => {
+  let lastData = {};
+
+  return (analyticsData) => {
+    // Don't repeat calculation analytics
+    const isClean = Object.keys(analyticsData).every(key => lastData[key] === analyticsData[key]);
+    if (isClean) return;
+
+    lastData = Object.assign({}, analyticsData);
+
+    _gaq.push(['_trackEvent', 'calculate', JSON.stringify(analyticsData)]);
+  };
+})();
+
+const trackCalculateDebounced = debounce(trackCalculate, 750);
+
 function calculate() {
   try {
-    // Wait until the user writes proper value
-    if (!accuracyElement.value.length) {
-      return;
-    }
-
     const {
       modifiers, accuracy, combo, misses,
     } = getCalculationSettings();
-
-    comboElement.value = combo;
-    missesElement.value = misses;
 
     const stars = new ojsama.diff().calc({ map: cleanBeatmap, mods: modifiers });
 
@@ -148,32 +164,20 @@ function calculate() {
     };
 
     // Track results
-    _gaq.push(['_trackEvent', 'calculate', JSON.stringify(analyticsData)]);
+    trackCalculateDebounced(analyticsData);
 
     difficultyStarsElement.innerText = stars.total.toFixed(2);
 
     setResultText(Math.round(pp.total));
-    resultElement.classList.toggle('hidden', false);
-    difficultyStarsContainer.classList.toggle('hidden', false);
   } catch (error) {
     displayError(error);
   }
-}
-
-function debounceCalculation(affectsStarRating) {
-  resultElement.classList.toggle('hidden', true);
-  // Only hide the stars container if the calculation affects star rating
-  if (affectsStarRating) difficultyStarsContainer.classList.toggle('hidden', true);
-  clearTimeout(debounceTimeout);
-  debounceTimeout = setTimeout(calculate, 500);
 }
 
 const opposingModifiers = [
   ['mod-hr', 'mod-ez'],
   ['mod-ht', 'mod-dt'],
 ];
-
-const affectStarRating = ['mod-hr', 'mod-ez', 'mod-dt', 'mod-ht'];
 
 function toggleOpposingModifiers(mod) {
   opposingModifiers.forEach((mods) => {
@@ -185,7 +189,11 @@ function toggleOpposingModifiers(mod) {
   });
 }
 
-function onReady(cover) {
+function resetCombo() {
+  comboElement.value = cleanBeatmap.max_combo();
+}
+
+function onReady([, cover]) {
   // Display content since we're done loading all the stuff.
   containerElement.classList.toggle('preloading', false);
 
@@ -202,7 +210,7 @@ function onReady(cover) {
   modifierElements.forEach((modElement) => {
     modElement.addEventListener('click', ({ target }) => {
       toggleOpposingModifiers(target.id);
-      debounceCalculation(affectStarRating.includes(target.id));
+      calculate();
     });
   });
 
@@ -214,30 +222,21 @@ function onReady(cover) {
       element.checked = !element.checked;
 
       toggleOpposingModifiers(mod);
-      debounceCalculation(false);
+      calculate();
     }
   });
 
-  function debounceCalculationWithFilter(evt) {
-    // Only allow number, decimal marker and backspace
-    const allowedKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.', ',', 'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight'];
-    if (evt.key && !allowedKeys.includes(evt.key)) {
-      evt.preventDefault();
-      return;
-    }
+  accuracyElement.addEventListener('input', calculate);
+  comboElement.addEventListener('input', calculate);
+  missesElement.addEventListener('input', calculate);
 
-    const navKeys = ['ArrowLeft', 'ArrowRight'];
-    if (!navKeys.includes(evt.key)) {
-      debounceCalculation(false);
-    }
-  }
-
-  accuracyElement.addEventListener('keydown', debounceCalculationWithFilter);
-  comboElement.addEventListener('keydown', debounceCalculationWithFilter);
-  missesElement.addEventListener('keydown', debounceCalculationWithFilter);
+  fcResetButton.addEventListener('click', () => {
+    resetCombo();
+    calculate();
+  });
 
   // Set the combo to the max combo by default
-  comboElement.value = cleanBeatmap.maxCombo;
+  resetCombo();
 
   calculate();
 }
@@ -321,30 +320,30 @@ chrome.tabs.query({
   const { url } = tab;
   currentUrl = url;
 
-  attemptToFetchBeatmap(url, FETCH_ATTEMPTS)
-    .then(raw => new ojsama.parser().feed(raw))
-    .then(({ map }) => {
-      cleanBeatmap = map;
+  Promise.all([
+    attemptToFetchBeatmap(url, FETCH_ATTEMPTS)
+      .then(raw => new ojsama.parser().feed(raw))
+      .then(({ map }) => {
+        cleanBeatmap = map;
 
-      // Support old beatmaps
-      cleanBeatmap.mode = Number(cleanBeatmap.mode || 0);
+        // Support old beatmaps
+        cleanBeatmap.mode = Number(cleanBeatmap.mode || 0);
 
-      if (cleanBeatmap.mode !== 0) {
-        throw Error(UNSUPPORTED_GAMEMODE);
-      }
-
+        if (cleanBeatmap.mode !== 0) {
+          throw Error(UNSUPPORTED_GAMEMODE);
+        }
+      }),
+    new Promise((resolve) => {
       // Preload beatmap cover
       const cover = new Image();
       cover.src = pageInfo.isUnranked
         ? `https://b.ppy.sh/thumb/${pageInfo.beatmapSetId}l.jpg`
         : `https://assets.ppy.sh//beatmaps/${pageInfo.beatmapSetId}/covers/cover.jpg`;
-
-      return new Promise((resolve) => {
-        cover.onload = () => resolve(cover);
-        cover.onerror = () => resolve();
-        cover.onabort = () => resolve();
-      });
-    })
+      cover.onload = () => resolve(cover);
+      cover.onerror = () => resolve();
+      cover.onabort = () => resolve();
+    }),
+  ])
     .then(onReady)
     .catch(displayError);
 });

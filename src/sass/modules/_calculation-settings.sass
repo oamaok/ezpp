@@ -9,8 +9,11 @@
   user-select: none
   display: flex
   .numeric
+    display: flex
     width: 33.333%
     padding: 0 0.5em
+    flex-flow: row wrap
+    align-items: center
 
     &:first-child
       padding-left: 0
@@ -18,10 +21,23 @@
       padding-right: 0
     label
       font-weight: 600
-      .hint
-        margin-left: 0.8em
-        font-weight: 500
-        font-size: 0.7em
+
+    .fc-reset
+      position: relative
+      border: 0
+      border-radius: 2px
+      background-color: #29b
+      box-shadow: 0 2px 0 darken(#29b, 10%)
+      color: #fff
+      font-size: 8px
+      font-weight: 600
+      padding: 0 0.6em
+      height: 1.6em
+      margin-left: 1em
+      &:active
+        top: 1px
+        box-shadow: 0 1px 0 darken(#29b, 10%)
+
     input
       background-color: #fff
       margin-top: 0.5em
