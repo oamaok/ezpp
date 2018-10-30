@@ -34,5 +34,9 @@
   {
     "name": "Polski (Polish)",
     "code": "pl"
+  },
+  {
+    "name": "Tiếng Việt (Vietnamese)",
+    "code": "vi"
   }
 ]
