@@ -34,5 +34,9 @@
   {
     "name": "Polski (Polish)",
     "code": "pl"
+  },
+  {
+    "name": "日本語 (Japanese)",
+    "code": "ja"
   }
 ]

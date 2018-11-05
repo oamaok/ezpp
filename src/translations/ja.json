@@ -1,0 +1,21 @@
+{
+  "error-occured": "エラーにより拡張機能が正常に動作しませんでした: ",
+  "version-update-message": "現在 ezpp! v{0} を使用しています",
+  "changelog": "更新履歴",
+  "accuracy": "精度",
+  "combo": "コンボ",
+  "empty-fc": "(空 = FC)",
+  "misses": "ミス",
+  "mod-hidden": "Hidden",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "DoubleTime",
+  "mod-flashlight": "Flashlight",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Easy",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut",
+  "language": "言語",
+  "settings": "設定",
+  "analytics": "匿名のアナリティクスデータを送信",
+  "result": "およそ {0}pp."
+}
