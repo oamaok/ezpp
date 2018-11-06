@@ -38,5 +38,9 @@
   {
     "name": "Tiếng Việt (Vietnamese)",
     "code": "vi"
+  },
+  {
+    "name": "日本語 (Japanese)",
+    "code": "ja"
   }
 ]
