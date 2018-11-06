@@ -1,0 +1,21 @@
+{
+  "error-occured": "Đã có lỗi xảy ra khiến cho phần mở rộng không hoạt động như mong muốn: ",
+  "version-update-message": "Bạn đang sử dụng ezpp! v{0}",
+  "changelog": "lịch sử cập nhật",
+  "accuracy": "Độ chính xác",
+  "combo": "Combo",
+  "empty-fc": "(rỗng = Full Combo)",
+  "misses": "Miss",
+  "mod-hidden": "Hidden",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "DoubleTime",
+  "mod-flashlight": "Flashlight",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Easy",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut",
+  "language": "Ngôn ngữ",
+  "settings": "Thiết lập",
+  "analytics": "Gửi thông tin thống kê ẩn danh",
+  "result": "Đó là khoảng {0}pp."
+}
