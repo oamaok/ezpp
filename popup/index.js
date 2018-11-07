@@ -242,7 +242,6 @@ const fetchBeatmapById = id =>
   fetch(`https://osu.ppy.sh/osu/${id}`, { credentials: 'include' })
     .then(res => res.text());
 
-
 const getPageInfo = (url, tabId) => new Promise((resolve) => {
   const info = {
     isOldSite: null,
@@ -255,6 +254,7 @@ const getPageInfo = (url, tabId) => new Promise((resolve) => {
 
   if (!info.isOldSite) {
     const beatmapId = match[4];
+
     if (!beatmapId) {
       throw new Error(UNSUPPORTED_GAMEMODE);
     }
@@ -264,6 +264,8 @@ const getPageInfo = (url, tabId) => new Promise((resolve) => {
 
     resolve(info);
   } else {
+    // Fetch data from the content script so we don't need to fetch the page
+    // second time.
     chrome.tabs.sendMessage(tabId, { action: 'GET_BEATMAP_INFO' }, (response) => {
       const { beatmapId, beatmapSetId } = response;
       info.beatmapSetId = beatmapSetId;
