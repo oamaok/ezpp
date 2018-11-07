@@ -38,7 +38,7 @@ module.exports = {
       },
       {
         test: /\.(png|svg|woff2|ttf)$/,
-        use: 'url-loader',
+        use: 'file-loader',
       },
     ],
   },
@@ -50,6 +50,10 @@ module.exports = {
       context: './static/',
       from: '**/*',
       to: './',
+    }, {
+      context: './assets/',
+      from: '**/*',
+      to: './assets',
     }]),
 
     new webpack.DefinePlugin({
@@ -60,6 +64,6 @@ module.exports = {
   ],
 
   resolve: {
-    extensions: ['.js', '.sass', '.scss'],
+    extensions: ['.js', '.sass', '.scss']
   },
 };

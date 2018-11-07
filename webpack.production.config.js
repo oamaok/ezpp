@@ -36,7 +36,8 @@ module.exports = {
         test: /\.s[ac]ss$/, use: ExtractTextPlugin.extract('css-loader!sass-loader'),
       },
       {
-        test: /\.(png|svg|woff2)$/, use: 'url-loader',
+        test: /\.(png|svg|woff2|ttf)$/,
+        use: 'file-loader',
       },
     ],
   },
@@ -48,6 +49,10 @@ module.exports = {
       context: './static/',
       from: '**/*',
       to: './',
+    }, {
+      context: './assets/',
+      from: '**/*',
+      to: './assets',
     }]),
 
     new webpack.DefinePlugin({

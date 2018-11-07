@@ -1,5 +1,5 @@
 .calculation-settings
-  background-image: url('../../assets/background.png')
+  background-image: url('/assets/background.png')
   z-index: 3
   position: relative
   box-shadow: 0 1px 4px rgba(0,0,0,.6)
@@ -51,7 +51,7 @@
 @mixin mod-badge($mod)
   &.mod-#{$mod}
     label::before
-      background-image: url('../../assets/mod-badges/' + $mod + '.png')
+      background-image: url('/assets/mod-badges/' + $mod + '.png')
 
 .mods
   display: flex

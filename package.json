@@ -49,6 +49,7 @@
   },
   "homepage": "https://github.com/oamaok/ezpp#readme",
   "devDependencies": {
+    "file-loader": "^2.0.0",
     "webpack-cli": "^3.1.1"
   }
 }
