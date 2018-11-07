@@ -2,7 +2,7 @@
   "name": "ezpp!",
   "version": "1.6.0",
   "description": "Browser extension for calculating pp!",
-  "main": "src/js/index.js",
+  "main": "popup/index.js",
   "dependencies": {
     "@babel/core": "^7.1.0",
     "@babel/preset-env": "^7.1.0",

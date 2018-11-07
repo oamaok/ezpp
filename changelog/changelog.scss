@@ -1,4 +1,14 @@
-@import 'fonts';
+@font-face
+  font-family: 'Exo 2'
+  font-style: normal
+  font-weight: 600
+  src: local('Exo 2 Semi Bold'), local('Exo2-SemiBold'), url('../assets/fonts/Exo2-SemiBold.woff2') format('woff2')
+
+@font-face
+  font-family: 'Exo 2'
+  font-style: normal
+  font-weight: 400
+  src: local('Exo 2 Regular'), local('Exo2-Regular'), url('../assets/fonts/Exo2-Regular.woff2') format('woff2')
 
 .markdown-body {
   -ms-text-size-adjust: 100%;
@@ -701,7 +711,7 @@ body, html {
 }
 
 body {
-  background-image: url('../../assets/page-light.png');
+  background-image: url('../assets/page-light.png');
 }
 
 #markdown{

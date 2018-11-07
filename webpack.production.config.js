@@ -6,10 +6,12 @@ const path = require('path');
 module.exports = {
   entry: {
     popup: [
-      path.resolve(__dirname, 'src/js/index.js'),
-      path.resolve(__dirname, 'src/sass/main.sass'),
+      path.resolve(__dirname, 'popup/index.js'),
+      path.resolve(__dirname, 'popup/styles/main.sass'),
     ],
-    changelog: path.resolve(__dirname, 'src/js/changelog.js'),
+    changelog: path.resolve(__dirname, 'changelog/index.js'),
+    background: path.resolve(__dirname, 'background/background.js'),
+    content: path.resolve(__dirname, 'background/content.js'),
   },
 
   output: {
@@ -42,13 +44,11 @@ module.exports = {
   plugins: [
     new ExtractTextPlugin('[name].css'),
 
-    new CopyWebpackPlugin([
-      {
-        context: './src/static/',
-        from: '**/*',
-        to: '.',
-      },
-    ]),
+    new CopyWebpackPlugin([{
+      context: './static/',
+      from: '**/*',
+      to: './',
+    }]),
 
     new webpack.DefinePlugin({
       __DEV__: false,

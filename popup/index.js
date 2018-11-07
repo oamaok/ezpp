@@ -32,6 +32,11 @@ versionElement.innerText = `ezpp! v${manifest.version}`;
 // Set after the extension initializes, used for additional error information.
 let currentUrl = null;
 let cleanBeatmap = null;
+let pageInfo = {
+  isOldSite: null,
+  beatmapSetId: null,
+  beatmapId: null,
+};
 
 const keyModMap = {
   'Q': 'mod-ez',
@@ -42,14 +47,6 @@ const keyModMap = {
   'F': 'mod-hd',
   'G': 'mod-fl',
   'C': 'mod-so',
-};
-
-const pageInfo = {
-  isOldSite: null,
-  isBeatmap: null,
-  beatmapSetId: null,
-  beatmapId: null,
-  isUnranked: null,
 };
 
 const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
@@ -241,60 +238,46 @@ function onReady([, cover]) {
   calculate();
 }
 
-const fetchBeatmapById = id => fetch(`https://osu.ppy.sh/osu/${id}`, { credentials: 'include' }).then(res => res.text());
+const fetchBeatmapById = id =>
+  fetch(`https://osu.ppy.sh/osu/${id}`, { credentials: 'include' })
+    .then(res => res.text());
 
-function fetchBeatmapByUrl(url) {
+
+const getPageInfo = (url, tabId) => new Promise((resolve) => {
+  const info = {
+    isOldSite: null,
+    beatmapSetId: null,
+    beatmapId: null,
+  };
+
   const match = url.match(BEATMAP_URL_REGEX);
-  pageInfo.isOldSite = match[2] !== 'beatmapsets';
+  info.isOldSite = match[2] !== 'beatmapsets';
 
-  // This value is only used for the old site.
-  pageInfo.isBeatmap = match[2] === 'b';
-
-  const id = match[3];
-
-  if (!pageInfo.isOldSite) {
+  if (!info.isOldSite) {
     const beatmapId = match[4];
-
     if (!beatmapId) {
-      return Promise.reject(new Error(UNSUPPORTED_GAMEMODE));
+      throw new Error(UNSUPPORTED_GAMEMODE);
     }
 
-    pageInfo.beatmapSetId = match[3];
-    pageInfo.beatmapId = beatmapId.substr(5);
-    return fetchBeatmapById(pageInfo.beatmapId);
-  }
+    info.beatmapSetId = match[3];
+    info.beatmapId = beatmapId.substr(5);
 
-  // For the old version of the site ID values must be found from the page source.
-  return fetch(url, { credentials: 'include' })
-    .then(res => res.text())
-    .then((html) => {
-      const setIdMatch = html
-        .match(/beatmap-rating-graph\.php\?s=(\d+)/);
-      const beatmapIdMatch = html
-        .match(/class=["']beatmapTab active["'] href=["']\/b\/(\d+)/);
+    resolve(info);
+  } else {
+    chrome.tabs.sendMessage(tabId, { action: 'GET_BEATMAP_INFO' }, (response) => {
+      const { beatmapId, beatmapSetId } = response;
+      info.beatmapSetId = beatmapSetId;
+      info.beatmapId = beatmapId;
 
-      if (!setIdMatch || !beatmapIdMatch) {
-        return Promise.reject(new Error(`
-          ezpp! is experiencing some issues related to the new osu! website rollout.
-          Please use the new look for the extenstion to work. Sorry for the inconvenience.
-        `));
-      }
-
-      pageInfo.beatmapSetId = pageInfo.isBeatmap ? setIdMatch[1] : id;
-      pageInfo.beatmapId = pageInfo.isBeatmap ? id : beatmapIdMatch[1];
-
-      // Check for 'Updated' text instead of 'Qualified' or 'Ranked'
-      pageInfo.isUnranked = !!html
-        .match('<td width=0%>\nSubmitted:<br/>\nUpdated:\n</td>');
-
-      return fetchBeatmapById(pageInfo.beatmapId);
+      resolve(info);
     });
-}
+  }
+});
 
-const attemptToFetchBeatmap = (url, attempts) => fetchBeatmapByUrl(url)
+const attemptToFetchBeatmap = (id, attempts) => fetchBeatmapById(id)
   .catch((error) => {
     // Retry fetching until no attempts are left.
-    if (attempts) return attemptToFetchBeatmap(url, attempts - 1);
+    if (attempts) return attemptToFetchBeatmap(id, attempts - 1);
 
     throw error;
   });
@@ -312,13 +295,11 @@ const processBeatmap = (rawBeatmap) => {
   }
 };
 
-const fetchBeatmapBackground = () =>
+const fetchBeatmapBackground = beatmapSetId =>
   new Promise((resolve) => {
     // Preload beatmap cover
     const cover = new Image();
-    cover.src = pageInfo.isUnranked
-      ? `https://b.ppy.sh/thumb/${pageInfo.beatmapSetId}l.jpg`
-      : `https://assets.ppy.sh//beatmaps/${pageInfo.beatmapSetId}/covers/cover.jpg`;
+    cover.src = `https://assets.ppy.sh/beatmaps/${beatmapSetId}/covers/cover@2x.jpg`;
     cover.onload = () => resolve(cover);
     cover.onerror = () => resolve();
     cover.onabort = () => resolve();
@@ -341,14 +322,18 @@ chrome.tabs.query({
   active: true, // Select active tabs
   lastFocusedWindow: true, // In the current window
 }, ([tab]) => {
-  const { url } = tab;
+  const { url, id } = tab;
   currentUrl = url;
 
-  Promise.all([
-    attemptToFetchBeatmap(url, FETCH_ATTEMPTS)
-      .then(processBeatmap),
-    fetchBeatmapBackground(),
-  ])
+  getPageInfo(url, id).then((info) => {
+    pageInfo = info;
+
+    return Promise.all([
+      attemptToFetchBeatmap(pageInfo.beatmapId, FETCH_ATTEMPTS)
+        .then(processBeatmap),
+      fetchBeatmapBackground(pageInfo.beatmapSetId),
+    ]);
+  })
     .then(onReady)
     .catch(displayError);
 });

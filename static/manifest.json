@@ -15,6 +15,10 @@
   "background": {
     "scripts": ["background.js"]
   },
+  "content_scripts": [{
+    "matches": ["*://osu.ppy.sh/*"],
+    "js": ["content.js"]
+  }],
   "page_action": {
     "default_icon": "icon48.png",
     "default_popup": "popup.html"

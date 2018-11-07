@@ -6,3 +6,4 @@ build/
 *.crx
 *.zip
 *.fuse_hidden*
+yarn-error.log

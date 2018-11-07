@@ -1,4 +1,4 @@
-require('../sass/changelog.scss');
+require('./changelog.scss');
 const showdown = require('showdown');
 
 const converter = new showdown.Converter();
