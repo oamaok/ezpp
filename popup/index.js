@@ -1,6 +1,7 @@
 import ojsama from 'ojsama';
 import manifest from '../static/manifest.json';
 import { setLanguage, createTextSetter } from './translations';
+import { BEATMAP_URL_REGEX } from '../common/constants';
 
 require('./analytics');
 require('./settings');
@@ -8,7 +9,6 @@ require('./notifications');
 
 const FETCH_ATTEMPTS = 3;
 const UNSUPPORTED_GAMEMODE = 'Unsupported gamemode!'; // TODO: Add to translations
-const BEATMAP_URL_REGEX = /^https?:\/\/(osu|new).ppy.sh\/([bs]|beatmapsets)\/(\d+)\/?(#osu\/\d+)?/i;
 
 const containerElement = document.getElementById('container');
 const headerElement = document.getElementById('header');
