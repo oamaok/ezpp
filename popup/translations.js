@@ -43,6 +43,9 @@ export function createTextSetter(element, translationKey, property = 'innerText'
 }
 
 export function setLanguage(language) {
+  document.documentElement.classList.remove(`lang-${currentLanguage}`);
+  document.documentElement.classList.add(`lang-${language}`);
+
   currentLanguage = language;
   languageSelector.value = language;
   chrome.storage.local.set({ language });

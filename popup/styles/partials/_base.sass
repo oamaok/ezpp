@@ -3,19 +3,24 @@
   padding: 0
   outline: 0
   color: inherit
-  font-family: 'Exo'
   box-sizing: border-box
 
 html
   color: #444
   font-size: 16px
+  font-family: 'Exo 2'
   &.firefox
     overflow: hidden
+
+  // Use Exo only for Vietnamese
+  &.lang-vi
+    font-family: 'Exo'
 
 body
   background-color: #000
   clear: both
   background-image: url('/assets/background.png')
+  font-family: inherit
 
 .firefox>body
   overflow: hidden
