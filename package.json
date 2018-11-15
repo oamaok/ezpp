@@ -31,7 +31,7 @@
   "scripts": {
     "start": "cross-env NODE_ENV=development webpack --config webpack.development.config.js -w",
     "start:chrome": "cross-env BUILD_CHROME=1 npm start",
-    "start:firefox": "cross-env BUILD_FF=1 NODE_ENV=development npm start",
+    "start:firefox": "cross-env BUILD_FF=1 npm start",
     "build": "rm -rf build/ && cross-env NODE_ENV=production webpack --config webpack.production.config.js",
     "build:chrome": "cross-env BUILD_CHROME=1 npm run build && (cd build; zip -qr ../ezpp-chrome.zip *) && rm -rf build/",
     "build:firefox": "cross-env BUILD_FF=1 npm run build && (cd build; zip -qr ../ezpp-firefox.zip *) && rm -rf build/",
