@@ -242,7 +242,7 @@ const fetchBeatmapById = id =>
   fetch(`https://osu.ppy.sh/osu/${id}`, { credentials: 'include' })
     .then(res => res.text());
 
-const getPageInfo = (url, tabId) => new Promise((resolve) => {
+const getPageInfo = (url, tabId) => new Promise((resolve, reject) => {
   const info = {
     isOldSite: null,
     beatmapSetId: null,
@@ -267,11 +267,15 @@ const getPageInfo = (url, tabId) => new Promise((resolve) => {
     // Fetch data from the content script so we don't need to fetch the page
     // second time.
     chrome.tabs.sendMessage(tabId, { action: 'GET_BEATMAP_INFO' }, (response) => {
-      const { beatmapId, beatmapSetId } = response;
-      info.beatmapSetId = beatmapSetId;
-      info.beatmapId = beatmapId;
+      if (response.status === 'ERROR') {
+        reject(response.error);
+      } else {
+        const { beatmapId, beatmapSetId } = response;
+        info.beatmapSetId = beatmapSetId;
+        info.beatmapId = beatmapId;
 
-      resolve(info);
+        resolve(info);
+      }
     });
   }
 });
