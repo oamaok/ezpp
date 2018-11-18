@@ -42,5 +42,9 @@
   {
     "name": "日本語 (Japanese)",
     "code": "ja"
+  },
+  {
+    "name": "繁體中文 (Chinese_Traditional)",
+    "code": "zh_TW"
   }
 ]
