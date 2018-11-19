@@ -1,0 +1,21 @@
+{
+  "error-occured": "插件出了點問題無法使用: ",
+  "version-update-message": "目前使用 ezpp! 版本v{0}",
+  "changelog": "更新日誌",
+  "accuracy": "準確度",
+  "combo": "Combo 數",
+  "empty-fc": "(留白 = FC)",
+  "misses": "Miss 數",
+  "mod-hidden": "Hidden",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "DoubleTime",
+  "mod-flashlight": "Flashlight",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Easy",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut",
+  "language": "選擇語言",
+  "settings": "設定",
+  "analytics": "發送匿名分析資料",
+  "result": "約略 {0}pp."
+}
