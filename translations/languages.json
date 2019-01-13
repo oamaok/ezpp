@@ -46,5 +46,9 @@
   {
     "name": "繁體中文 (Chinese_Traditional)",
     "code": "zh_TW"
+  },
+  {
+    "name": "Italiano (Italian)",
+    "code": "it"
   }
 ]
