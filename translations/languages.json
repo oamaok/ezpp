@@ -50,5 +50,9 @@
   {
     "name": "Italiano (Italian)",
     "code": "it"
+  },
+  {
+    "name": "Português Brasileiro (Brazilian Portuguese)",
+    "code": "pt_BR"
   }
 ]

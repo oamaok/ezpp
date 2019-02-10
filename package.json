@@ -21,7 +21,7 @@
     "html-webpack-plugin": "^2.30.1",
     "json-loader": "^0.5.7",
     "node-sass": "^4.9.3",
-    "ojsama": "git://github.com/Francesco149/ojsama#fl-rebalance",
+    "ojsama": "^1.1.0",
     "sass-loader": "^7.1.0",
     "showdown": "^1.7.2",
     "style-loader": "^0.23.0",
