@@ -44,8 +44,12 @@
     "code": "ja"
   },
   {
-    "name": "繁體中文 (Chinese, traditional)",
+    "name": "繁體中文 (Chinese, Traditional)",
     "code": "zh_TW"
+  },
+  {
+    "name": "简体中文 (Chinese, Simplified)",
+    "code": "zh_CN"
   },
   {
     "name": "Italiano (Italian)",
