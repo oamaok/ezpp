@@ -4097,10 +4097,10 @@ object.pick@^1.3.0:
   dependencies:
     isobject "^3.0.1"
 
-ojsama@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/ojsama/-/ojsama-1.1.0.tgz#c5751752fc47832eb6c838571246aba7cf024455"
-  integrity sha512-9+ZcfIkVOOLpjbrqrpvG93aWCGBam2AXBw9DVVMWbnGi5Q3fpytjYnBl5bZglz/0jhPj0n+0l+r9xHe630WLgg==
+ojsama@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/ojsama/-/ojsama-1.2.1.tgz#fc40619a14f08707c097de4f9f30056d2d2e1152"
+  integrity sha512-jLcmySOlNpyNCihj/+F9QZifV5cjgJUkSta2TCGGDXRWGE+ZPkpGwEk7dzuI7o+fn3dSoi18lPUdbsb4LQpScw==
 
 once@^1.3.0, once@^1.3.1, once@^1.4.0:
   version "1.4.0"
