@@ -1,0 +1,21 @@
+{
+  "error-occured": "扩展程序因以下问题无法正常使用: ",
+  "version-update-message": "目前使用 ezpp! v{0}",
+  "changelog": "更新日志",
+  "accuracy": "准确率",
+  "combo": "最大连击",
+  "empty-fc": "(留空 = 全连击)",
+  "misses": "失误数",
+  "mod-hidden": "Hidden",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "DoubleTime",
+  "mod-flashlight": "Flashlight",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Easy",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut",
+  "language": "语言",
+  "settings": "设定",
+  "analytics": "发送匿名分析数据",
+  "result": "约 {0}pp."
+}
