@@ -58,5 +58,8 @@
   {
     "name": "Português Brasileiro (Brazilian Portuguese)",
     "code": "pt_BR"
-  }
+  },
+  {
+    "name": "한국어 (Korean)",
+    "code": "ko"
 ]
