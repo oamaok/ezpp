@@ -1,0 +1,21 @@
+{
+    "error-occured": "오류가 발생하였습니다: ",
+    "version-update-message": "ezpp가 업데이트 되었습니다! v{0} 실행 중",
+    "changelog": "수정사항",
+    "accuracy": "정확도",
+    "combo": "콤보",
+    "empty-fc": "(비어 있음 = FC)",
+    "misses": "미스",
+    "mod-hidden": "히든",
+    "mod-hardrock": "하드락",
+    "mod-doubletime": "더블타임",
+    "mod-flashlight": "플래시라이트",
+    "mod-nofail": "노페일",
+    "mod-easy": "이지",
+    "mod-halftime": "하프타임",
+    "mod-spunout": "스펀아웃",
+    "language": "언어",
+    "settings": "설정",
+    "analytics": "익명 사용 통계 보내기",
+    "result": "약 {0}pp 입니다."
+  }
