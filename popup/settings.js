@@ -5,6 +5,7 @@ const settingsCloseButton = document.getElementById('close-settings');
 const settingsContainer = document.getElementById('settings');
 const languageSelector = document.getElementById('language-selector');
 const analyticsToggle = document.getElementById('analytics-toggle');
+const darkmodeToggle = document.getElementById('darkmode-toggle');
 
 settingsOpenButton.addEventListener('click', () => {
   _gaq.push(['_trackEvent', 'settings', 'open']);
@@ -22,6 +23,19 @@ analyticsToggle.addEventListener('change', (evt) => {
   chrome.storage.local.set({
     analytics: evt.target.checked,
   });
+});
+
+
+chrome.storage.local.get(['darkmode'], ({ darkmode }) => {
+  document.documentElement.classList.toggle('darkmode', !!darkmode);
+  darkmodeToggle.checked = darkmode
+});
+
+darkmodeToggle.addEventListener('change', (evt) => {
+  chrome.storage.local.set({
+    darkmode: evt.target.checked,
+  });
+  document.documentElement.classList.toggle('darkmode', evt.target.checked);
 });
 
 languages

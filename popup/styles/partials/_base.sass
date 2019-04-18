@@ -1,3 +1,5 @@
+$darkmode-text: #eee
+
 *
   margin: 0
   padding: 0
@@ -6,7 +8,7 @@
   box-sizing: border-box
 
 html
-  color: #444
+  color: #222
   font-size: 16px
   font-family: 'Exo 2'
   &.firefox
@@ -19,7 +21,12 @@ html
 body
   background-color: #000
   clear: both
+
   background-image: url('/assets/background.png')
+  .darkmode &
+    background-image: url('/assets/background-darkmode.png')
+    color: $darkmode-text
+
   font-family: inherit
 
 .firefox>body

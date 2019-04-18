@@ -17,5 +17,6 @@
   "language": "Language",
   "settings": "Settings",
   "analytics": "Send anonymous analytics data",
-  "result": "That's about {0}pp."
+  "result": "That's about {0}pp.",
+  "darkmode": "Enable darkmode"
 }

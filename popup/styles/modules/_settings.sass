@@ -6,8 +6,12 @@
   left: 105%
   top: 0
   transition: 0.3s all ease-out
+
   background-image: url('/assets/background.png')
-  color: #444
+  .darkmode &
+    background-image: url('/assets/background-darkmode.png')
+    color: $darkmode-text
+
   padding: 1em
   border-left: 8px solid #29b
 
@@ -18,6 +22,8 @@
     padding: 0.8em 1em
     border: 0
     color: #444
+    .darkmode &
+      color: $darkmode-text
     background: none
     transition: all 0.1s ease-out
     &:hover
@@ -25,6 +31,8 @@
 
 
   h1
+    .darkmode &
+      color: #f7f7f7
     color: #444
     margin-bottom: 1em
 
@@ -32,12 +40,18 @@
     margin-bottom: 1em
     padding-bottom: 1em
     border-bottom: 2px solid #ccc
+    display: flex
     label
       margin-right: 0.5em
 
     input[type=checkbox]
       position: relative
       top: 0.1em
+
+    #language-selector
+      max-width: 200px
+      .darkmode &
+        color: #333
 
   .changelog
     color: #29b
