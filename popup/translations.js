@@ -2,6 +2,8 @@
 /* eslint-disable import/no-dynamic-require */
 export const languages = require('../translations/languages.json');
 
+const FALLBACK_LANGUAGE = 'en';
+
 export const translations = languages
   .reduce((acc, lang) => ({
     ...acc,
@@ -14,7 +16,8 @@ let currentLanguage = 'en';
 const setterHooks = [];
 
 export function getTranslation(translationKey, ...args) {
-  const template = translations[currentLanguage][translationKey];
+  const template = translations[currentLanguage][translationKey]
+    || translations[FALLBACK_LANGUAGE][translationKey];
 
   if (!args.length) return template;
 
@@ -58,6 +61,6 @@ export function setLanguage(language) {
 
   [...document.querySelectorAll('[data-t]')].forEach((element) => {
     const translationKey = element.getAttribute('data-t');
-    element.innerText = translations[language][translationKey];
+    element.innerText = getTranslation(translationKey);
   });
 }
