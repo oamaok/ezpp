@@ -17,5 +17,6 @@
   "language": "言語",
   "settings": "設定",
   "analytics": "匿名のアナリティクスデータを送信",
-  "result": "およそ {0}pp."
+  "result": "およそ {0}pp.",
+  "darkmode": "ダークモードを有効"
 }
