@@ -17,5 +17,6 @@
   "language": "Kieli",
   "settings": "Asetukset",
   "analytics": "Lähetä anonyymiä analytiikkaa",
-  "result": "Suunnilleen {0}pp."
+  "result": "Suunnilleen {0}pp.",
+  "darkmode": "Käytä tummaa teemaa"
 }
