@@ -17,5 +17,6 @@
   "language": "Idioma",
   "settings": "Ajustes",
   "analytics": "Envía datos anónimos de análisis",
-  "result": "Eso es más o menos {0}pp."
+  "result": "Eso es más o menos {0}pp.",
+  "darkmode": "Habilitar modo oscuro"
 }
