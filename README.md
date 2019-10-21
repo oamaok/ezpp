@@ -8,11 +8,12 @@ values for a beatmap without manually downloading the beatmap.
 Current versions of software used:
 
 ```shell
-$ node -v
-v10.8.0
-
-$ npm -v
-6.4.0
+[teemu@xps ezpp]$ npm -v
+6.12.0
+[teemu@xps ezpp]$ yarn -v
+1.19.1
+[teemu@xps ezpp]$ node -v
+v12.12.0
 ```
 
 Everything should work with older versions of both Node and NPM.
