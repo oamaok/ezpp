@@ -3,9 +3,9 @@
   width: 100%
   position: absolute
   z-index: 4
-  left: 105%
+  transform: translateX(100%)
   top: 0
-  transition: 0.3s all ease-out
+  transition: 0.5s all ease
 
   background-image: url('/assets/background.png')
   .darkmode &
@@ -57,4 +57,4 @@
     color: #29b
 
   &.open
-    left: 0
+    transform: none
