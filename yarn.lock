@@ -4221,10 +4221,10 @@ object.values@^1.1.0:
     function-bind "^1.1.1"
     has "^1.0.3"
 
-ojsama@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/ojsama/-/ojsama-1.2.1.tgz#fc40619a14f08707c097de4f9f30056d2d2e1152"
-  integrity sha512-jLcmySOlNpyNCihj/+F9QZifV5cjgJUkSta2TCGGDXRWGE+ZPkpGwEk7dzuI7o+fn3dSoi18lPUdbsb4LQpScw==
+ojsama@^1.2.5:
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/ojsama/-/ojsama-1.2.5.tgz#45993864dc4ff5b4164452365c771cefc2e808ca"
+  integrity sha512-Fr2X4HVhvv1XZdzxbaOzyQRGhPZeA0vJoUk2UuRcwCd2ye8wkE1Ph664JHECcwWlBgNhRVVOx8Z+zv5yP2j1wg==
 
 once@^1.3.0, once@^1.3.1, once@^1.4.0:
   version "1.4.0"
