@@ -9,6 +9,7 @@ if (__DEV__) {
 }
 
 const analyticsToggle = document.getElementById('analytics-toggle');
+analyticsToggle.disabled = __FIREFOX__;
 
 if (!__FIREFOX__ && !__DEV__) {
   chrome.storage.local.get(['analytics'], ({ analytics }) => {
