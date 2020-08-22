@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "ezpp!",
-  "description": "Directly calculate pp for a beatmap in your browser.",
+  "description": "Calculate pp for a beatmap directly in your browser.",
   "version": "1.8.5",
   "icons": {
     "48": "icon48.png",
@@ -27,6 +27,5 @@
     "tabs", "storage",
     "https://*.ppy.sh/",
     "http://*.ppy.sh/"
-  ],
-  "content_security_policy": "script-src 'self' https://ssl.google-analytics.com; object-src 'self'"
+  ]
 }

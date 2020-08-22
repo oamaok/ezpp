@@ -9,6 +9,7 @@ require('./notifications');
 
 const FETCH_ATTEMPTS = 3;
 const UNSUPPORTED_GAMEMODE = 'Unsupported gamemode!'; // TODO: Add to translations
+const MOD_DT = 64;
 
 const containerElement = document.getElementById('container');
 const headerElement = document.getElementById('header');
@@ -24,6 +25,7 @@ const comboElement = document.getElementById('combo');
 const missesElement = document.getElementById('misses');
 const resultElement = document.getElementById('result');
 const errorElement = document.getElementById('error');
+const bpmElement = document.getElementById('bpm');
 
 const setResultText = createTextSetter(resultElement, 'result');
 
@@ -131,13 +133,17 @@ const trackCalculate = (() => {
   };
 })();
 
-const trackCalculateDebounced = debounce(trackCalculate, 750);
+const trackCalculateDebounced = debounce(trackCalculate, 500);
 
 function calculate() {
   try {
     const {
       modifiers, accuracy, combo, misses,
     } = getCalculationSettings();
+
+    const bpmMultiplier = (modifiers & MOD_DT) ? 1.5 : 1;
+    const msPerBeat = cleanBeatmap.timing_points[0].ms_per_beat;
+    const bpm = 1 / msPerBeat * 1000 * 60 * bpmMultiplier;
 
     const stars = new ojsama.diff().calc({ map: cleanBeatmap, mods: modifiers });
 
@@ -164,6 +170,7 @@ function calculate() {
     trackCalculateDebounced(analyticsData);
 
     difficultyStarsElement.innerText = stars.total.toFixed(2);
+    bpmElement.innerText = Math.round(bpm * 100) / 100;
 
     setResultText(Math.round(pp.total));
   } catch (error) {

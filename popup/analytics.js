@@ -10,30 +10,23 @@ if (__DEV__) {
 
 const analyticsToggle = document.getElementById('analytics-toggle');
 
-chrome.storage.local.get(['analytics'], ({ analytics }) => {
-  const uninitialized = typeof analytics === 'undefined'
+if (!__FIREFOX__ && !__DEV__) {
+  chrome.storage.local.get(['analytics'], ({ analytics }) => {
+    const uninitialized = typeof analytics === 'undefined';
+    const shouldInjectAnalytics = uninitialized || analytics;
 
-  if (uninitialized) {
-    // Turn analytics off by default on firefox
-    chrome.storage.local.set({
-      analytics: !__FIREFOX__,
-    })
-  }
+    analyticsToggle.checked = shouldInjectAnalytics;
 
-  // By default don't inject analytics on Firefox. Disables analytics when developing.
-  const shouldInjectAnalytics = (uninitialized ? !__FIREFOX__ : analytics) && !__DEV__;
+    if (shouldInjectAnalytics) {
+      _gaq.push(['_setAccount', 'UA-77789641-4']);
+      _gaq.push(['_trackPageview']);
 
-  analyticsToggle.checked = shouldInjectAnalytics;
-
-  if (shouldInjectAnalytics) {
-    _gaq.push(['_setAccount', 'UA-77789641-4']);
-    _gaq.push(['_trackPageview']);
-
-    const ga = document.createElement('script');
-    ga.type = 'text/javascript';
-    ga.async = true;
-    ga.src = 'https://ssl.google-analytics.com/ga.js';
-    const s = document.getElementsByTagName('script')[0];
-    s.parentNode.insertBefore(ga, s);
-  }
-})
+      const ga = document.createElement('script');
+      ga.type = 'text/javascript';
+      ga.async = true;
+      ga.src = 'https://ssl.google-analytics.com/ga.js';
+      const s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(ga, s);
+    }
+  })
+}

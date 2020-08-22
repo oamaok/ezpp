@@ -1,6 +1,6 @@
 {
   "name": "ezpp!",
-  "version": "1.8.5",
+  "version": "1.8.6",
   "description": "Browser extension for calculating pp!",
   "main": "popup/index.js",
   "dependencies": {
@@ -20,6 +20,7 @@
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "html-webpack-plugin": "^2.30.1",
     "json-loader": "^0.5.7",
+    "material-design-icons": "^3.0.1",
     "node-sass": "^4.9.3",
     "ojsama": "^1.2.5",
     "sass-loader": "^7.1.0",

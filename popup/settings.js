@@ -28,7 +28,7 @@ analyticsToggle.addEventListener('change', (evt) => {
 
 chrome.storage.local.get(['darkmode'], ({ darkmode }) => {
   document.documentElement.classList.toggle('darkmode', !!darkmode);
-  darkmodeToggle.checked = darkmode
+  darkmodeToggle.checked = darkmode;
 });
 
 darkmodeToggle.addEventListener('change', (evt) => {
