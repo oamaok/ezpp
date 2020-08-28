@@ -9,7 +9,10 @@ require('./notifications');
 
 const FETCH_ATTEMPTS = 3;
 const UNSUPPORTED_GAMEMODE = 'Unsupported gamemode!'; // TODO: Add to translations
+const MOD_EZ = 2;
+const MOD_HR = 16;
 const MOD_DT = 64;
+const MOD_HT = 256;
 
 const containerElement = document.getElementById('container');
 const headerElement = document.getElementById('header');
@@ -26,6 +29,7 @@ const missesElement = document.getElementById('misses');
 const resultElement = document.getElementById('result');
 const errorElement = document.getElementById('error');
 const bpmElement = document.getElementById('bpm');
+const arElement = document.getElementById('ar');
 
 const setResultText = createTextSetter(resultElement, 'result');
 
@@ -135,6 +139,63 @@ const trackCalculate = (() => {
 
 const trackCalculateDebounced = debounce(trackCalculate, 500);
 
+function calculateDTAR(ms) {
+  if (ms < 300) {
+    return 11; // with DT, the AR is capped at 11
+  } else if (ms < 1200) {
+    return 11 - (ms - 300) / 150;
+  }
+  return 5 - (ms - 1200) / 120;
+}
+
+function calculateAR(modifiers, ar) {
+  let ms;
+  switch (modifiers & (MOD_HT | MOD_DT | MOD_EZ | MOD_HR)) {
+    case MOD_HR: return Math.min(10, ar * 1.4);
+    case MOD_EZ: return ar / 2;
+
+    case (MOD_DT + MOD_HR): {
+      if (ar < 4) {
+        ms = 1200 - 112 * ar;
+      } else if (ar > 4) {
+        ms = 740 - 140 * (ar - 4);
+      } else {
+        ms = 864 - 124 * (ar - 3);
+      }
+      return calculateDTAR(ms);
+    }
+    case (MOD_DT + MOD_EZ): return calculateDTAR(1200 - 40 * ar);
+
+    case MOD_DT: return calculateDTAR(ar > 5 ? 200 + (11 - ar) * 100 : 800 + (5 - ar) * 80);
+    case MOD_HT: {
+      if (ar === 5) return 0;
+      if (ar < 5) return -1.5 * (5 - ar);
+      if (ar < 8) return 1.875 * ar;
+      return 4 + 1.5 * (ar - 7);
+    }
+
+    case (MOD_HT + MOD_HR): {
+      if (ar > 7) return 8.5;
+      if (ar < 4) {
+        ms = 2700 - 252 * ar;
+      } else if (ar < 5) {
+        ms = 1944 - 279 * (ar - 3);
+      } else {
+        ms = 1665 - 315 * (ar - 4);
+      }
+      if (ar < 6) {
+        return 15 - ms / 120;
+      } else if (ar > 7) {
+        return 13 - ms / 150;
+      }
+      return 15 - ms / 120;
+    }
+    case (MOD_HT + MOD_EZ): return -0.75 * (10 - ar);
+
+    default: return ar;
+  }
+}
+
 function calculate() {
   try {
     const {
@@ -171,6 +232,11 @@ function calculate() {
 
     difficultyStarsElement.innerText = stars.total.toFixed(2);
     bpmElement.innerText = Math.round(bpm * 100) / 100;
+    if (cleanBeatmap.ar === null) {
+      arElement.innerText = '?';
+    } else {
+      arElement.innerText = Math.round(calculateAR(modifiers, cleanBeatmap.ar) * 100) / 100;
+    }
 
     setResultText(Math.round(pp.total));
   } catch (error) {
