@@ -22,7 +22,7 @@
     "json-loader": "^0.5.7",
     "material-design-icons": "^3.0.1",
     "node-sass": "^4.9.3",
-    "ojsama": "^1.2.5",
+    "ojsama": "^2.1.0",
     "sass-loader": "^7.1.0",
     "showdown": "^1.7.2",
     "style-loader": "^0.23.0",
