@@ -202,7 +202,9 @@ function calculate() {
       modifiers, accuracy, combo, misses,
     } = getCalculationSettings();
 
-    const bpmMultiplier = (modifiers & MOD_DT) ? 1.5 : 1;
+    let bpmMultiplier = 1;
+    if (modifiers & MOD_DT) bpmMultiplier = 1.5;
+    if (modifiers & MOD_HT) bpmMultiplier = 0.75;
     const msPerBeat = cleanBeatmap.timing_points[0].ms_per_beat;
     const bpm = 1 / msPerBeat * 1000 * 60 * bpmMultiplier;
 
