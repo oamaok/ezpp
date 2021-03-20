@@ -128,10 +128,10 @@ const trackCalculate = (() => {
 
   return (analyticsData) => {
     // Don't repeat calculation analytics
-    const isClean = Object.keys(analyticsData).every(key => lastData[key] === analyticsData[key]);
+    const isClean = Object.keys(analyticsData).every((key) => lastData[key] === analyticsData[key]);
     if (isClean) return;
 
-    lastData = Object.assign({}, analyticsData);
+    lastData = { ...analyticsData };
 
     _gaq.push(['_trackEvent', 'calculate', JSON.stringify(analyticsData)]);
   };
@@ -142,7 +142,7 @@ const trackCalculateDebounced = debounce(trackCalculate, 500);
 function calculateDTAR(ms) {
   if (ms < 300) {
     return 11; // with DT, the AR is capped at 11
-  } else if (ms < 1200) {
+  } if (ms < 1200) {
     return 11 - (ms - 300) / 150;
   }
   return 5 - (ms - 1200) / 120;
@@ -185,7 +185,7 @@ function calculateAR(modifiers, ar) {
       }
       if (ar < 6) {
         return 15 - ms / 120;
-      } else if (ar > 7) {
+      } if (ar > 7) {
         return 13 - ms / 150;
       }
       return 15 - ms / 120;
@@ -225,7 +225,7 @@ function calculate() {
       accuracy: parseFloat(accuracy),
       combo: parseInt(combo),
       misses: parseInt(misses),
-      stars: parseFloat(stars.total.toFixed(2)),
+      stars: parseFloat(stars.total.toFixed(1)),
       pp: parseFloat(pp.total.toFixed(2)),
     };
 
@@ -233,11 +233,11 @@ function calculate() {
     trackCalculateDebounced(analyticsData);
 
     difficultyStarsElement.innerText = stars.total.toFixed(2);
-    bpmElement.innerText = Math.round(bpm * 100) / 100;
+    bpmElement.innerText = Math.round(bpm * 10) / 10;
     if (cleanBeatmap.ar === null) {
       arElement.innerText = '?';
     } else {
-      arElement.innerText = Math.round(calculateAR(modifiers, cleanBeatmap.ar) * 100) / 100;
+      arElement.innerText = Math.round(calculateAR(modifiers, cleanBeatmap.ar) * 10) / 10;
     }
 
     setResultText(Math.round(pp.total));
@@ -313,9 +313,8 @@ function onReady([, cover]) {
   calculate();
 }
 
-const fetchBeatmapById = id =>
-  fetch(`https://osu.ppy.sh/osu/${id}`, { credentials: 'include' })
-    .then(res => res.text());
+const fetchBeatmapById = (id) => fetch(`https://osu.ppy.sh/osu/${id}`, { credentials: 'include' })
+  .then((res) => res.text());
 
 const getPageInfo = (url, tabId) => new Promise((resolve, reject) => {
   const info = {
@@ -376,15 +375,14 @@ const processBeatmap = (rawBeatmap) => {
   }
 };
 
-const fetchBeatmapBackground = beatmapSetId =>
-  new Promise((resolve) => {
-    // Preload beatmap cover
-    const cover = new Image();
-    cover.src = `https://assets.ppy.sh/beatmaps/${beatmapSetId}/covers/cover@2x.jpg`;
-    cover.onload = () => resolve(cover);
-    cover.onerror = () => resolve();
-    cover.onabort = () => resolve();
-  });
+const fetchBeatmapBackground = (beatmapSetId) => new Promise((resolve) => {
+  // Preload beatmap cover
+  const cover = new Image();
+  cover.src = `https://assets.ppy.sh/beatmaps/${beatmapSetId}/covers/cover@2x.jpg`;
+  cover.onload = () => resolve(cover);
+  cover.onerror = () => resolve();
+  cover.onabort = () => resolve();
+});
 
 // Track errors with GA
 window.addEventListener('error', trackError);

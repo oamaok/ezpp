@@ -1,7 +1,9 @@
 const webpack = require('webpack');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const path = require('path');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 module.exports = {
   entry: {
@@ -14,6 +16,12 @@ module.exports = {
     content: path.resolve(__dirname, 'background/content.js'),
   },
 
+  stats: {
+    children: true,
+  },
+
+  mode: isProduction ? 'production' : 'development',
+
   output: {
     publicPath: '',
     path: path.resolve(__dirname, 'build'),
@@ -23,40 +31,41 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js?$/,
+        test: /\.js$/,
         exclude: /(node_modules|bower_components)/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env'],
-          },
-        },
+        use: 'babel-loader',
       },
       {
-        test: /\.s[ac]ss$/, use: ExtractTextPlugin.extract('css-loader!sass-loader'),
+        test: /\.s[ac]ss$/, use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
       },
       {
-        test: /\.(png|svg|woff2|ttf)$/,
+        test: /\.(png|svg|woff2?|ttf|eot)$/,
         use: 'file-loader',
       },
     ],
   },
 
-  plugins: [
-    new ExtractTextPlugin('[name].css'),
+  devtool: false,
 
-    new CopyWebpackPlugin([{
-      context: './static/',
-      from: '**/*',
-      to: './',
-    }, {
-      context: './assets/',
-      from: '**/*',
-      to: './assets',
-    }]),
+  plugins: [
+    new MiniCssExtractPlugin({
+      filename: '[name].css',
+    }),
+
+    new CopyWebpackPlugin({
+      patterns: [{
+        context: './static/',
+        from: '**/*',
+        to: './',
+      }, {
+        context: './assets/',
+        from: '**/*',
+        to: './assets',
+      }],
+    }),
 
     new webpack.DefinePlugin({
-      __DEV__: false,
+      __DEV__: !isProduction,
       __CHROME__: JSON.stringify(JSON.parse(process.env.BUILD_CHROME || true)),
       __FIREFOX__: JSON.stringify(JSON.parse(process.env.BUILD_FF || false)),
     }),

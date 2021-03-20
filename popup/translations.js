@@ -29,7 +29,7 @@ export function getTranslation(translationKey, ...args) {
 
 /* eslint-disable no-param-reassign */
 export function createTextSetter(element, translationKey, property = 'innerText') {
-  if (setterHooks.some(hook => hook.element === element)) {
+  if (setterHooks.some((hook) => hook.element === element)) {
     throw new Error('This element already has a text setter');
   }
 

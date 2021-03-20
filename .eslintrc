@@ -1,6 +1,6 @@
 {
   "extends": "airbnb",
-  "parser": "babel-eslint",
+  "parser": "@babel/eslint-parser",
   "parserOptions": {
     "ecmaVersion": 6,
     "sourceType": "module",
@@ -29,6 +29,7 @@
     "react/jsx-no-bind": 0,
     "react/prefer-stateless-function": 0,
     "no-mixed-operators": 0,
-    "prefer-destructuring": 0
+    "prefer-destructuring": 0,
+    "import/no-extraneous-dependencies": 0
   }
 }
