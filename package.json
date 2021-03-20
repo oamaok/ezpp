@@ -21,7 +21,7 @@
     "html-webpack-plugin": "^2.30.1",
     "json-loader": "^0.5.7",
     "material-design-icons": "^3.0.1",
-    "node-sass": "^4.9.3",
+    "node-sass": "^4.13.1",
     "ojsama": "^2.1.0",
     "sass-loader": "^7.1.0",
     "showdown": "^1.7.2",
