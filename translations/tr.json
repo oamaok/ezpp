@@ -1,0 +1,22 @@
+{
+  "error-occured": "Bir hata uzantının düzgün çalışmasını engelledi: ",
+  "version-update-message": "Artık ezpp kullanıyorsunuz! v{0}",
+  "changelog": "changelog",
+  "accuracy": "Doğruluk",
+  "combo": "Combo",
+  "empty-fc": "(boş = FC)",
+  "misses": "Kaçırmalar",
+  "mod-hidden": "Hidden",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "DoubleTime",
+  "mod-flashlight": "Flashlight",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Easy",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut",
+  "language": "Dil",
+  "settings": "Ayarlar",
+  "analytics": "Anonim analiz verilerini gönderin",
+  "result": "Bu yaklaşık {0} pp.",
+  "darkmode": "Karanlık Modu Aç"
+}
