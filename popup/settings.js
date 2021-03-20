@@ -37,7 +37,7 @@ darkmodeToggle.addEventListener('change', (evt) => {
 });
 
 languages
-  .sort((a, b) => a.name - b.name)
+  .sort((a, b) => a.name.localeCompare(b.name))
   .forEach((language) => {
     const option = document.createElement('option');
     option.setAttribute('value', language.code);
