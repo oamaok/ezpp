@@ -28,7 +28,7 @@ yarn
 
 ### Chromium-based browsers
 
- - Run `yarn start:chrome`. This will create `build` directory inside the directory containing the extension.
+ - Run `yarn start:chrome`. This will create a `build/` directory to the repository root.
  - Open up Chrome and navigate to `chrome://extensions`.
  - Enable `Developer mode`.
  - Click the `Load unpacked` button and select the previously mentioned `build` directory. 
@@ -40,7 +40,7 @@ To build a production version of the package, run `yarn build:chrome`.
 
 ### Firefox
 
- - Run `yarn start:firefox`. This will create `build` directory inside the directory containing the extension.
+ - Run `yarn start:firefox`. This will create a `build/` directory to the repository root.
  - Open up Firefox and navigate to `about:debugging#/runtime/this-firefox`.
  - Click the `Load Temporary Add-on` button and select any file in the previously mentioned directory.
  - The extension is now ready to go!
