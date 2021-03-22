@@ -46,6 +46,7 @@ let pageInfo = {
   beatmapId: null,
   stars: 0,
   ncircles: 0,
+  mode: null,
 };
 
 const keyModMap = {
@@ -366,19 +367,21 @@ const getPageInfo = (url, tabId) => new Promise((resolve, reject) => {
     beatmapId: null,
     stars: 0,
     ncircles: 0,
+    mode: 'osu',
   };
 
   const match = url.match(BEATMAP_URL_REGEX);
   info.isOldSite = match[2] !== 'beatmapsets';
 
   if (!info.isOldSite) {
-    // match[5] contains gamemode: osu, taiko, fruits, mania
+    const mode = match[5];
     const beatmapId = match[6];
 
+    info.mode = mode;
     info.beatmapSetId = match[3];
     info.beatmapId = beatmapId;
 
-    chrome.tabs.sendMessage(tabId, { action: 'GET_BEATMAP_INFO' }, (response) => {
+    chrome.tabs.sendMessage(tabId, { action: 'GET_BEATMAP_STATS' }, (response) => {
       if (!response) return reject(new Error('Empty response from content script')); // I don't know why but it happened to me (acrylic-style) multiple times
       if (response.status === 'ERROR') {
         reject(response.error);
@@ -423,6 +426,9 @@ const processBeatmap = (rawBeatmap) => {
 
   // Support old beatmaps
   cleanBeatmap.mode = Number(cleanBeatmap.mode || 0);
+  if (pageInfo.mode === 'taiko') cleanBeatmap.mode = 1;
+  if (pageInfo.mode === 'fruits') cleanBeatmap.mode = 2;
+  if (pageInfo.mode === 'mania') cleanBeatmap.mode = 3;
 
   if (cleanBeatmap.mode !== 0 && cleanBeatmap.mode !== 1) {
     throw Error(UNSUPPORTED_GAMEMODE);
