@@ -2,6 +2,7 @@ import ojsama from 'ojsama';
 import manifest from '../static/manifest.json';
 import { setLanguage, createTextSetter } from './translations';
 import { BEATMAP_URL_REGEX } from '../common/constants';
+import { calculateTaikoPerformance } from './calculators/taiko'
 
 require('./analytics');
 require('./settings');
@@ -42,6 +43,8 @@ let pageInfo = {
   isOldSite: null,
   beatmapSetId: null,
   beatmapId: null,
+  stars: 0,
+  ncircles: 0,
 };
 
 const keyModMap = {
@@ -57,6 +60,16 @@ const keyModMap = {
 
 const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
 
+function getMaxCombo() {
+  if (!cleanBeatmap) return -1;
+  if (cleanBeatmap.mode === 0) {
+    return cleanBeatmap.max_combo();
+  }
+  if (cleanBeatmap.mode === 1) {
+    return pageInfo.ncircles;
+  }
+}
+
 function getCalculationSettings() {
   // Bitwise OR the mods together
   const modifiers = modifierElements.reduce((num, element) => (
@@ -64,7 +77,7 @@ function getCalculationSettings() {
   ), 0);
 
   // An error might be reported before the beatmap is loaded.
-  const maxCombo = cleanBeatmap ? cleanBeatmap.max_combo() : -1;
+  const maxCombo = getMaxCombo();
 
   const accuracy = clamp(parseFloat(accuracyElement.value.replace(',', '.')), 0, 100);
   const combo = clamp(parseInt(comboElement.value) || maxCombo, 0, maxCombo);
@@ -208,14 +221,39 @@ function calculate() {
     const msPerBeat = cleanBeatmap.timing_points[0].ms_per_beat;
     const bpm = 1 / msPerBeat * 1000 * 60 * bpmMultiplier;
 
-    const stars = new ojsama.diff().calc({ map: cleanBeatmap, mods: modifiers });
+    let stars;
+    let pp;
+    if (cleanBeatmap.mode === 0) {
+      stars = new ojsama.diff().calc({ map: cleanBeatmap, mods: modifiers });
 
-    const pp = ojsama.ppv2({
-      stars,
-      combo,
-      nmiss: misses,
-      acc_percent: accuracy,
-    });
+      pp = ojsama.ppv2({
+        stars,
+        combo,
+        nmiss: misses,
+        acc_percent: accuracy,
+      });
+    }
+    if (cleanBeatmap.mode === 1) {
+      stars = { total: pageInfo.stars };
+      pp = calculateTaikoPerformance(cleanBeatmap, stars.total, modifiers, combo, misses, accuracy);
+      arElement.parentElement.style.display = 'none';
+      // disable these mods as they are not supported yet (missing star rating calculator)
+      document.getElementById('mod-hr').disabled = true;
+      document.getElementById('mod-dt').disabled = true;
+      document.getElementById('mod-ez').disabled = true;
+      document.getElementById('mod-ht').disabled = true;
+      document.getElementById('mod-so').disabled = true;
+      document.getElementById('mod-hr').value = false;
+      document.getElementById('mod-dt').value = false;
+      document.getElementById('mod-ez').value = false;
+      document.getElementById('mod-ht').value = false;
+      document.getElementById('mod-so').value = false;
+      document.querySelector("label[for=mod-hr]").style.display = 'none';
+      document.querySelector("label[for=mod-dt]").style.display = 'none';
+      document.querySelector("label[for=mod-ez]").style.display = 'none';
+      document.querySelector("label[for=mod-ht]").style.display = 'none';
+      document.querySelector("label[for=mod-so]").style.display = 'none';
+    }
 
     const { beatmapId } = pageInfo;
 
@@ -262,7 +300,7 @@ function toggleOpposingModifiers(mod) {
 }
 
 function resetCombo() {
-  comboElement.value = cleanBeatmap.max_combo();
+  comboElement.value = getMaxCombo();
 }
 
 function onReady([, cover]) {
@@ -321,22 +359,29 @@ const getPageInfo = (url, tabId) => new Promise((resolve, reject) => {
     isOldSite: null,
     beatmapSetId: null,
     beatmapId: null,
+    stars: 0,
+    ncircles: 0,
   };
 
   const match = url.match(BEATMAP_URL_REGEX);
   info.isOldSite = match[2] !== 'beatmapsets';
 
   if (!info.isOldSite) {
-    const beatmapId = match[4];
-
-    if (!beatmapId) {
-      throw new Error(UNSUPPORTED_GAMEMODE);
-    }
+    const beatmapId = match[6];
 
     info.beatmapSetId = match[3];
-    info.beatmapId = beatmapId.substr(5);
+    info.beatmapId = beatmapId;
 
-    resolve(info);
+    chrome.tabs.sendMessage(tabId, { action: 'GET_BEATMAP_STARS' }, (response) => {
+      if (response.status === 'ERROR') {
+        reject(response.error);
+      } else {
+        const { stars, ncircles } = response;
+        info.stars = stars;
+        info.ncircles = ncircles;
+        resolve(info);
+      }
+    });
   } else {
     // Fetch data from the content script so we don't need to fetch the page
     // second time.
@@ -344,9 +389,10 @@ const getPageInfo = (url, tabId) => new Promise((resolve, reject) => {
       if (response.status === 'ERROR') {
         reject(response.error);
       } else {
-        const { beatmapId, beatmapSetId } = response;
+        const { beatmapId, beatmapSetId, stars } = response;
         info.beatmapSetId = beatmapSetId;
         info.beatmapId = beatmapId;
+        info.stars = stars;
 
         resolve(info);
       }
@@ -370,7 +416,7 @@ const processBeatmap = (rawBeatmap) => {
   // Support old beatmaps
   cleanBeatmap.mode = Number(cleanBeatmap.mode || 0);
 
-  if (cleanBeatmap.mode !== 0) {
+  if (cleanBeatmap.mode !== 0 && cleanBeatmap.mode !== 1) {
     throw Error(UNSUPPORTED_GAMEMODE);
   }
 };
