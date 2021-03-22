@@ -378,7 +378,7 @@ const getPageInfo = (url, tabId) => new Promise((resolve, reject) => {
     info.beatmapSetId = match[3];
     info.beatmapId = beatmapId;
 
-    chrome.tabs.sendMessage(tabId, { action: 'GET_BEATMAP_STARS' }, (response) => {
+    chrome.tabs.sendMessage(tabId, { action: 'GET_BEATMAP_INFO' }, (response) => {
       if (!response) return reject(new Error('Empty response from content script')); // I don't know why but it happened to me (acrylic-style) multiple times
       if (response.status === 'ERROR') {
         reject(response.error);
@@ -396,10 +396,11 @@ const getPageInfo = (url, tabId) => new Promise((resolve, reject) => {
       if (response.status === 'ERROR') {
         reject(response.error);
       } else {
-        const { beatmapId, beatmapSetId, stars } = response;
+        const { beatmapId, beatmapSetId, stars, ncircles } = response;
         info.beatmapSetId = beatmapSetId;
         info.beatmapId = beatmapId;
         info.stars = stars;
+        info.ncircles = ncircles;
 
         resolve(info);
       }
