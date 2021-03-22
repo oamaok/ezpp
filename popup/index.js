@@ -1,41 +1,41 @@
-import ojsama from 'ojsama';
-import manifest from '../static/manifest.json';
-import { setLanguage, createTextSetter } from './translations';
-import { BEATMAP_URL_REGEX } from '../common/constants';
-import * as taiko from './calculators/taiko';
-import * as std from './calculators/standard';
+import ojsama from 'ojsama'
+import manifest from '../static/manifest.json'
+import { setLanguage, createTextSetter } from './translations'
+import { BEATMAP_URL_REGEX } from '../common/constants'
+import * as taiko from './calculators/taiko'
+import * as std from './calculators/standard'
 
-require('./analytics');
-require('./settings');
-require('./notifications');
+require('./analytics')
+require('./settings')
+require('./notifications')
 
-const FETCH_ATTEMPTS = 3;
-const UNSUPPORTED_GAMEMODE = 'Unsupported gamemode!'; // TODO: Add to translations
+const FETCH_ATTEMPTS = 3
+const UNSUPPORTED_GAMEMODE = 'Unsupported gamemode!' // TODO: Add to translations
 
-const containerElement = document.getElementById('container');
-const headerElement = document.getElementById('header');
-const versionElement = document.querySelector('.version');
-const titleElement = document.querySelector('.song-title');
-const artistElement = document.querySelector('.artist');
-const fcResetButton = document.querySelector('.fc-reset');
-const difficultyNameElement = document.getElementById('difficulty-name');
-const difficultyStarsElement = document.getElementById('difficulty-stars');
-const modifierElements = [...document.querySelectorAll('.mod>input')];
-const accuracyElement = document.getElementById('accuracy');
-const comboElement = document.getElementById('combo');
-const missesElement = document.getElementById('misses');
-const resultElement = document.getElementById('result');
-const errorElement = document.getElementById('error');
-const bpmElement = document.getElementById('bpm');
-const arElement = document.getElementById('ar');
+const containerElement = document.getElementById('container')
+const headerElement = document.getElementById('header')
+const versionElement = document.querySelector('.version')
+const titleElement = document.querySelector('.song-title')
+const artistElement = document.querySelector('.artist')
+const fcResetButton = document.querySelector('.fc-reset')
+const difficultyNameElement = document.getElementById('difficulty-name')
+const difficultyStarsElement = document.getElementById('difficulty-stars')
+const modifierElements = [...document.querySelectorAll('.mod>input')]
+const accuracyElement = document.getElementById('accuracy')
+const comboElement = document.getElementById('combo')
+const missesElement = document.getElementById('misses')
+const resultElement = document.getElementById('result')
+const errorElement = document.getElementById('error')
+const bpmElement = document.getElementById('bpm')
+const arElement = document.getElementById('ar')
 
-const setResultText = createTextSetter(resultElement, 'result');
+const setResultText = createTextSetter(resultElement, 'result')
 
-versionElement.innerText = `ezpp! v${manifest.version}`;
+versionElement.innerText = `ezpp! v${manifest.version}`
 
 // Set after the extension initializes, used for additional error information.
-let currentUrl = null;
-let cleanBeatmap = null;
+let currentUrl = null
+let cleanBeatmap = null
 let pageInfo = {
   isOldSite: null,
   beatmapSetId: null,
@@ -70,58 +70,66 @@ let pageInfo = {
     version: '',
   },
   mode: null,
-};
+}
 
 const keyModMap = {
-  'Q': 'mod-ez',
-  'W': 'mod-nf',
-  'E': 'mod-ht',
-  'A': 'mod-hr',
-  'D': 'mod-dt',
-  'F': 'mod-hd',
-  'G': 'mod-fl',
-  'C': 'mod-so',
-};
+  Q: 'mod-ez',
+  W: 'mod-nf',
+  E: 'mod-ht',
+  A: 'mod-hr',
+  D: 'mod-dt',
+  F: 'mod-hd',
+  G: 'mod-fl',
+  C: 'mod-so',
+}
 
-const MODE_STANDARD = 0;
-const MODE_TAIKO = 1;
+const MODE_STANDARD = 0
+const MODE_TAIKO = 1
 
-const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
+const clamp = (x, min, max) => Math.min(Math.max(x, min), max)
 
 function getMaxCombo() {
-  if (!cleanBeatmap) return -1;
+  if (!cleanBeatmap) return -1
   if (cleanBeatmap.mode === MODE_STANDARD) {
-    return cleanBeatmap.max_combo();
+    return cleanBeatmap.max_combo()
   }
   if (cleanBeatmap.mode === MODE_TAIKO) {
-    return pageInfo.beatmap.max_combo;
+    return pageInfo.beatmap.max_combo
   }
 
-  return -1;
+  return -1
 }
 
 function getCalculationSettings() {
   // Bitwise OR the mods together
-  const modifiers = modifierElements.reduce((num, element) => (
-    num | (element.checked ? parseInt(element.value) : 0)
-  ), 0);
+  const modifiers = modifierElements.reduce(
+    (num, element) => num | (element.checked ? parseInt(element.value) : 0),
+    0
+  )
 
   // An error might be reported before the beatmap is loaded.
-  const maxCombo = getMaxCombo();
+  const maxCombo = getMaxCombo()
 
-  const accuracy = clamp(parseFloat(accuracyElement.value.replace(',', '.')), 0, 100);
-  const combo = clamp(parseInt(comboElement.value) || maxCombo, 0, maxCombo);
-  const misses = clamp(parseInt(missesElement.value) || 0, 0, maxCombo);
+  const accuracy = clamp(
+    parseFloat(accuracyElement.value.replace(',', '.')),
+    0,
+    100
+  )
+  const combo = clamp(parseInt(comboElement.value) || maxCombo, 0, maxCombo)
+  const misses = clamp(parseInt(missesElement.value) || 0, 0, maxCombo)
 
   return {
-    modifiers, accuracy, combo, misses,
-  };
+    modifiers,
+    accuracy,
+    combo,
+    misses,
+  }
 }
 
 function trackError(error) {
   // Don't report unsupported gamemode errors.
   if (error.message === UNSUPPORTED_GAMEMODE) {
-    return;
+    return
   }
 
   const report = {
@@ -141,82 +149,96 @@ function trackError(error) {
     navigator: {
       userAgent: window.navigator.userAgent,
     },
-  };
+  }
 
-  _gaq.push([
-    '_trackEvent',
-    'error',
-    JSON.stringify(report),
-  ]);
+  _gaq.push(['_trackEvent', 'error', JSON.stringify(report)])
 }
 
 function displayError(error) {
-  trackError(error);
-  errorElement.innerText = error.message;
-  containerElement.classList.toggle('error', true);
-  containerElement.classList.toggle('preloading', false);
+  trackError(error)
+  errorElement.innerText = error.message
+  containerElement.classList.toggle('error', true)
+  containerElement.classList.toggle('preloading', false)
 }
 
 function debounce(fn, timeout) {
-  let debounceTimeout = null;
+  let debounceTimeout = null
 
   return (...args) => {
-    clearTimeout(debounceTimeout);
-    debounceTimeout = setTimeout(() => fn(...args), timeout);
-  };
+    clearTimeout(debounceTimeout)
+    debounceTimeout = setTimeout(() => fn(...args), timeout)
+  }
 }
 
 const trackCalculate = (() => {
-  let lastData = {};
+  let lastData = {}
 
   return (analyticsData) => {
     // Don't repeat calculation analytics
-    const isClean = Object.keys(analyticsData).every((key) => lastData[key] === analyticsData[key]);
-    if (isClean) return;
+    const isClean = Object.keys(analyticsData).every(
+      (key) => lastData[key] === analyticsData[key]
+    )
+    if (isClean) return
 
-    lastData = { ...analyticsData };
+    lastData = { ...analyticsData }
 
-    _gaq.push(['_trackEvent', 'calculate', JSON.stringify(analyticsData)]);
-  };
-})();
+    _gaq.push(['_trackEvent', 'calculate', JSON.stringify(analyticsData)])
+  }
+})()
 
-const trackCalculateDebounced = debounce(trackCalculate, 500);
+const trackCalculateDebounced = debounce(trackCalculate, 500)
 
 function calculate() {
   try {
-    const {
-      modifiers, accuracy, combo, misses,
-    } = getCalculationSettings();
+    const { modifiers, accuracy, combo, misses } = getCalculationSettings()
 
-    let bpmMultiplier = 1;
-    if (modifiers & ojsama.modbits.dt) bpmMultiplier = 1.5;
-    if (modifiers & ojsama.modbits.ht) bpmMultiplier = 0.75;
-    const msPerBeat = cleanBeatmap.timing_points[0].ms_per_beat;
-    const bpm = 1 / msPerBeat * 1000 * 60 * bpmMultiplier;
+    let bpmMultiplier = 1
+    if (modifiers & ojsama.modbits.dt) bpmMultiplier = 1.5
+    if (modifiers & ojsama.modbits.ht) bpmMultiplier = 0.75
+    const msPerBeat = cleanBeatmap.timing_points[0].ms_per_beat
+    const bpm = (1 / msPerBeat) * 1000 * 60 * bpmMultiplier
 
-    let stars = { total: 0 };
-    let pp;
+    let stars = { total: 0 }
+    let pp
 
     switch (cleanBeatmap.mode) {
       case MODE_STANDARD:
-        document.documentElement.classList.add('mode-standard');
-        const stdResult = std.calculatePerformance(cleanBeatmap, modifiers, combo, misses, accuracy);
-        pp = stdResult.pp;
-        stars = stdResult.stars;
-        arElement.innerText = cleanBeatmap.ar === null ? '?' : Math.round(std.calculateApproachRate(modifiers, cleanBeatmap.ar) * 10) / 10;
-        break;
+        document.documentElement.classList.add('mode-standard')
+        const stdResult = std.calculatePerformance(
+          cleanBeatmap,
+          modifiers,
+          combo,
+          misses,
+          accuracy
+        )
+        pp = stdResult.pp
+        stars = stdResult.stars
+        arElement.innerText =
+          cleanBeatmap.ar === null
+            ? '?'
+            : Math.round(
+                std.calculateApproachRate(modifiers, cleanBeatmap.ar) * 10
+              ) / 10
+        break
 
       case MODE_TAIKO:
-        document.documentElement.classList.add('mode-taiko');
+        document.documentElement.classList.add('mode-taiko')
         // TOOD: implement star rating calculator
-        stars = { total: pageInfo.beatmap.difficulty_rating };
-        pp = taiko.calculatePerformance(cleanBeatmap, stars.total, modifiers, combo, misses, accuracy);
-        break;
+        stars = { total: pageInfo.beatmap.difficulty_rating }
+        pp = taiko.calculatePerformance(
+          cleanBeatmap,
+          stars.total,
+          modifiers,
+          combo,
+          misses,
+          accuracy
+        )
+        break
 
       default:
     }
 
-    const { beatmapId } = pageInfo;
+    const { beatmapId } = pageInfo
 
     const analyticsData = {
       beatmapId: parseInt(beatmapId),
@@ -226,207 +248,222 @@ function calculate() {
       misses: parseInt(misses),
       stars: parseFloat(stars.total.toFixed(1)),
       pp: parseFloat(pp.total.toFixed(2)),
-    };
+    }
 
     // Track results
-    trackCalculateDebounced(analyticsData);
+    trackCalculateDebounced(analyticsData)
 
-    difficultyStarsElement.innerText = stars.total.toFixed(2);
-    bpmElement.innerText = Math.round(bpm * 10) / 10;
+    difficultyStarsElement.innerText = stars.total.toFixed(2)
+    bpmElement.innerText = Math.round(bpm * 10) / 10
 
-    setResultText(Math.round(pp.total));
+    setResultText(Math.round(pp.total))
   } catch (error) {
-    displayError(error);
+    displayError(error)
   }
 }
 
 const opposingModifiers = [
   ['mod-hr', 'mod-ez'],
   ['mod-ht', 'mod-dt'],
-];
+]
 
 function toggleOpposingModifiers(mod) {
   opposingModifiers.forEach((mods) => {
-    const index = mods.indexOf(mod);
+    const index = mods.indexOf(mod)
     if (index !== -1) {
-      const name = mods[1 - index];
-      modifierElements.find(({ id }) => id === name).checked = false;
+      const name = mods[1 - index]
+      modifierElements.find(({ id }) => id === name).checked = false
     }
-  });
+  })
 }
 
 function resetCombo() {
-  comboElement.value = getMaxCombo();
+  comboElement.value = getMaxCombo()
 }
 
 function onReady([, cover]) {
   // Display content since we're done loading all the stuff.
-  containerElement.classList.toggle('preloading', false);
+  containerElement.classList.toggle('preloading', false)
 
   // Set header background
   if (cover) {
-    headerElement.style.backgroundImage = `url('${cover.src}')`;
+    headerElement.style.backgroundImage = `url('${cover.src}')`
   }
 
   // Set header text
-  titleElement.innerText = cleanBeatmap.title;
-  artistElement.innerText = cleanBeatmap.artist;
-  difficultyNameElement.innerText = cleanBeatmap.version;
+  titleElement.innerText = cleanBeatmap.title
+  artistElement.innerText = cleanBeatmap.artist
+  difficultyNameElement.innerText = cleanBeatmap.version
 
   modifierElements.forEach((modElement) => {
     modElement.addEventListener('click', ({ target }) => {
-      toggleOpposingModifiers(target.id);
-      calculate();
-    });
-  });
+      toggleOpposingModifiers(target.id)
+      calculate()
+    })
+  })
 
   window.addEventListener('keydown', ({ key = '' }) => {
-    const mod = keyModMap[key.toUpperCase()];
+    const mod = keyModMap[key.toUpperCase()]
 
     if (mod) {
-      const element = modifierElements.find(({ id }) => id === mod);
-      element.checked = !element.checked;
+      const element = modifierElements.find(({ id }) => id === mod)
+      element.checked = !element.checked
 
-      toggleOpposingModifiers(mod);
-      calculate();
+      toggleOpposingModifiers(mod)
+      calculate()
     }
-  });
+  })
 
-  accuracyElement.addEventListener('input', calculate);
-  comboElement.addEventListener('input', calculate);
-  missesElement.addEventListener('input', calculate);
+  accuracyElement.addEventListener('input', calculate)
+  comboElement.addEventListener('input', calculate)
+  missesElement.addEventListener('input', calculate)
 
   fcResetButton.addEventListener('click', () => {
-    resetCombo();
-    calculate();
-  });
+    resetCombo()
+    calculate()
+  })
 
   // Set the combo to the max combo by default
-  resetCombo();
+  resetCombo()
 
-  calculate();
+  calculate()
 }
 
-const fetchBeatmapById = (id) => fetch(`https://osu.ppy.sh/osu/${id}`, { credentials: 'include' })
-  .then((res) => res.text());
+const fetchBeatmapById = (id) =>
+  fetch(`https://osu.ppy.sh/osu/${id}`, {
+    credentials: 'include',
+  }).then((res) => res.text())
 
-const getPageInfo = (url, tabId) => new Promise((resolve, reject) => {
-  const info = {
-    isOldSite: null,
-    beatmapSetId: null,
-    beatmapId: null,
-    stars: 0,
-    beatmap: {},
-  };
+const getPageInfo = (url, tabId) =>
+  new Promise((resolve, reject) => {
+    const info = {
+      isOldSite: null,
+      beatmapSetId: null,
+      beatmapId: null,
+      stars: 0,
+      beatmap: {},
+    }
 
-  const match = url.match(BEATMAP_URL_REGEX);
-  info.isOldSite = match[2] !== 'beatmapsets';
+    const match = url.match(BEATMAP_URL_REGEX)
+    info.isOldSite = match[2] !== 'beatmapsets'
 
-  if (!info.isOldSite) {
-    const mode = match[5];
-    const beatmapId = match[6];
+    if (!info.isOldSite) {
+      const mode = match[5]
+      const beatmapId = match[6]
 
-    info.mode = mode;
-    info.beatmapSetId = match[3];
-    info.beatmapId = beatmapId;
+      info.mode = mode
+      info.beatmapSetId = match[3]
+      info.beatmapId = beatmapId
 
-    chrome.tabs.sendMessage(tabId, { action: 'GET_BEATMAP_STATS', beatmapId }, (response) => {
-      if (!response) {
-        // FIXME(acrylic-style): I don't know why but it happened to me multiple times
-        reject(new Error('Empty response from content script'));
-        return;
-      }
+      chrome.tabs.sendMessage(
+        tabId,
+        { action: 'GET_BEATMAP_STATS', beatmapId },
+        (response) => {
+          if (!response) {
+            // FIXME(acrylic-style): I don't know why but it happened to me multiple times
+            reject(new Error('Empty response from content script'))
+            return
+          }
 
-      if (response.status === 'ERROR') {
-        reject(response.error);
-        return;
-      }
+          if (response.status === 'ERROR') {
+            reject(response.error)
+            return
+          }
 
-      info.beatmap = response.beatmap;
-      resolve(info);
-    });
-  } else {
-    // Fetch data from the content script so we don't need to fetch the page
-    // second time.
-    chrome.tabs.sendMessage(tabId, { action: 'GET_BEATMAP_INFO' }, (response) => {
-      if (response.status === 'ERROR') {
-        reject(response.error);
-        return;
-      }
+          info.beatmap = response.beatmap
+          resolve(info)
+        }
+      )
+    } else {
+      // Fetch data from the content script so we don't need to fetch the page
+      // second time.
+      chrome.tabs.sendMessage(
+        tabId,
+        { action: 'GET_BEATMAP_INFO' },
+        (response) => {
+          if (response.status === 'ERROR') {
+            reject(response.error)
+            return
+          }
 
-      const {
-        beatmapId, beatmapSetId,
-      } = response;
-      info.beatmapSetId = beatmapSetId;
-      info.beatmapId = beatmapId;
+          const { beatmapId, beatmapSetId } = response
+          info.beatmapSetId = beatmapSetId
+          info.beatmapId = beatmapId
 
-      resolve(info);
-    });
-  }
-});
+          resolve(info)
+        }
+      )
+    }
+  })
 
-const attemptToFetchBeatmap = (id, attempts) => fetchBeatmapById(id)
-  .catch((error) => {
+const attemptToFetchBeatmap = (id, attempts) =>
+  fetchBeatmapById(id).catch((error) => {
     // Retry fetching until no attempts are left.
-    if (attempts) return attemptToFetchBeatmap(id, attempts - 1);
+    if (attempts) return attemptToFetchBeatmap(id, attempts - 1)
 
-    throw error;
-  });
+    throw error
+  })
 
 const processBeatmap = (rawBeatmap) => {
-  const { map } = new ojsama.parser().feed(rawBeatmap);
+  const { map } = new ojsama.parser().feed(rawBeatmap)
 
-  cleanBeatmap = map;
+  cleanBeatmap = map
 
   // Support old beatmaps
-  cleanBeatmap.mode = Number(cleanBeatmap.mode || MODE_STANDARD);
-  if (pageInfo.mode === 'taiko') cleanBeatmap.mode = MODE_TAIKO;
-  if (pageInfo.mode === 'fruits') cleanBeatmap.mode = 2;
-  if (pageInfo.mode === 'mania') cleanBeatmap.mode = 3;
+  cleanBeatmap.mode = Number(cleanBeatmap.mode || MODE_STANDARD)
+  if (pageInfo.mode === 'taiko') cleanBeatmap.mode = MODE_TAIKO
+  if (pageInfo.mode === 'fruits') cleanBeatmap.mode = 2
+  if (pageInfo.mode === 'mania') cleanBeatmap.mode = 3
 
   if (cleanBeatmap.mode !== 0 && cleanBeatmap.mode !== 1) {
-    throw Error(UNSUPPORTED_GAMEMODE);
+    throw Error(UNSUPPORTED_GAMEMODE)
   }
-};
+}
 
-const fetchBeatmapBackground = (beatmapSetId) => new Promise((resolve) => {
-  // Preload beatmap cover
-  const cover = new Image();
-  cover.src = `https://assets.ppy.sh/beatmaps/${beatmapSetId}/covers/cover@2x.jpg`;
-  cover.onload = () => resolve(cover);
-  cover.onerror = () => resolve();
-  cover.onabort = () => resolve();
-});
+const fetchBeatmapBackground = (beatmapSetId) =>
+  new Promise((resolve) => {
+    // Preload beatmap cover
+    const cover = new Image()
+    cover.src = `https://assets.ppy.sh/beatmaps/${beatmapSetId}/covers/cover@2x.jpg`
+    cover.onload = () => resolve(cover)
+    cover.onerror = () => resolve()
+    cover.onabort = () => resolve()
+  })
 
 // Track errors with GA
-window.addEventListener('error', trackError);
+window.addEventListener('error', trackError)
 
 if (__FIREFOX__) {
-  containerElement.classList.toggle('firefox', true);
-  document.documentElement.classList.toggle('firefox', true);
+  containerElement.classList.toggle('firefox', true)
+  document.documentElement.classList.toggle('firefox', true)
 }
 
 chrome.storage.local.get(['language'], ({ language }) => {
-  setLanguage(language || 'en');
-});
+  setLanguage(language || 'en')
+})
 
 // Init the extension.
-chrome.tabs.query({
-  active: true, // Select active tabs
-  lastFocusedWindow: true, // In the current window
-}, ([tab]) => {
-  const { url, id } = tab;
-  currentUrl = url;
+chrome.tabs.query(
+  {
+    active: true, // Select active tabs
+    lastFocusedWindow: true, // In the current window
+  },
+  ([tab]) => {
+    const { url, id } = tab
+    currentUrl = url
 
-  getPageInfo(url, id).then((info) => {
-    pageInfo = info;
+    getPageInfo(url, id)
+      .then((info) => {
+        pageInfo = info
 
-    return Promise.all([
-      attemptToFetchBeatmap(pageInfo.beatmapId, FETCH_ATTEMPTS)
-        .then(processBeatmap),
-      fetchBeatmapBackground(pageInfo.beatmapSetId),
-    ]);
-  })
-    .then(onReady)
-    .catch(displayError);
-});
+        return Promise.all([
+          attemptToFetchBeatmap(pageInfo.beatmapId, FETCH_ATTEMPTS).then(
+            processBeatmap
+          ),
+          fetchBeatmapBackground(pageInfo.beatmapSetId),
+        ])
+      })
+      .then(onReady)
+      .catch(displayError)
+  }
+)

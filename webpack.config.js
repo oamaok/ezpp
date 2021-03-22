@@ -1,9 +1,9 @@
-const webpack = require('webpack');
-const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
+const webpack = require('webpack')
+const path = require('path')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'production'
 
 module.exports = {
   entry: {
@@ -36,7 +36,8 @@ module.exports = {
         use: 'babel-loader',
       },
       {
-        test: /\.s[ac]ss$/, use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
+        test: /\.s[ac]ss$/,
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'sass-loader'],
       },
       {
         test: /\.(png|svg|woff2?|ttf|eot)$/,
@@ -53,15 +54,18 @@ module.exports = {
     }),
 
     new CopyWebpackPlugin({
-      patterns: [{
-        context: './static/',
-        from: '**/*',
-        to: './',
-      }, {
-        context: './assets/',
-        from: '**/*',
-        to: './assets',
-      }],
+      patterns: [
+        {
+          context: './static/',
+          from: '**/*',
+          to: './',
+        },
+        {
+          context: './assets/',
+          from: '**/*',
+          to: './assets',
+        },
+      ],
     }),
 
     new webpack.DefinePlugin({
@@ -74,4 +78,4 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.sass', '.scss'],
   },
-};
+}

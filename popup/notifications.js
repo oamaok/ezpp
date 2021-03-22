@@ -1,38 +1,33 @@
-import manifest from '../static/manifest.json';
-import { createTextSetter } from './translations';
+import manifest from '../static/manifest.json'
+import { createTextSetter } from './translations'
 
-const notificationElement = document.getElementById('notification');
-const notificationClearElement = document.getElementById('notification-clear');
-const versionElement = document.getElementById('notification-version');
+const notificationElement = document.getElementById('notification')
+const notificationClearElement = document.getElementById('notification-clear')
+const versionElement = document.getElementById('notification-version')
 
-const setVersionText = createTextSetter(versionElement, 'version-update-message');
+const setVersionText = createTextSetter(
+  versionElement,
+  'version-update-message'
+)
 
 function clearNotification() {
   chrome.storage.local.set({
     displayNotification: false,
-  });
+  })
 
-  notificationElement.classList.toggle('hidden', true);
+  notificationElement.classList.toggle('hidden', true)
 }
 
 // Clear the notification
-notificationClearElement.addEventListener('click', clearNotification);
+notificationClearElement.addEventListener('click', clearNotification)
 
 // Version change detection
 chrome.storage.local.get(
-  [
-    'version',
-    'displayNotification',
-    'updatedAt',
-  ],
-  ({
-    version,
-    displayNotification,
-    updatedAt = 0,
-  }) => {
-    setVersionText(manifest.version);
+  ['version', 'displayNotification', 'updatedAt'],
+  ({ version, displayNotification, updatedAt = 0 }) => {
+    setVersionText(manifest.version)
 
-    const now = new Date().getTime();
+    const now = new Date().getTime()
 
     // First time using the extension, set the version
     // but don't display notifications
@@ -41,8 +36,8 @@ chrome.storage.local.get(
         version: manifest.version,
         updatedAt: now,
         displayNotification: false,
-      });
-      return;
+      })
+      return
     }
 
     // Update detected, show notification and set the version
@@ -51,18 +46,18 @@ chrome.storage.local.get(
         version: manifest.version,
         updatedAt: now,
         displayNotification: true,
-      });
-      notificationElement.classList.toggle('hidden', false);
+      })
+      notificationElement.classList.toggle('hidden', false)
     } else {
       // Display the notification for max one hour
-      const dayAfterUpdate = updatedAt + 60 * 60 * 1000;
+      const dayAfterUpdate = updatedAt + 60 * 60 * 1000
       if (dayAfterUpdate < now) {
-        clearNotification();
+        clearNotification()
       }
 
       if (displayNotification) {
-        notificationElement.classList.toggle('hidden', false);
+        notificationElement.classList.toggle('hidden', false)
       }
     }
-  },
-);
+  }
+)

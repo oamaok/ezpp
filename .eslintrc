@@ -1,13 +1,6 @@
 {
-  "extends": "airbnb",
+  "extends": ["prettier"],
   "parser": "@babel/eslint-parser",
-  "parserOptions": {
-    "ecmaVersion": 6,
-    "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true
-    }
-  },
   "env": {
     "webextensions": true,
     "browser": true,
@@ -17,19 +10,13 @@
     "__CHROME__": true,
     "_gaq": true
   },
+  "plugins": ["prettier"],
   "rules": {
-    "semi": 2,
-    "new-cap": 0,
-    "radix": 0,
-    "no-bitwise": 0,
-    "no-case-declarations": 0,
-    "quote-props": 0,
-    "react/prop-types": 0,
-    "react/no-multi-comp": 0,
-    "react/jsx-no-bind": 0,
-    "react/prefer-stateless-function": 0,
-    "no-mixed-operators": 0,
-    "prefer-destructuring": 0,
-    "import/no-extraneous-dependencies": 0
+    "prettier/prettier": ["error", {
+      "printWidth": 80,
+      "singleQuote": true,
+      "semi": false,
+      "quoteProps": "consistent"
+    }]
   }
 }
