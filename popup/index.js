@@ -31,6 +31,8 @@ const resultElement = document.getElementById('result');
 const errorElement = document.getElementById('error');
 const bpmElement = document.getElementById('bpm');
 const arElement = document.getElementById('ar');
+const resultBoxElement = document.getElementById('result-box');
+const resultDetailsElement = document.getElementById('result-details');
 
 const setResultText = createTextSetter(resultElement, 'result');
 
@@ -221,7 +223,7 @@ function calculate() {
     const msPerBeat = cleanBeatmap.timing_points[0].ms_per_beat;
     const bpm = 1 / msPerBeat * 1000 * 60 * bpmMultiplier;
 
-    let stars;
+    let stars = { total: 0 };
     let pp;
     if (cleanBeatmap.mode === 0) {
       stars = new ojsama.diff().calc({ map: cleanBeatmap, mods: modifiers });
@@ -232,11 +234,14 @@ function calculate() {
         nmiss: misses,
         acc_percent: accuracy,
       });
+      resultDetailsElement.textContent = `Acc: ${Math.round(pp.acc * 10) / 10}, Aim: ${Math.round(pp.aim * 10) / 10}, Spd: ${Math.round(pp.speed * 10) / 10}`;
     }
     if (cleanBeatmap.mode === 1) {
+      // todo: implement star rating calculator
       stars = { total: pageInfo.stars };
       pp = calculateTaikoPerformance(cleanBeatmap, stars.total, modifiers, combo, misses, accuracy);
       arElement.parentElement.style.display = 'none';
+      resultDetailsElement.textContent = `Strain: ${Math.round(pp.strain * 10) / 10}, Accuracy: ${Math.round(pp.accuracy * 10) / 10}`;
       // disable these mods as they are not supported yet (missing star rating calculator)
       document.getElementById('mod-hr').disabled = true;
       document.getElementById('mod-dt').disabled = true;
