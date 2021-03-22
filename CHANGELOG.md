@@ -5,6 +5,7 @@
 ## v1.10.1
  - Fix AR calculations (thanks to [acrylic-style](https://github.com/acrylic-style))
  - Fix Swedish translation file encoding (thanks to [Walavouchey](https://github.com/Walavouchey))
+ - Remove local changelog, use GitHub link instead
 
 ## v1.10.0
  - Add Taiko support (thanks to [acrylic-style](https://github.com/acrylic-style))

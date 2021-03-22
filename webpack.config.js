@@ -11,7 +11,6 @@ module.exports = {
       path.resolve(__dirname, 'popup/index.js'),
       path.resolve(__dirname, 'popup/styles/main.sass'),
     ],
-    changelog: path.resolve(__dirname, 'changelog/index.js'),
     background: path.resolve(__dirname, 'background/background.js'),
     content: path.resolve(__dirname, 'background/content.js'),
   },
@@ -42,10 +41,6 @@ module.exports = {
       {
         test: /\.(png|svg|woff2?|ttf|eot)$/,
         use: 'file-loader',
-      },
-      {
-        test: /\.md$/,
-        use: 'raw-loader',
       },
     ],
   },
