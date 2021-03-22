@@ -1,0 +1,22 @@
+{
+  "error-occured": "Ett fel förhindrade tillägget att fungera: ",
+  "version-update-message": "Du använder nu ezpp! v{0}",
+  "changelog": "ändringshistorik",
+  "accuracy": "Träffsäkerhet",
+  "combo": "Kombo",
+  "empty-fc": "(tom = FC)",
+  "misses": "Missar",
+  "mod-hidden": "Hidden",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "DoubleTime",
+  "mod-flashlight": "Flashlight",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Easy",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut",
+  "language": "Språk",
+  "settings": "Inställningar",
+  "analytics": "Skicka anonym data",
+  "result": "Det blir ungefär {0}pp.",
+  "darkmode": "Sätt på mörk tema"
+}

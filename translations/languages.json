@@ -66,5 +66,9 @@
   {
     "name": "한국어",
     "code": "ko"
+  },
+  {
+    "name": "Svenska",
+    "code": "sv"
   }
 ]
