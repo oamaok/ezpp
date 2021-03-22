@@ -31,7 +31,6 @@ const resultElement = document.getElementById('result');
 const errorElement = document.getElementById('error');
 const bpmElement = document.getElementById('bpm');
 const arElement = document.getElementById('ar');
-const resultBoxElement = document.getElementById('result-box');
 const resultDetailsElement = document.getElementById('result-details');
 
 const setResultText = createTextSetter(resultElement, 'result');
@@ -234,7 +233,7 @@ function calculate() {
         nmiss: misses,
         acc_percent: accuracy,
       });
-      resultDetailsElement.textContent = `Acc: ${Math.round(pp.acc * 10) / 10}, Aim: ${Math.round(pp.aim * 10) / 10}, Spd: ${Math.round(pp.speed * 10) / 10}`;
+      resultDetailsElement.textContent = `Acc: ${Math.round(pp.acc * 10) / 10}, Aim: ${Math.round(pp.aim * 10) / 10}, Speed: ${Math.round(pp.speed * 10) / 10}`;
     }
     if (cleanBeatmap.mode === 1) {
       // todo: implement star rating calculator
@@ -242,22 +241,23 @@ function calculate() {
       pp = calculateTaikoPerformance(cleanBeatmap, stars.total, modifiers, combo, misses, accuracy);
       arElement.parentElement.style.display = 'none';
       resultDetailsElement.textContent = `Strain: ${Math.round(pp.strain * 10) / 10}, Accuracy: ${Math.round(pp.accuracy * 10) / 10}`;
+      // disable spin out mod as taiko does not have this
+      document.getElementById('mod-so').disabled = true;
+      document.getElementById('mod-so').value = false;
+      document.querySelector("label[for=mod-so]").style.display = 'none';
       // disable these mods as they are not supported yet (missing star rating calculator)
       document.getElementById('mod-hr').disabled = true;
       document.getElementById('mod-dt').disabled = true;
       document.getElementById('mod-ez').disabled = true;
       document.getElementById('mod-ht').disabled = true;
-      document.getElementById('mod-so').disabled = true;
       document.getElementById('mod-hr').value = false;
       document.getElementById('mod-dt').value = false;
       document.getElementById('mod-ez').value = false;
       document.getElementById('mod-ht').value = false;
-      document.getElementById('mod-so').value = false;
       document.querySelector("label[for=mod-hr]").style.display = 'none';
       document.querySelector("label[for=mod-dt]").style.display = 'none';
       document.querySelector("label[for=mod-ez]").style.display = 'none';
       document.querySelector("label[for=mod-ht]").style.display = 'none';
-      document.querySelector("label[for=mod-so]").style.display = 'none';
     }
 
     const { beatmapId } = pageInfo;
