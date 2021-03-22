@@ -1,8 +1,8 @@
 {
-  "error-occured": "Ett fel fˆrhindrade till‰gget att fungera: ",
-  "version-update-message": "Du anv‰nder nu ezpp! v{0}",
-  "changelog": "‰ndringshistorik",
-  "accuracy": "Tr‰ffs‰kerhet",
+  "error-occured": "Ett fel f√∂rhindrade till√§gget att fungera: ",
+  "version-update-message": "Du anv√§nder nu ezpp! v{0}",
+  "changelog": "√§ndringshistorik",
+  "accuracy": "Tr√§ffs√§kerhet",
   "combo": "Kombo",
   "empty-fc": "(tom = FC)",
   "misses": "Missar",
@@ -14,9 +14,9 @@
   "mod-easy": "Easy",
   "mod-halftime": "HalfTime",
   "mod-spunout": "SpunOut",
-  "language": "SprÂk",
-  "settings": "Inst‰llningar",
+  "language": "Spr√•k",
+  "settings": "Inst√§llningar",
   "analytics": "Skicka anonym data",
-  "result": "Det blir ungef‰r {0}pp.",
-  "darkmode": "S‰tt pÂ mˆrk tema"
+  "result": "Det blir ungef√§r {0}pp.",
+  "darkmode": "S√§tt p√• m√∂rk tema"
 }
