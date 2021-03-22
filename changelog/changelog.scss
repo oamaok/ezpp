@@ -696,21 +696,19 @@
   margin: 0; padding: 0;
 }
 
-body, html {
-  height: 100%;
+html {
+  filter: invert(1);
 }
 
-body {
-  background-image: url('/assets/page-light.png');
+body, html {
+  height: 100%;
+  background-color: #fff;
 }
 
 #markdown{
-  display: none;
   max-width: 50em;
   margin: 0 auto;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.75);
   overflow: auto;
   padding: 1em;
   min-height: 100;
-  background-color: #fff;
 }
