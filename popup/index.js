@@ -2,7 +2,8 @@ import ojsama from 'ojsama';
 import manifest from '../static/manifest.json';
 import { setLanguage, createTextSetter } from './translations';
 import { BEATMAP_URL_REGEX } from '../common/constants';
-import { calculateTaikoPerformance } from './calculators/taiko'
+import * as taiko from './calculators/taiko';
+import * as std from './calculators/standard';
 
 require('./analytics');
 require('./settings');
@@ -10,10 +11,6 @@ require('./notifications');
 
 const FETCH_ATTEMPTS = 3;
 const UNSUPPORTED_GAMEMODE = 'Unsupported gamemode!'; // TODO: Add to translations
-const MOD_EZ = 2;
-const MOD_HR = 16;
-const MOD_DT = 64;
-const MOD_HT = 256;
 
 const containerElement = document.getElementById('container');
 const headerElement = document.getElementById('header');
@@ -31,7 +28,6 @@ const resultElement = document.getElementById('result');
 const errorElement = document.getElementById('error');
 const bpmElement = document.getElementById('bpm');
 const arElement = document.getElementById('ar');
-const resultDetailsElement = document.getElementById('result-details');
 
 const setResultText = createTextSetter(resultElement, 'result');
 
@@ -44,8 +40,35 @@ let pageInfo = {
   isOldSite: null,
   beatmapSetId: null,
   beatmapId: null,
-  stars: 0,
-  ncircles: 0,
+  beatmap: {
+    accuracy: 0,
+    ar: 0,
+    beatmapset_id: 0,
+    bpm: 0,
+    convert: false,
+    count_circles: 0,
+    count_sliders: 0,
+    count_spinners: 0,
+    cs: 0,
+    deleted_at: null,
+    difficulty_rating: 0,
+    drain: 0,
+    failtimes: { fail: [], exit: [] },
+    hit_length: 0,
+    id: 0,
+    is_scoreable: true,
+    last_updated: '',
+    max_combo: 0,
+    mode: 'osu',
+    mode_int: 0,
+    passcount: 0,
+    playcount: 0,
+    ranked: 0,
+    status: '',
+    total_length: 0,
+    url: '',
+    version: '',
+  },
   mode: null,
 };
 
@@ -60,6 +83,9 @@ const keyModMap = {
   'C': 'mod-so',
 };
 
+const MODE_STANDARD = 0;
+const MODE_TAIKO = 1;
+
 const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
 
 function getMaxCombo() {
@@ -68,8 +94,10 @@ function getMaxCombo() {
     return cleanBeatmap.max_combo();
   }
   if (cleanBeatmap.mode === 1) {
-    return pageInfo.ncircles;
+    return pageInfo.beatmap.max_combo;
   }
+
+  return -1;
 }
 
 function getCalculationSettings() {
@@ -154,63 +182,6 @@ const trackCalculate = (() => {
 
 const trackCalculateDebounced = debounce(trackCalculate, 500);
 
-function calculateDTAR(ms) {
-  if (ms < 300) {
-    return 11; // with DT, the AR is capped at 11
-  } if (ms < 1200) {
-    return 11 - (ms - 300) / 150;
-  }
-  return 5 - (ms - 1200) / 120;
-}
-
-function calculateAR(modifiers, ar) {
-  let ms;
-  switch (modifiers & (MOD_HT | MOD_DT | MOD_EZ | MOD_HR)) {
-    case MOD_HR: return Math.min(10, ar * 1.4);
-    case MOD_EZ: return ar / 2;
-
-    case (MOD_DT + MOD_HR): {
-      if (ar < 4) {
-        ms = 1200 - 112 * ar;
-      } else if (ar > 4) {
-        ms = 740 - 140 * (ar - 4);
-      } else {
-        ms = 864 - 124 * (ar - 3);
-      }
-      return calculateDTAR(ms);
-    }
-    case (MOD_DT + MOD_EZ): return calculateDTAR(1200 - 40 * ar);
-
-    case MOD_DT: return calculateDTAR(ar > 5 ? 200 + (11 - ar) * 100 : 800 + (5 - ar) * 80);
-    case MOD_HT: {
-      if (ar === 5) return 0;
-      if (ar < 5) return -1.5 * (5 - ar);
-      if (ar < 8) return 1.875 * ar;
-      return 4 + 1.5 * (ar - 7);
-    }
-
-    case (MOD_HT + MOD_HR): {
-      if (ar > 7) return 8.5;
-      if (ar < 4) {
-        ms = 2700 - 252 * ar;
-      } else if (ar < 5) {
-        ms = 1944 - 279 * (ar - 3);
-      } else {
-        ms = 1665 - 315 * (ar - 4);
-      }
-      if (ar < 6) {
-        return 15 - ms / 120;
-      } if (ar > 7) {
-        return 13 - ms / 150;
-      }
-      return 15 - ms / 120;
-    }
-    case (MOD_HT + MOD_EZ): return -0.75 * (10 - ar);
-
-    default: return ar;
-  }
-}
-
 function calculate() {
   try {
     const {
@@ -218,47 +189,31 @@ function calculate() {
     } = getCalculationSettings();
 
     let bpmMultiplier = 1;
-    if (modifiers & MOD_DT) bpmMultiplier = 1.5;
-    if (modifiers & MOD_HT) bpmMultiplier = 0.75;
+    if (modifiers & ojsama.modbits.dt) bpmMultiplier = 1.5;
+    if (modifiers & ojsama.modbits.ht) bpmMultiplier = 0.75;
     const msPerBeat = cleanBeatmap.timing_points[0].ms_per_beat;
     const bpm = 1 / msPerBeat * 1000 * 60 * bpmMultiplier;
 
     let stars = { total: 0 };
     let pp;
-    if (cleanBeatmap.mode === 0) {
-      stars = new ojsama.diff().calc({ map: cleanBeatmap, mods: modifiers });
 
-      pp = ojsama.ppv2({
-        stars,
-        combo,
-        nmiss: misses,
-        acc_percent: accuracy,
-      });
-      resultDetailsElement.textContent = `Acc: ${Math.round(pp.acc * 10) / 10}, Aim: ${Math.round(pp.aim * 10) / 10}, Speed: ${Math.round(pp.speed * 10) / 10}`;
-    }
-    if (cleanBeatmap.mode === 1) {
-      // todo: implement star rating calculator
-      stars = { total: pageInfo.stars };
-      pp = calculateTaikoPerformance(cleanBeatmap, stars.total, modifiers, combo, misses, accuracy);
-      arElement.parentElement.style.display = 'none';
-      resultDetailsElement.textContent = `Strain: ${Math.round(pp.strain * 10) / 10}, Accuracy: ${Math.round(pp.accuracy * 10) / 10}`;
-      // disable spin out mod as taiko does not have this
-      document.getElementById('mod-so').disabled = true;
-      document.getElementById('mod-so').value = false;
-      document.querySelector("label[for=mod-so]").style.display = 'none';
-      // disable these mods as they are not supported yet (missing star rating calculator)
-      document.getElementById('mod-hr').disabled = true;
-      document.getElementById('mod-dt').disabled = true;
-      document.getElementById('mod-ez').disabled = true;
-      document.getElementById('mod-ht').disabled = true;
-      document.getElementById('mod-hr').value = false;
-      document.getElementById('mod-dt').value = false;
-      document.getElementById('mod-ez').value = false;
-      document.getElementById('mod-ht').value = false;
-      document.querySelector("label[for=mod-hr]").style.display = 'none';
-      document.querySelector("label[for=mod-dt]").style.display = 'none';
-      document.querySelector("label[for=mod-ez]").style.display = 'none';
-      document.querySelector("label[for=mod-ht]").style.display = 'none';
+    switch (cleanBeatmap.mode) {
+      case MODE_STANDARD:
+        document.documentElement.classList.add('mode-standard');
+        const stdResult = std.calculatePerformance(cleanBeatmap, modifiers, combo, misses, accuracy);
+        pp = stdResult.pp;
+        stars = stdResult.stars;
+        arElement.innerText = cleanBeatmap.ar === null ? '?' : Math.round(std.calculateApproachRate(modifiers, cleanBeatmap.ar) * 10) / 10;
+        break;
+
+      case MODE_TAIKO:
+        document.documentElement.classList.add('mode-taiko');
+        // TOOD: implement star rating calculator
+        stars = { total: pageInfo.beatmap.difficulty_rating };
+        pp = taiko.calculatePerformance(cleanBeatmap, stars.total, modifiers, combo, misses, accuracy);
+        break;
+
+      default:
     }
 
     const { beatmapId } = pageInfo;
@@ -278,11 +233,6 @@ function calculate() {
 
     difficultyStarsElement.innerText = stars.total.toFixed(2);
     bpmElement.innerText = Math.round(bpm * 10) / 10;
-    if (cleanBeatmap.ar === null) {
-      arElement.innerText = '?';
-    } else {
-      arElement.innerText = Math.round(calculateAR(modifiers, cleanBeatmap.ar) * 10) / 10;
-    }
 
     setResultText(Math.round(pp.total));
   } catch (error) {
@@ -366,8 +316,7 @@ const getPageInfo = (url, tabId) => new Promise((resolve, reject) => {
     beatmapSetId: null,
     beatmapId: null,
     stars: 0,
-    ncircles: 0,
-    mode: 'osu',
+    beatmap: {},
   };
 
   const match = url.match(BEATMAP_URL_REGEX);
@@ -381,16 +330,20 @@ const getPageInfo = (url, tabId) => new Promise((resolve, reject) => {
     info.beatmapSetId = match[3];
     info.beatmapId = beatmapId;
 
-    chrome.tabs.sendMessage(tabId, { action: 'GET_BEATMAP_STATS' }, (response) => {
-      if (!response) return reject(new Error('Empty response from content script')); // I don't know why but it happened to me (acrylic-style) multiple times
+    chrome.tabs.sendMessage(tabId, { action: 'GET_BEATMAP_STATS', beatmapId }, (response) => {
+      if (!response) {
+        // FIXME(acrylic-style): I don't know why but it happened to me multiple times
+        reject(new Error('Empty response from content script'));
+        return;
+      }
+
       if (response.status === 'ERROR') {
         reject(response.error);
-      } else {
-        const { stars, ncircles } = response;
-        info.stars = stars;
-        info.ncircles = ncircles;
-        resolve(info);
+        return;
       }
+
+      info.beatmap = response.beatmap;
+      resolve(info);
     });
   } else {
     // Fetch data from the content script so we don't need to fetch the page
@@ -398,15 +351,16 @@ const getPageInfo = (url, tabId) => new Promise((resolve, reject) => {
     chrome.tabs.sendMessage(tabId, { action: 'GET_BEATMAP_INFO' }, (response) => {
       if (response.status === 'ERROR') {
         reject(response.error);
-      } else {
-        const { beatmapId, beatmapSetId, stars, ncircles } = response;
-        info.beatmapSetId = beatmapSetId;
-        info.beatmapId = beatmapId;
-        info.stars = stars;
-        info.ncircles = ncircles;
-
-        resolve(info);
+        return;
       }
+
+      const {
+        beatmapId, beatmapSetId,
+      } = response;
+      info.beatmapSetId = beatmapSetId;
+      info.beatmapId = beatmapId;
+
+      resolve(info);
     });
   }
 });
@@ -425,8 +379,8 @@ const processBeatmap = (rawBeatmap) => {
   cleanBeatmap = map;
 
   // Support old beatmaps
-  cleanBeatmap.mode = Number(cleanBeatmap.mode || 0);
-  if (pageInfo.mode === 'taiko') cleanBeatmap.mode = 1;
+  cleanBeatmap.mode = Number(cleanBeatmap.mode || MODE_STANDARD);
+  if (pageInfo.mode === 'taiko') cleanBeatmap.mode = MODE_TAIKO;
   if (pageInfo.mode === 'fruits') cleanBeatmap.mode = 2;
   if (pageInfo.mode === 'mania') cleanBeatmap.mode = 3;
 
