@@ -1,7 +1,6 @@
-require('./changelog.scss')
-const showdown = require('showdown')
+import * as showdown from 'showdown'
+import changeLog from '../CHANGELOG.md'
+import './changelog.scss'
 
 const converter = new showdown.Converter()
-const element = document.getElementById('markdown')
-element.innerHTML = converter.makeHtml(element.innerHTML)
-element.style.display = 'block'
+document.getElementById('markdown').innerHTML = converter.makeHtml(changeLog)
