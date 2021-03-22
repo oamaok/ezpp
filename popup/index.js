@@ -90,10 +90,10 @@ const clamp = (x, min, max) => Math.min(Math.max(x, min), max);
 
 function getMaxCombo() {
   if (!cleanBeatmap) return -1;
-  if (cleanBeatmap.mode === 0) {
+  if (cleanBeatmap.mode === MODE_STANDARD) {
     return cleanBeatmap.max_combo();
   }
-  if (cleanBeatmap.mode === 1) {
+  if (cleanBeatmap.mode === MODE_TAIKO) {
     return pageInfo.beatmap.max_combo;
   }
 
