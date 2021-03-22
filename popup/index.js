@@ -372,12 +372,14 @@ const getPageInfo = (url, tabId) => new Promise((resolve, reject) => {
   info.isOldSite = match[2] !== 'beatmapsets';
 
   if (!info.isOldSite) {
+    // match[5] contains gamemode: osu, taiko, fruits, mania
     const beatmapId = match[6];
 
     info.beatmapSetId = match[3];
     info.beatmapId = beatmapId;
 
     chrome.tabs.sendMessage(tabId, { action: 'GET_BEATMAP_STARS' }, (response) => {
+      if (!response) return reject(new Error('Empty response from content script')); // I don't know why but it happened to me (acrylic-style) multiple times
       if (response.status === 'ERROR') {
         reject(response.error);
       } else {
