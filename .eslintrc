@@ -10,13 +10,14 @@
     "__CHROME__": true,
     "_gaq": true
   },
-  "plugins": ["prettier"],
+  "plugins": ["prettier", "prefer-arrow"],
   "rules": {
     "prettier/prettier": ["error", {
       "printWidth": 80,
       "singleQuote": true,
       "semi": false,
       "quoteProps": "consistent"
-    }]
+    }],
+    "prefer-arrow/prefer-arrow-functions": ["error", {} ]
   }
 }

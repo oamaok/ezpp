@@ -97,13 +97,13 @@ const MODE_TAIKO = 1
 
 const clamp = (x, min, max) => Math.min(Math.max(x, min), max)
 
-function refreshTitleArtist() {
+const refreshTitleArtist = () => {
   const unicode = metadataInOriginalLanguageToggle.checked ? '_unicode' : ''
   titleElement.innerText = cleanBeatmap['title' + unicode]
   artistElement.innerText = cleanBeatmap['artist' + unicode]
 }
 
-function getMaxCombo() {
+const getMaxCombo = () => {
   if (!cleanBeatmap) return -1
   if (cleanBeatmap.mode === MODE_STANDARD) {
     return cleanBeatmap.max_combo()
@@ -115,7 +115,7 @@ function getMaxCombo() {
   return -1
 }
 
-function getCalculationSettings() {
+const getCalculationSettings = () => {
   // Bitwise OR the mods together
   const modifiers = modifierElements.reduce(
     (num, element) => num | (element.checked ? parseInt(element.value) : 0),
@@ -141,7 +141,7 @@ function getCalculationSettings() {
   }
 }
 
-function trackError(error) {
+const trackError = (error) => {
   // Don't report unsupported gamemode errors.
   if (error.message === UNSUPPORTED_GAMEMODE) {
     return
@@ -169,14 +169,14 @@ function trackError(error) {
   _gaq.push(['_trackEvent', 'error', JSON.stringify(report)])
 }
 
-function displayError(error) {
+const displayError = (error) => {
   trackError(error)
   errorElement.innerText = error.message
   containerElement.classList.toggle('error', true)
   containerElement.classList.toggle('preloading', false)
 }
 
-function debounce(fn, timeout) {
+const debounce = (fn, timeout) => {
   let debounceTimeout = null
 
   return (...args) => {
@@ -203,7 +203,7 @@ const trackCalculate = (() => {
 
 const trackCalculateDebounced = debounce(trackCalculate, 500)
 
-function calculate() {
+const calculate = () => {
   try {
     const { modifiers, accuracy, combo, misses } = getCalculationSettings()
 
@@ -282,7 +282,7 @@ const opposingModifiers = [
   ['mod-ht', 'mod-dt'],
 ]
 
-function toggleOpposingModifiers(mod) {
+const toggleOpposingModifiers = (mod) => {
   opposingModifiers.forEach((mods) => {
     const index = mods.indexOf(mod)
     if (index !== -1) {
@@ -292,11 +292,11 @@ function toggleOpposingModifiers(mod) {
   })
 }
 
-function resetCombo() {
+const resetCombo = () => {
   comboElement.value = getMaxCombo()
 }
 
-function onReady([, cover]) {
+const onReady = ([, cover]) => {
   // Display content since we're done loading all the stuff.
   containerElement.classList.toggle('preloading', false)
 

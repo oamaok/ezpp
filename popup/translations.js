@@ -16,7 +16,7 @@ const languageSelector = document.getElementById('language-selector')
 let currentLanguage = 'en'
 const setterHooks = []
 
-export function getTranslation(translationKey, ...args) {
+export const getTranslation = (translationKey, ...args) => {
   const template =
     translations[currentLanguage][translationKey] ||
     translations[FALLBACK_LANGUAGE][translationKey]
@@ -30,11 +30,11 @@ export function getTranslation(translationKey, ...args) {
 }
 
 /* eslint-disable no-param-reassign */
-export function createTextSetter(
+export const createTextSetter = (
   element,
   translationKey,
   property = 'innerText'
-) {
+) => {
   if (setterHooks.some((hook) => hook.element === element)) {
     throw new Error('This element already has a text setter')
   }
@@ -48,13 +48,13 @@ export function createTextSetter(
 
   setterHooks.push(hook)
 
-  return function setText(...args) {
+  return (...args) => {
     hook.args = args
     element[property] = getTranslation(translationKey, ...args)
   }
 }
 
-export function setLanguage(language) {
+export const setLanguage = (language) => {
   document.documentElement.classList.remove(`lang-${currentLanguage}`)
   document.documentElement.classList.add(`lang-${language}`)
 

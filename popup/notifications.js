@@ -10,7 +10,7 @@ const setVersionText = createTextSetter(
   'version-update-message'
 )
 
-function clearNotification() {
+const clearNotification = () => {
   chrome.storage.local.set({
     displayNotification: false,
   })
