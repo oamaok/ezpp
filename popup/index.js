@@ -425,12 +425,12 @@ const initializeExtension = async ({ url: tabUrl, id: tabId }) => {
       headerElement.style.backgroundImage = `url('${backgroundImage.src}')`
     }
 
-    // Display content since we're done loading all the stuff.
-    containerElement.classList.toggle('preloading', false)
-
     // Set header content
     setSongDetails(settings.metadataInOriginalLanguage)
     difficultyNameElement.innerText = cleanBeatmap.version
+
+    // Display content since we're done loading all the stuff.
+    containerElement.classList.toggle('preloading', false)
 
     modifierElements.forEach((modElement) => {
       modElement.addEventListener('click', ({ target }) => {
