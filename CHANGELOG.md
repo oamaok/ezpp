@@ -2,6 +2,9 @@
 
 [google web store](https://chrome.google.com/webstore/detail/ezpp/aimihpobjpagjiakhcpijibnaafdniol) - [firefox add-ons](https://addons.mozilla.org/fi/firefox/addon/ezpp/) - [source code](https://github.com/oamaok/ezpp) - [github](https://github.com/oamaok/ezpp) - [issues](https://github.com/oamaok/ezpp/issues)
 
+## v1.10.2
+ - Fix a bug which caused all the text to disappear in some cases
+
 ## v1.10.1
  - Fix AR calculations (thanks to [acrylic-style](https://github.com/acrylic-style))
  - Add setting to use original song metadata (thanks to [acrylic-style](https://github.com/acrylic-style))

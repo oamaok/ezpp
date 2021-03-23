@@ -26,10 +26,8 @@ let currentLanguage
 const setterHooks = []
 
 export const getTranslation = (translationKey, ...args) => {
-  if (!currentLanguage) return ''
-
   const template =
-    translations[currentLanguage][translationKey] ||
+    translations[currentLanguage || FALLBACK_LANGUAGE][translationKey] ||
     translations[FALLBACK_LANGUAGE][translationKey]
 
   if (!args.length) return template
