@@ -6,6 +6,9 @@ const settingsContainer = document.getElementById('settings')
 const languageSelector = document.getElementById('language-selector')
 const analyticsToggle = document.getElementById('analytics-toggle')
 const darkmodeToggle = document.getElementById('darkmode-toggle')
+const metadataInOriginalLanguageToggle = document.getElementById(
+  'metadata-in-original-language-toggle'
+)
 
 settingsOpenButton.addEventListener('click', () => {
   _gaq.push(['_trackEvent', 'settings', 'open'])
@@ -34,6 +37,19 @@ darkmodeToggle.addEventListener('change', (evt) => {
     darkmode: evt.target.checked,
   })
   document.documentElement.classList.toggle('darkmode', evt.target.checked)
+})
+
+chrome.storage.local.get(
+  ['metadataInOriginalLanguage'],
+  ({ metadataInOriginalLanguage }) => {
+    metadataInOriginalLanguageToggle.checked = metadataInOriginalLanguage
+  }
+)
+
+metadataInOriginalLanguageToggle.addEventListener('change', (evt) => {
+  chrome.storage.local.set({
+    metadataInOriginalLanguage: evt.target.checked,
+  })
 })
 
 languages

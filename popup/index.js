@@ -29,6 +29,15 @@ const errorElement = document.getElementById('error')
 const bpmElement = document.getElementById('bpm')
 const arElement = document.getElementById('ar')
 
+const metadataInOriginalLanguageToggle = document.getElementById(
+  'metadata-in-original-language-toggle'
+)
+
+// user may have been changed "show beatmap metadata in original language"
+document.getElementById('close-settings').addEventListener('click', () => {
+  refreshTitleArtist()
+})
+
 const setResultText = createTextSetter(resultElement, 'result')
 
 versionElement.innerText = `ezpp! v${manifest.version}`
@@ -87,6 +96,12 @@ const MODE_STANDARD = 0
 const MODE_TAIKO = 1
 
 const clamp = (x, min, max) => Math.min(Math.max(x, min), max)
+
+function refreshTitleArtist() {
+  const unicode = metadataInOriginalLanguageToggle.checked ? '_unicode' : ''
+  titleElement.innerText = cleanBeatmap['title' + unicode]
+  artistElement.innerText = cleanBeatmap['artist' + unicode]
+}
 
 function getMaxCombo() {
   if (!cleanBeatmap) return -1
@@ -291,8 +306,7 @@ function onReady([, cover]) {
   }
 
   // Set header text
-  titleElement.innerText = cleanBeatmap.title
-  artistElement.innerText = cleanBeatmap.artist
+  refreshTitleArtist()
   difficultyNameElement.innerText = cleanBeatmap.version
 
   modifierElements.forEach((modElement) => {
