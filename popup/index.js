@@ -290,53 +290,6 @@ const resetCombo = () => {
   comboElement.value = getMaxCombo()
 }
 
-const onReady = (settings, backgroundImage) => {
-  // Display content since we're done loading all the stuff.
-  containerElement.classList.toggle('preloading', false)
-
-  // Set header background
-  if (backgroundImage) {
-    headerElement.style.backgroundImage = `url('${backgroundImage.src}')`
-  }
-
-  // Set header text
-  setSongDetails(settings.metadataInOriginalLanguage)
-  difficultyNameElement.innerText = cleanBeatmap.version
-
-  modifierElements.forEach((modElement) => {
-    modElement.addEventListener('click', ({ target }) => {
-      toggleOpposingModifiers(target.id)
-      calculate()
-    })
-  })
-
-  window.addEventListener('keydown', ({ key = '' }) => {
-    const mod = keyModMap[key.toUpperCase()]
-
-    if (mod) {
-      const element = modifierElements.find(({ id }) => id === mod)
-      element.checked = !element.checked
-
-      toggleOpposingModifiers(mod)
-      calculate()
-    }
-  })
-
-  accuracyElement.addEventListener('input', calculate)
-  comboElement.addEventListener('input', calculate)
-  missesElement.addEventListener('input', calculate)
-
-  fcResetButton.addEventListener('click', () => {
-    resetCombo()
-    calculate()
-  })
-
-  // Set the combo to the max combo by default
-  resetCombo()
-
-  calculate()
-}
-
 const fetchBeatmapById = (id) =>
   fetch(`https://osu.ppy.sh/osu/${id}`, {
     credentials: 'include',
@@ -467,7 +420,50 @@ const initializeExtension = async ({ url: tabUrl, id: tabId }) => {
       fetchBeatmapBackground(pageInfo.beatmapSetId),
     ])
 
-    onReady(settings, backgroundImage)
+    // Set header background
+    if (backgroundImage) {
+      headerElement.style.backgroundImage = `url('${backgroundImage.src}')`
+    }
+
+    // Display content since we're done loading all the stuff.
+    containerElement.classList.toggle('preloading', false)
+
+    // Set header content
+    setSongDetails(settings.metadataInOriginalLanguage)
+    difficultyNameElement.innerText = cleanBeatmap.version
+
+    modifierElements.forEach((modElement) => {
+      modElement.addEventListener('click', ({ target }) => {
+        toggleOpposingModifiers(target.id)
+        calculate()
+      })
+    })
+
+    window.addEventListener('keydown', ({ key = '' }) => {
+      const mod = keyModMap[key.toUpperCase()]
+
+      if (mod) {
+        const element = modifierElements.find(({ id }) => id === mod)
+        element.checked = !element.checked
+
+        toggleOpposingModifiers(mod)
+        calculate()
+      }
+    })
+
+    accuracyElement.addEventListener('input', calculate)
+    comboElement.addEventListener('input', calculate)
+    missesElement.addEventListener('input', calculate)
+
+    fcResetButton.addEventListener('click', () => {
+      resetCombo()
+      calculate()
+    })
+
+    // Set the combo to the max combo by default
+    resetCombo()
+
+    calculate()
   } catch (err) {
     displayError(err)
   }
