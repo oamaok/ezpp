@@ -1,7 +1,18 @@
 /* eslint-disable global-require */
-export const languages = require('../translations/languages.json')
+import languages from '../translations/languages.json'
+export { languages }
 
 const FALLBACK_LANGUAGE = 'en'
+
+const languageSelector = document.getElementById('language-selector')
+languages
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .forEach((language) => {
+    const option = document.createElement('option')
+    option.setAttribute('value', language.code)
+    option.innerText = language.name
+    languageSelector.appendChild(option)
+  })
 
 export const translations = languages.reduce(
   (acc, lang) => ({
@@ -11,12 +22,12 @@ export const translations = languages.reduce(
   {}
 )
 
-const languageSelector = document.getElementById('language-selector')
-
-let currentLanguage = 'en'
+let currentLanguage
 const setterHooks = []
 
-export function getTranslation(translationKey, ...args) {
+export const getTranslation = (translationKey, ...args) => {
+  if (!currentLanguage) return ''
+
   const template =
     translations[currentLanguage][translationKey] ||
     translations[FALLBACK_LANGUAGE][translationKey]
@@ -30,11 +41,11 @@ export function getTranslation(translationKey, ...args) {
 }
 
 /* eslint-disable no-param-reassign */
-export function createTextSetter(
+export const createTextSetter = (
   element,
   translationKey,
   property = 'innerText'
-) {
+) => {
   if (setterHooks.some((hook) => hook.element === element)) {
     throw new Error('This element already has a text setter')
   }
@@ -48,19 +59,21 @@ export function createTextSetter(
 
   setterHooks.push(hook)
 
-  return function setText(...args) {
+  return (...args) => {
     hook.args = args
     element[property] = getTranslation(translationKey, ...args)
   }
 }
 
-export function setLanguage(language) {
+export const setLanguage = (language) => {
+  if (language === currentLanguage) return
+
+  if (currentLanguage) _gaq.push(['_trackEvent', 'language', language])
+
   document.documentElement.classList.remove(`lang-${currentLanguage}`)
   document.documentElement.classList.add(`lang-${language}`)
 
   currentLanguage = language
-  languageSelector.value = language
-  chrome.storage.local.set({ language })
 
   setterHooks.forEach(({ element, translationKey, property, args }) => {
     element[property] = getTranslation(translationKey, ...args)

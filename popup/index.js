@@ -1,12 +1,13 @@
 import ojsama from 'ojsama'
+
 import manifest from '../static/manifest.json'
 import { setLanguage, createTextSetter } from './translations'
+import { loadSettings, onSettingsChange } from './settings'
 import { BEATMAP_URL_REGEX } from '../common/constants'
+import { loadAnalytics } from './analytics'
 import * as taiko from './calculators/taiko'
 import * as std from './calculators/standard'
 
-require('./analytics')
-require('./settings')
 require('./notifications')
 
 const FETCH_ATTEMPTS = 3
@@ -28,15 +29,6 @@ const resultElement = document.getElementById('result')
 const errorElement = document.getElementById('error')
 const bpmElement = document.getElementById('bpm')
 const arElement = document.getElementById('ar')
-
-const metadataInOriginalLanguageToggle = document.getElementById(
-  'metadata-in-original-language-toggle'
-)
-
-// user may have been changed "show beatmap metadata in original language"
-document.getElementById('close-settings').addEventListener('click', () => {
-  refreshTitleArtist()
-})
 
 const setResultText = createTextSetter(resultElement, 'result')
 
@@ -97,13 +89,15 @@ const MODE_TAIKO = 1
 
 const clamp = (x, min, max) => Math.min(Math.max(x, min), max)
 
-function refreshTitleArtist() {
-  const unicode = metadataInOriginalLanguageToggle.checked ? '_unicode' : ''
+const setSongDetails = (metadataInOriginalLanguage) => {
+  if (!cleanBeatmap) return
+
+  const unicode = metadataInOriginalLanguage ? '_unicode' : ''
   titleElement.innerText = cleanBeatmap['title' + unicode]
   artistElement.innerText = cleanBeatmap['artist' + unicode]
 }
 
-function getMaxCombo() {
+const getMaxCombo = () => {
   if (!cleanBeatmap) return -1
   if (cleanBeatmap.mode === MODE_STANDARD) {
     return cleanBeatmap.max_combo()
@@ -115,7 +109,7 @@ function getMaxCombo() {
   return -1
 }
 
-function getCalculationSettings() {
+const getCalculationSettings = () => {
   // Bitwise OR the mods together
   const modifiers = modifierElements.reduce(
     (num, element) => num | (element.checked ? parseInt(element.value) : 0),
@@ -141,7 +135,7 @@ function getCalculationSettings() {
   }
 }
 
-function trackError(error) {
+const trackError = (error) => {
   // Don't report unsupported gamemode errors.
   if (error.message === UNSUPPORTED_GAMEMODE) {
     return
@@ -169,14 +163,14 @@ function trackError(error) {
   _gaq.push(['_trackEvent', 'error', JSON.stringify(report)])
 }
 
-function displayError(error) {
+const displayError = (error) => {
   trackError(error)
   errorElement.innerText = error.message
   containerElement.classList.toggle('error', true)
   containerElement.classList.toggle('preloading', false)
 }
 
-function debounce(fn, timeout) {
+const debounce = (fn, timeout) => {
   let debounceTimeout = null
 
   return (...args) => {
@@ -203,7 +197,7 @@ const trackCalculate = (() => {
 
 const trackCalculateDebounced = debounce(trackCalculate, 500)
 
-function calculate() {
+const calculate = () => {
   try {
     const { modifiers, accuracy, combo, misses } = getCalculationSettings()
 
@@ -282,7 +276,7 @@ const opposingModifiers = [
   ['mod-ht', 'mod-dt'],
 ]
 
-function toggleOpposingModifiers(mod) {
+const toggleOpposingModifiers = (mod) => {
   opposingModifiers.forEach((mods) => {
     const index = mods.indexOf(mod)
     if (index !== -1) {
@@ -292,55 +286,8 @@ function toggleOpposingModifiers(mod) {
   })
 }
 
-function resetCombo() {
+const resetCombo = () => {
   comboElement.value = getMaxCombo()
-}
-
-function onReady([, cover]) {
-  // Display content since we're done loading all the stuff.
-  containerElement.classList.toggle('preloading', false)
-
-  // Set header background
-  if (cover) {
-    headerElement.style.backgroundImage = `url('${cover.src}')`
-  }
-
-  // Set header text
-  refreshTitleArtist()
-  difficultyNameElement.innerText = cleanBeatmap.version
-
-  modifierElements.forEach((modElement) => {
-    modElement.addEventListener('click', ({ target }) => {
-      toggleOpposingModifiers(target.id)
-      calculate()
-    })
-  })
-
-  window.addEventListener('keydown', ({ key = '' }) => {
-    const mod = keyModMap[key.toUpperCase()]
-
-    if (mod) {
-      const element = modifierElements.find(({ id }) => id === mod)
-      element.checked = !element.checked
-
-      toggleOpposingModifiers(mod)
-      calculate()
-    }
-  })
-
-  accuracyElement.addEventListener('input', calculate)
-  comboElement.addEventListener('input', calculate)
-  missesElement.addEventListener('input', calculate)
-
-  fcResetButton.addEventListener('click', () => {
-    resetCombo()
-    calculate()
-  })
-
-  // Set the combo to the max combo by default
-  resetCombo()
-
-  calculate()
 }
 
 const fetchBeatmapById = (id) =>
@@ -444,6 +391,84 @@ const fetchBeatmapBackground = (beatmapSetId) =>
     cover.onabort = () => resolve()
   })
 
+const handleSettings = (settings) => {
+  document.documentElement.classList.toggle('darkmode', settings.darkmode)
+
+  setLanguage(settings.language)
+
+  setSongDetails(settings.metadataInOriginalLanguage)
+
+  if (settings.analytics) {
+    loadAnalytics()
+  }
+}
+
+const initializeExtension = async ({ url: tabUrl, id: tabId }) => {
+  try {
+    const settings = await loadSettings()
+
+    handleSettings(settings)
+    onSettingsChange(handleSettings)
+
+    currentUrl = tabUrl
+    pageInfo = await getPageInfo(tabUrl, tabId)
+
+    const [, backgroundImage] = await Promise.all([
+      attemptToFetchBeatmap(pageInfo.beatmapId, FETCH_ATTEMPTS).then(
+        processBeatmap
+      ),
+      fetchBeatmapBackground(pageInfo.beatmapSetId),
+    ])
+
+    // Set header background
+    if (backgroundImage) {
+      headerElement.style.backgroundImage = `url('${backgroundImage.src}')`
+    }
+
+    // Set header content
+    setSongDetails(settings.metadataInOriginalLanguage)
+    difficultyNameElement.innerText = cleanBeatmap.version
+
+    // Display content since we're done loading all the stuff.
+    containerElement.classList.toggle('preloading', false)
+
+    modifierElements.forEach((modElement) => {
+      modElement.addEventListener('click', ({ target }) => {
+        toggleOpposingModifiers(target.id)
+        calculate()
+      })
+    })
+
+    window.addEventListener('keydown', ({ key = '' }) => {
+      const mod = keyModMap[key.toUpperCase()]
+
+      if (mod) {
+        const element = modifierElements.find(({ id }) => id === mod)
+        element.checked = !element.checked
+
+        toggleOpposingModifiers(mod)
+        calculate()
+      }
+    })
+
+    accuracyElement.addEventListener('input', calculate)
+    comboElement.addEventListener('input', calculate)
+    missesElement.addEventListener('input', calculate)
+
+    fcResetButton.addEventListener('click', () => {
+      resetCombo()
+      calculate()
+    })
+
+    // Set the combo to the max combo by default
+    resetCombo()
+
+    calculate()
+  } catch (err) {
+    displayError(err)
+  }
+}
+
 // Track errors with GA
 window.addEventListener('error', trackError)
 
@@ -452,32 +477,12 @@ if (__FIREFOX__) {
   document.documentElement.classList.toggle('firefox', true)
 }
 
-chrome.storage.local.get(['language'], ({ language }) => {
-  setLanguage(language || 'en')
-})
-
-// Init the extension.
 chrome.tabs.query(
   {
     active: true, // Select active tabs
     lastFocusedWindow: true, // In the current window
   },
   ([tab]) => {
-    const { url, id } = tab
-    currentUrl = url
-
-    getPageInfo(url, id)
-      .then((info) => {
-        pageInfo = info
-
-        return Promise.all([
-          attemptToFetchBeatmap(pageInfo.beatmapId, FETCH_ATTEMPTS).then(
-            processBeatmap
-          ),
-          fetchBeatmapBackground(pageInfo.beatmapSetId),
-        ])
-      })
-      .then(onReady)
-      .catch(displayError)
+    initializeExtension(tab)
   }
 )

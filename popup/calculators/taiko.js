@@ -4,7 +4,7 @@ export const GREAT_MIN = 50
 export const GREAT_MID = 35
 export const GREAT_MAX = 20
 
-export function difficltyRange(difficulty, min, mid, max) {
+export const difficltyRange = (difficulty, min, mid, max) => {
   if (difficulty > 5) return mid + ((max - mid) * (difficulty - 5)) / 5
   if (difficulty < 5) return mid - ((mid - min) * (5 - difficulty)) / 5
   return mid
@@ -16,14 +16,14 @@ export function difficltyRange(difficulty, min, mid, max) {
  * @param {{ total: number }} stars
  * @param {ojsama.modbits} mods
  */
-export function calculatePerformance(
+export const calculatePerformance = (
   map,
   stars,
   mods,
   combo,
   misses,
   accuracy
-) {
+) => {
   let multiplier = 1.1
   if (mods & ojsama.modbits.nf) multiplier *= 0.9
   if (mods & ojsama.modbits.hd) multiplier *= 1.1
@@ -47,13 +47,13 @@ export function calculatePerformance(
   return { total, strain: strainValue, accuracy: accuracyValue }
 }
 
-export function calculateStrainPerformance(
+export const calculateStrainPerformance = (
   stars,
   mods,
   misses,
   accuracy,
   combo
-) {
+) => {
   let strainValue =
     Math.pow(5.0 * Math.max(1.0, stars / 0.0075) - 4.0, 2.0) / 100000.0
   const lengthBonus = 1 + 0.1 * Math.min(1.0, combo / 1500.0)
@@ -64,7 +64,11 @@ export function calculateStrainPerformance(
   return strainValue * accuracy
 }
 
-export function calculateAccuracyPerformance(greatHitWindow, accuracy, combo) {
+export const calculateAccuracyPerformance = (
+  greatHitWindow,
+  accuracy,
+  combo
+) => {
   if (greatHitWindow <= 0) return 0
   const accValue =
     Math.pow(150.0 / greatHitWindow, 1.1) * Math.pow(accuracy, 15) * 22.0
