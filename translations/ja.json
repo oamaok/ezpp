@@ -18,5 +18,6 @@
   "settings": "設定",
   "analytics": "匿名のアナリティクスデータを送信",
   "result": "およそ {0}pp.",
-  "darkmode": "ダークモードを有効"
+  "darkmode": "ダークモードを有効",
+  "metadata-in-original-language": "ビートマップのメタデータを元の言語で表示"
 }
