@@ -8,6 +8,7 @@ const isProduction = process.env.NODE_ENV === 'production'
 module.exports = {
   entry: {
     popup: [
+      'regenerator-runtime/runtime',
       path.resolve(__dirname, 'popup/index.js'),
       path.resolve(__dirname, 'popup/styles/main.sass'),
     ],
