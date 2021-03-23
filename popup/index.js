@@ -1,12 +1,12 @@
 import ojsama from 'ojsama'
 import manifest from '../static/manifest.json'
 import { setLanguage, createTextSetter } from './translations'
+import { loadSettings, onSettingsChange } from './settings'
 import { BEATMAP_URL_REGEX } from '../common/constants'
 import * as taiko from './calculators/taiko'
 import * as std from './calculators/standard'
 
 require('./analytics')
-require('./settings')
 require('./notifications')
 
 const FETCH_ATTEMPTS = 3
@@ -28,15 +28,6 @@ const resultElement = document.getElementById('result')
 const errorElement = document.getElementById('error')
 const bpmElement = document.getElementById('bpm')
 const arElement = document.getElementById('ar')
-
-const metadataInOriginalLanguageToggle = document.getElementById(
-  'metadata-in-original-language-toggle'
-)
-
-// user may have been changed "show beatmap metadata in original language"
-document.getElementById('close-settings').addEventListener('click', () => {
-  refreshTitleArtist()
-})
 
 const setResultText = createTextSetter(resultElement, 'result')
 
@@ -97,8 +88,8 @@ const MODE_TAIKO = 1
 
 const clamp = (x, min, max) => Math.min(Math.max(x, min), max)
 
-const refreshTitleArtist = () => {
-  const unicode = metadataInOriginalLanguageToggle.checked ? '_unicode' : ''
+const setSongDetails = (metadataInOriginalLanguage) => {
+  const unicode = metadataInOriginalLanguage ? '_unicode' : ''
   titleElement.innerText = cleanBeatmap['title' + unicode]
   artistElement.innerText = cleanBeatmap['artist' + unicode]
 }
@@ -296,17 +287,17 @@ const resetCombo = () => {
   comboElement.value = getMaxCombo()
 }
 
-const onReady = ([, cover]) => {
+const onReady = (settings, backgroundImage) => {
   // Display content since we're done loading all the stuff.
   containerElement.classList.toggle('preloading', false)
 
   // Set header background
-  if (cover) {
-    headerElement.style.backgroundImage = `url('${cover.src}')`
+  if (backgroundImage) {
+    headerElement.style.backgroundImage = `url('${backgroundImage.src}')`
   }
 
   // Set header text
-  refreshTitleArtist()
+  setSongDetails(settings.metadataInOriginalLanguage)
   difficultyNameElement.innerText = cleanBeatmap.version
 
   modifierElements.forEach((modElement) => {
@@ -444,6 +435,35 @@ const fetchBeatmapBackground = (beatmapSetId) =>
     cover.onabort = () => resolve()
   })
 
+const initializeExtension = async ({ url: tabUrl, id: tabId }) => {
+  try {
+    const settings = await loadSettings()
+
+    setLanguage(settings.language)
+    document.documentElement.classList.toggle('darkmode', settings.darkmode)
+
+    onSettingsChange((settings) => {
+      document.documentElement.classList.toggle('darkmode', settings.darkmode)
+      setLanguage(settings.language)
+      setSongDetails(settings.metadataInOriginalLanguage)
+    })
+
+    currentUrl = tabUrl
+    pageInfo = await getPageInfo(tabUrl, tabId)
+
+    const [, backgroundImage] = await Promise.all([
+      attemptToFetchBeatmap(pageInfo.beatmapId, FETCH_ATTEMPTS).then(
+        processBeatmap
+      ),
+      fetchBeatmapBackground(pageInfo.beatmapSetId),
+    ])
+
+    onReady(settings, backgroundImage)
+  } catch (err) {
+    displayError(err)
+  }
+}
+
 // Track errors with GA
 window.addEventListener('error', trackError)
 
@@ -452,32 +472,12 @@ if (__FIREFOX__) {
   document.documentElement.classList.toggle('firefox', true)
 }
 
-chrome.storage.local.get(['language'], ({ language }) => {
-  setLanguage(language || 'en')
-})
-
-// Init the extension.
 chrome.tabs.query(
   {
     active: true, // Select active tabs
     lastFocusedWindow: true, // In the current window
   },
   ([tab]) => {
-    const { url, id } = tab
-    currentUrl = url
-
-    getPageInfo(url, id)
-      .then((info) => {
-        pageInfo = info
-
-        return Promise.all([
-          attemptToFetchBeatmap(pageInfo.beatmapId, FETCH_ATTEMPTS).then(
-            processBeatmap
-          ),
-          fetchBeatmapBackground(pageInfo.beatmapSetId),
-        ])
-      })
-      .then(onReady)
-      .catch(displayError)
+    initializeExtension(tab)
   }
 )

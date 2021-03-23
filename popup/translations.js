@@ -1,7 +1,18 @@
 /* eslint-disable global-require */
-export const languages = require('../translations/languages.json')
+import languages from '../translations/languages.json'
+export { languages }
 
 const FALLBACK_LANGUAGE = 'en'
+
+const languageSelector = document.getElementById('language-selector')
+languages
+  .sort((a, b) => a.name.localeCompare(b.name))
+  .forEach((language) => {
+    const option = document.createElement('option')
+    option.setAttribute('value', language.code)
+    option.innerText = language.name
+    languageSelector.appendChild(option)
+  })
 
 export const translations = languages.reduce(
   (acc, lang) => ({
@@ -11,12 +22,12 @@ export const translations = languages.reduce(
   {}
 )
 
-const languageSelector = document.getElementById('language-selector')
-
-let currentLanguage = 'en'
+let currentLanguage
 const setterHooks = []
 
 export const getTranslation = (translationKey, ...args) => {
+  if (!currentLanguage) return ''
+
   const template =
     translations[currentLanguage][translationKey] ||
     translations[FALLBACK_LANGUAGE][translationKey]
@@ -55,12 +66,14 @@ export const createTextSetter = (
 }
 
 export const setLanguage = (language) => {
+  if (language === currentLanguage) return
+
+  if (currentLanguage) _gaq.push(['_trackEvent', 'language', language])
+
   document.documentElement.classList.remove(`lang-${currentLanguage}`)
   document.documentElement.classList.add(`lang-${language}`)
 
   currentLanguage = language
-  languageSelector.value = language
-  chrome.storage.local.set({ language })
 
   setterHooks.forEach(({ element, translationKey, property, args }) => {
     element[property] = getTranslation(translationKey, ...args)

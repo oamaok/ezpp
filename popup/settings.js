@@ -1,14 +1,75 @@
-import { setLanguage, languages } from './translations'
+const SETTINGS = [
+  {
+    key: 'language',
+    element: document.getElementById('language-selector'),
+    type: 'string',
+    default: 'en',
+  },
+  {
+    key: 'metadataInOriginalLanguage',
+    element: document.getElementById('metadata-in-original-language-toggle'),
+    type: 'boolean',
+    default: false,
+  },
+  {
+    key: 'darkmode',
+    element: document.getElementById('darkmode-toggle'),
+    type: 'boolean',
+    default: false,
+  },
+  {
+    key: 'analytics',
+    element: document.getElementById('analytics-toggle'),
+    type: 'boolean',
+    default: !__FIREFOX__,
+  },
+]
+
+let currentSettings = {}
+const settingsChangeListeners = []
+
+SETTINGS.forEach((setting) => {
+  // Initialize currentSettings to default values
+  currentSettings[setting.key] = setting.default
+
+  // Add event listeneres for all the setting elements
+  setting.element.addEventListener('change', (evt) => {
+    let value
+    if (setting.type === 'boolean') value = evt.target.checked
+    if (setting.type === 'string') value = evt.target.value
+
+    chrome.storage.local.set({ [setting.key]: value })
+    currentSettings[setting.key] = value
+
+    settingsChangeListeners.forEach((fn) => fn(currentSettings))
+  })
+})
+
+export const loadSettings = async () => {
+  const keys = SETTINGS.map((setting) => setting.key)
+  currentSettings = await new Promise((resolve) =>
+    chrome.storage.local.get(keys, (storedSettings) => {
+      const settings = {}
+      SETTINGS.forEach((setting) => {
+        const value = storedSettings[setting.key] ?? settings.default
+        if (setting.type === 'string') setting.element.value = value
+        if (setting.type === 'boolean') setting.element.checked = value
+        settings[setting.key] = value
+      })
+      resolve(settings)
+    })
+  )
+
+  return currentSettings
+}
+
+export const onSettingsChange = (fn) => {
+  settingsChangeListeners.push(fn)
+}
 
 const settingsOpenButton = document.getElementById('open-settings')
 const settingsCloseButton = document.getElementById('close-settings')
 const settingsContainer = document.getElementById('settings')
-const languageSelector = document.getElementById('language-selector')
-const analyticsToggle = document.getElementById('analytics-toggle')
-const darkmodeToggle = document.getElementById('darkmode-toggle')
-const metadataInOriginalLanguageToggle = document.getElementById(
-  'metadata-in-original-language-toggle'
-)
 
 settingsOpenButton.addEventListener('click', () => {
   _gaq.push(['_trackEvent', 'settings', 'open'])
@@ -18,50 +79,4 @@ settingsOpenButton.addEventListener('click', () => {
 settingsCloseButton.addEventListener('click', () => {
   _gaq.push(['_trackEvent', 'settings', 'close'])
   settingsContainer.classList.toggle('open', false)
-})
-
-// Initial state of the toggle is set in analytics.js
-analyticsToggle.addEventListener('change', (evt) => {
-  chrome.storage.local.set({
-    analytics: evt.target.checked,
-  })
-})
-
-chrome.storage.local.get(['darkmode'], ({ darkmode }) => {
-  document.documentElement.classList.toggle('darkmode', !!darkmode)
-  darkmodeToggle.checked = darkmode
-})
-
-darkmodeToggle.addEventListener('change', (evt) => {
-  chrome.storage.local.set({
-    darkmode: evt.target.checked,
-  })
-  document.documentElement.classList.toggle('darkmode', evt.target.checked)
-})
-
-chrome.storage.local.get(
-  ['metadataInOriginalLanguage'],
-  ({ metadataInOriginalLanguage }) => {
-    metadataInOriginalLanguageToggle.checked = metadataInOriginalLanguage
-  }
-)
-
-metadataInOriginalLanguageToggle.addEventListener('change', (evt) => {
-  chrome.storage.local.set({
-    metadataInOriginalLanguage: evt.target.checked,
-  })
-})
-
-languages
-  .sort((a, b) => a.name.localeCompare(b.name))
-  .forEach((language) => {
-    const option = document.createElement('option')
-    option.setAttribute('value', language.code)
-    option.innerText = language.name
-    languageSelector.appendChild(option)
-  })
-
-languageSelector.addEventListener('change', (evt) => {
-  _gaq.push(['_trackEvent', 'language', evt.target.value])
-  setLanguage(evt.target.value)
 })
