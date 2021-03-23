@@ -1,12 +1,13 @@
 import ojsama from 'ojsama'
+
 import manifest from '../static/manifest.json'
 import { setLanguage, createTextSetter } from './translations'
 import { loadSettings, onSettingsChange } from './settings'
 import { BEATMAP_URL_REGEX } from '../common/constants'
+import { loadAnalytics } from './analytics'
 import * as taiko from './calculators/taiko'
 import * as std from './calculators/standard'
 
-require('./analytics')
 require('./notifications')
 
 const FETCH_ATTEMPTS = 3
@@ -89,6 +90,8 @@ const MODE_TAIKO = 1
 const clamp = (x, min, max) => Math.min(Math.max(x, min), max)
 
 const setSongDetails = (metadataInOriginalLanguage) => {
+  if (!cleanBeatmap) return
+
   const unicode = metadataInOriginalLanguage ? '_unicode' : ''
   titleElement.innerText = cleanBeatmap['title' + unicode]
   artistElement.innerText = cleanBeatmap['artist' + unicode]
@@ -435,18 +438,24 @@ const fetchBeatmapBackground = (beatmapSetId) =>
     cover.onabort = () => resolve()
   })
 
+const handleSettings = (settings) => {
+  document.documentElement.classList.toggle('darkmode', settings.darkmode)
+
+  setLanguage(settings.language)
+
+  setSongDetails(settings.metadataInOriginalLanguage)
+
+  if (settings.analytics) {
+    loadAnalytics()
+  }
+}
+
 const initializeExtension = async ({ url: tabUrl, id: tabId }) => {
   try {
     const settings = await loadSettings()
 
-    setLanguage(settings.language)
-    document.documentElement.classList.toggle('darkmode', settings.darkmode)
-
-    onSettingsChange((settings) => {
-      document.documentElement.classList.toggle('darkmode', settings.darkmode)
-      setLanguage(settings.language)
-      setSongDetails(settings.metadataInOriginalLanguage)
-    })
+    handleSettings(settings)
+    onSettingsChange(handleSettings)
 
     currentUrl = tabUrl
     pageInfo = await getPageInfo(tabUrl, tabId)
