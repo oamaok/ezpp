@@ -1,14 +1,13 @@
 import { HitType } from './hitType'
+import { ObjectType } from './objectType'
+import ParsedTaikoObject from './parsedTaikoObject'
+import ParsedTaikoResult from './parsedTaikoResult'
 
 // x,y,time,type,hit sounds
 export const REGEX = /^(\d+),(\d+),(\d+),(\d+),(\d+)/
 
-/**
- * @param {string} rawBeatmap
- * @returns objects
- */
-export const feed = (rawBeatmap) => {
-  const result = []
+export const feed = (rawBeatmap: string): ParsedTaikoResult => {
+  const objects = [] as Array<ParsedTaikoObject>
   let doRead = false
   for (const s of rawBeatmap.split('\n')) {
     if (s.startsWith('[HitObjects]')) {
@@ -19,16 +18,16 @@ export const feed = (rawBeatmap) => {
     if (!REGEX.test(s)) continue
     const match = s.match(REGEX)
     try {
-      const time = match[3]
-      const type = match[4]
-      const hitSounds = match[5]
+      const time: number = parseInt(match[3])
+      const type: number = parseInt(match[4])
+      const hitSounds: number = parseInt(match[5])
       /*
        * type (ObjectType, equivalent to ojsama.)
        * & 1 = circle
        * & 2 = slider
        * & 12 = spinner
        *
-       * hs
+       * hitSounds
        * 0 = red (centre)
        * 4 = big red (centre)
        * 8 = blue (rim)
@@ -39,16 +38,19 @@ export const feed = (rawBeatmap) => {
        * & 4 = big
        * & 8 = blue (kats) (rim)
        */
-      result.push({
-        time,
-        type,
-        hitSounds,
-        hitType: hitSounds & 8 ? HitType.Rim : HitType.Centre,
-      })
+      objects.push(
+        new ParsedTaikoObject(
+          time,
+          type,
+          hitSounds,
+          ObjectType.fromNumber(type),
+          hitSounds & 8 ? HitType.Rim : HitType.Centre
+        )
+      )
     } catch (e) {
       console.error('Failed to read line "' + s + '"', match)
       throw new Error('Error trying to read "' + s + '"')
     }
   }
-  return result
+  return new ParsedTaikoResult(objects)
 }

@@ -1,6 +1,7 @@
 {
   "extends": ["prettier"],
-  "parser": "@babel/eslint-parser",
+  //"parser": "@babel/eslint-parser",
+  "parser": "@typescript-eslint/parser",
   "env": {
     "webextensions": true,
     "browser": true,
@@ -10,7 +11,7 @@
     "__CHROME__": true,
     "_gaq": true
   },
-  "plugins": ["prettier", "prefer-arrow"],
+  "plugins": ["prettier", "prefer-arrow", "@typescript-eslint"],
   "rules": {
     "prettier/prettier": ["error", {
       "printWidth": 80,

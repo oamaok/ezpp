@@ -9,6 +9,7 @@ import * as taiko from './calculators/taiko'
 import * as std from './calculators/standard'
 import * as taikoReader from './objects/taiko/taikoReader'
 import TaikoDifficultyAttributes from './objects/taiko/taikoDifficultyAttributes'
+import ParsedTaikoResult from './objects/taiko/parsedTaikoResult'
 
 require('./notifications')
 
@@ -40,9 +41,9 @@ versionElement.innerText = `ezpp! v${manifest.version}`
 let currentUrl = null
 let cleanBeatmap = null
 /**
- * @type {{ time: number, type: number, hitSounds: number, hitType: number }[]}
+ * @type {ParsedTaikoResult}
  */
-let taikoObjects = null
+let parsedTaikoResult = null
 let pageInfo = {
   isOldSite: null,
   beatmapSetId: null,
@@ -259,7 +260,13 @@ const calculate = () => {
           stars = { total: pageInfo.convert.difficulty_rating }
           attr.starRating = pageInfo.convert.difficulty_rating
         } else {
-          attr = taiko.calculate(cleanBeatmap, modifiers, taikoObjects)
+          attr = taiko.calculate(
+            cleanBeatmap,
+            modifiers,
+            parsedTaikoResult,
+            !!pageInfo.convert
+          )
+          console.log(attr)
           stars = { total: attr.starRating }
         }
         pp = taiko.calculatePerformance(
@@ -397,7 +404,7 @@ const attemptToFetchBeatmap = (id, attempts) =>
 
 const processBeatmap = (rawBeatmap) => {
   const { map } = new ojsama.parser().feed(rawBeatmap)
-  taikoObjects = taikoReader.feed(rawBeatmap)
+  parsedTaikoResult = taikoReader.feed(rawBeatmap)
 
   cleanBeatmap = map
 

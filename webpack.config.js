@@ -31,7 +31,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.[tj]s$/,
         exclude: /(node_modules|bower_components)/,
         use: 'babel-loader',
       },
@@ -76,6 +76,6 @@ module.exports = {
   ],
 
   resolve: {
-    extensions: ['.js', '.sass', '.scss'],
+    extensions: ['.ts', '.js', '.sass', '.scss'],
   },
 }

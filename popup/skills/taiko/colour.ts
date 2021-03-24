@@ -1,4 +1,4 @@
-import DifficultyHitObject from '../../objects/difficultyHitObject'
+import { HitType } from '../../objects/taiko/hitType'
 import { ObjectType } from '../../objects/taiko/objectType'
 import TaikoDifficultyHitObject from '../../objects/taiko/taikoDifficultyHitObject'
 import LimitedCapacityQueue from '../../util/limitedCapacityQueue'
@@ -6,24 +6,22 @@ import Skill from '../skill'
 
 export const MONO_HISTORY_MAX_LENGTH = 5
 
-export default class Colour extends Skill {
-  constructor(mods) {
+export default class Colour extends Skill<TaikoDifficultyHitObject> {
+  public monoHistory = new LimitedCapacityQueue<number>(MONO_HISTORY_MAX_LENGTH)
+  public previousHitType: HitType = null
+  public currentMonoLength = 0
+
+  public constructor(mods: number) {
     super(mods)
     this.skillMultiplier = 1.0
     this.strainDecayBase = 0.4
-    this.monoHistory = new LimitedCapacityQueue(MONO_HISTORY_MAX_LENGTH) // LimitedCapacityQueue<number>
-    this.previousHitType = null
-    this.currentMonoLength = 0
   }
 
-  /**
-   * @param {DifficultyHitObject} current
-   */
-  strainValueOf(current) {
+  public strainValueOf(current: TaikoDifficultyHitObject): number {
     if (
       !(
-        current.lastObject.type & ObjectType.Hit &&
-        current.baseObject.type & ObjectType.Hit &&
+        current.lastObject.objectType === ObjectType.Hit &&
+        current.baseObject.objectType === ObjectType.Hit &&
         current.deltaTime < 1000
       )
     ) {
@@ -34,13 +32,9 @@ export default class Colour extends Skill {
       return 0.0
     }
     let objectStrain = 0.0
-    /**
-     * @type {TaikoDifficultyHitObject}
-     */
-    const taikoCurrent = current
     if (
       this.previousHitType != null &&
-      taikoCurrent.hitType !== this.previousHitType
+      current.hitType !== this.previousHitType
     ) {
       objectStrain = 1.0
       if (this.monoHistory.count < 2) {
@@ -58,11 +52,11 @@ export default class Colour extends Skill {
     } else {
       this.currentMonoLength += 1
     }
-    this.previousHitType = taikoCurrent.hitType
+    this.previousHitType = current.hitType
     return objectStrain
   }
 
-  repetitionPenalties() {
+  private repetitionPenalties(): number {
     const mostRecentPatternsToCompare = 2
     let penalty = 1.0
     this.monoHistory.enqueue(this.currentMonoLength)
@@ -81,7 +75,10 @@ export default class Colour extends Skill {
     return penalty
   }
 
-  isSamePattern(start, mostRecentPatternsToCompare) {
+  private isSamePattern(
+    start: number,
+    mostRecentPatternsToCompare: number
+  ): boolean {
     for (let i = 0; i < mostRecentPatternsToCompare; i++) {
       if (
         this.monoHistory.get(start + i) !==
@@ -94,7 +91,7 @@ export default class Colour extends Skill {
     return true
   }
 
-  repetitionPenalty(notesSince) {
+  private repetitionPenalty(notesSince: number): number {
     return Math.min(1.0, 0.032 * notesSince)
   }
 }
