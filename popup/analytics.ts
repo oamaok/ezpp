@@ -1,8 +1,11 @@
 window._gaq = []
 
+// @ts-ignore
 if (__DEV__) {
   window._gaq.push = (data) => {
+    // eslint-disable-next-line no-console
     console.log('Analytics event:', JSON.stringify(data, null, 2))
+    return 0
   }
 }
 
@@ -20,7 +23,7 @@ export const loadAnalytics = () => {
   ga.async = true
   ga.src = 'https://ssl.google-analytics.com/ga.js'
   const s = document.getElementsByTagName('script')[0]
-  s.parentNode.insertBefore(ga, s)
+  s.parentNode?.insertBefore(ga, s)
 
   analyticsLoaded = true
 }

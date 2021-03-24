@@ -2,9 +2,11 @@
 import languages from '../translations/languages.json'
 export { languages }
 
+type TranslatableProperties = 'innerHTML' | 'innerText' | 'textContent'
+
 const FALLBACK_LANGUAGE = 'en'
 
-const languageSelector = document.getElementById('language-selector')
+const languageSelector = document.getElementById('language-selector')!
 languages
   .sort((a, b) => a.name.localeCompare(b.name))
   .forEach((language) => {
@@ -14,7 +16,10 @@ languages
     languageSelector.appendChild(option)
   })
 
-export const translations = languages.reduce(
+export const translations: Record<
+  string,
+  Record<string, string>
+> = languages.reduce(
   (acc, lang) => ({
     ...acc,
     [lang.code]: require(`../translations/${lang.code}.json`),
@@ -22,10 +27,15 @@ export const translations = languages.reduce(
   {}
 )
 
-let currentLanguage
-const setterHooks = []
+let currentLanguage: string
+const setterHooks: {
+  element: HTMLElement
+  translationKey: string
+  property: TranslatableProperties
+  args: any[]
+}[] = []
 
-export const getTranslation = (translationKey, ...args) => {
+export const getTranslation = (translationKey: string, ...args: any[]) => {
   const template =
     translations[currentLanguage || FALLBACK_LANGUAGE][translationKey] ||
     translations[FALLBACK_LANGUAGE][translationKey]
@@ -38,17 +48,21 @@ export const getTranslation = (translationKey, ...args) => {
   )
 }
 
-/* eslint-disable no-param-reassign */
 export const createTextSetter = (
-  element,
-  translationKey,
-  property = 'innerText'
+  element: HTMLElement,
+  translationKey: string,
+  property: TranslatableProperties = 'innerText'
 ) => {
   if (setterHooks.some((hook) => hook.element === element)) {
     throw new Error('This element already has a text setter')
   }
 
-  const hook = {
+  const hook: {
+    element: HTMLElement
+    translationKey: string
+    property: TranslatableProperties
+    args: any[]
+  } = {
     element,
     translationKey,
     property,
@@ -57,13 +71,13 @@ export const createTextSetter = (
 
   setterHooks.push(hook)
 
-  return (...args) => {
+  return (...args: any[]) => {
     hook.args = args
     element[property] = getTranslation(translationKey, ...args)
   }
 }
 
-export const setLanguage = (language) => {
+export const setLanguage = (language: string) => {
   if (language === currentLanguage) return
 
   if (currentLanguage) _gaq.push(['_trackEvent', 'language', language])
@@ -76,8 +90,8 @@ export const setLanguage = (language) => {
   setterHooks.forEach(({ element, translationKey, property, args }) => {
     element[property] = getTranslation(translationKey, ...args)
   })
-  ;[...document.querySelectorAll('[data-t]')].forEach((element) => {
-    const translationKey = element.getAttribute('data-t')
-    element.innerText = getTranslation(translationKey)
+  document.querySelectorAll('[data-t]').forEach((element) => {
+    const translationKey = element.getAttribute('data-t')!
+    ;(element as HTMLElement).innerText = getTranslation(translationKey)
   })
 }

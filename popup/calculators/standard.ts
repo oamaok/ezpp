@@ -1,6 +1,6 @@
 import ojsama from 'ojsama'
 
-const calculateDTAR = (ms) => {
+const calculateDTAR = (ms: number): number => {
   if (ms < 300) {
     return 11 // with DT, the AR is capped at 11
   }
@@ -10,8 +10,11 @@ const calculateDTAR = (ms) => {
   return 5 - (ms - 1200) / 120
 }
 
-export const calculateApproachRate = (modifiers, ar) => {
-  let ms
+export const calculateApproachRate = (
+  modifiers: number,
+  ar: number
+): number => {
+  let ms: number
   switch (
     modifiers &
     (ojsama.modbits.ht |
@@ -71,7 +74,16 @@ export const calculateApproachRate = (modifiers, ar) => {
   }
 }
 
-export const calculatePerformance = (map, mods, combo, misses, accuracy) => {
+export const calculatePerformance = (
+  map: ojsama.beatmap,
+  mods: number,
+  combo: number,
+  misses: number,
+  accuracy: number
+): {
+  pp: ojsama.std_ppv2
+  stars: ojsama.std_diff
+} => {
   const stars = new ojsama.diff().calc({ map, mods })
 
   const pp = ojsama.ppv2({

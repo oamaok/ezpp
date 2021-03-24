@@ -9,82 +9,95 @@ import * as taiko from './calculators/taiko'
 import * as std from './calculators/standard'
 import * as taikoReader from './objects/taiko/taikoReader'
 import TaikoDifficultyAttributes from './objects/taiko/taikoDifficultyAttributes'
+import ParsedTaikoResult from './objects/taiko/parsedTaikoResult'
 
 require('./notifications')
 
 const FETCH_ATTEMPTS = 3
 const UNSUPPORTED_GAMEMODE = 'Unsupported gamemode!' // TODO: Add to translations
 
-const containerElement = document.getElementById('container')
-const headerElement = document.getElementById('header')
-const versionElement = document.querySelector('.version')
-const titleElement = document.querySelector('.song-title')
-const artistElement = document.querySelector('.artist')
-const fcResetButton = document.querySelector('.fc-reset')
-const difficultyNameElement = document.getElementById('difficulty-name')
-const difficultyStarsElement = document.getElementById('difficulty-stars')
+const containerElement = document.getElementById('container')!
+const headerElement = document.getElementById('header')!
+const versionElement = document.querySelector('.version') as HTMLElement
+const titleElement = document.querySelector('.song-title') as HTMLElement
+const artistElement = document.querySelector('.artist') as HTMLElement
+const fcResetButton = document.querySelector('.fc-reset') as HTMLElement
+const difficultyNameElement = document.getElementById(
+  'difficulty-name'
+) as HTMLElement
+const difficultyStarsElement = document.getElementById(
+  'difficulty-stars'
+) as HTMLElement
+// @ts-ignore
 const modifierElements = [...document.querySelectorAll('.mod>input')]
-const accuracyElement = document.getElementById('accuracy')
-const comboElement = document.getElementById('combo')
-const missesElement = document.getElementById('misses')
-const resultElement = document.getElementById('result')
-const errorElement = document.getElementById('error')
-const bpmElement = document.getElementById('bpm')
-const arElement = document.getElementById('ar')
+const accuracyElement = document.getElementById('accuracy') as HTMLFormElement
+const comboElement = document.getElementById('combo') as HTMLFormElement
+const missesElement = document.getElementById('misses') as HTMLFormElement
+const resultElement = document.getElementById('result') as HTMLElement
+const errorElement = document.getElementById('error') as HTMLElement
+const bpmElement = document.getElementById('bpm') as HTMLElement
+const arElement = document.getElementById('ar') as HTMLElement
 
 const setResultText = createTextSetter(resultElement, 'result')
 
 versionElement.innerText = `ezpp! v${manifest.version}`
 
 // Set after the extension initializes, used for additional error information.
-let currentUrl = null
-let cleanBeatmap = null
-/**
- * @type {{ time: number, type: number, hitSounds: number, hitType: number }[]}
- */
-let taikoObjects = null
-let pageInfo = {
-  isOldSite: null,
-  beatmapSetId: null,
-  beatmapId: null,
+let currentUrl: string
+let cleanBeatmap: ojsama.beatmap
+let parsedTaikoResult: ParsedTaikoResult
+let pageInfo: {
+  isOldSite: boolean
+  beatmapSetId: string
+  beatmapId: string
   beatmap: {
-    accuracy: 0,
-    ar: 0,
-    beatmapset_id: 0,
-    bpm: 0,
-    convert: false,
-    count_circles: 0,
-    count_sliders: 0,
-    count_spinners: 0,
-    cs: 0,
-    deleted_at: null,
-    difficulty_rating: 0,
-    drain: 0,
-    failtimes: { fail: [], exit: [] },
-    hit_length: 0,
-    id: 0,
-    is_scoreable: true,
-    last_updated: '',
-    max_combo: 0,
-    mode: 'osu',
-    mode_int: 0,
-    passcount: 0,
-    playcount: 0,
-    ranked: 0,
-    status: '',
-    total_length: 0,
-    url: '',
-    version: '',
-  },
-  // convert may be null!
-  convert: {
-    difficulty_rating: 0,
-    mode: 'taiko',
-  },
-  mode: null,
+    accuracy: number
+    ar: number
+    beatmapset_id: number
+    bpm: number
+    checksum: string
+    convert: boolean
+    count_circles: number
+    count_sliders: number
+    count_spinners: number
+    cs: number
+    deleted_at?: Date
+    difficulty_rating: number
+    drain: number
+    failtimes: {
+      fail: Array<number> // length capped at 100
+      exit: Array<number> // length capped at 100
+    }
+    hit_length: number
+    id: number
+    is_scoreable: boolean
+    last_updated: string
+    max_combo: number | null // null for mania
+    mode: 'osu' | 'taiko' | 'fruits' | 'mania'
+    mode_int: 0 | 1 | 2 | 3
+    passcount: number
+    playcount: number
+    ranked: number
+    status:
+      | 'ranked'
+      | 'loved'
+      | 'graveyard'
+      | 'wip'
+      | 'pending'
+      | 'qualified'
+      | 'approved'
+    total_length: 0
+    url: ''
+    version: ''
+  }
+  convert?: {
+    difficulty_rating: 0
+    mode: 'taiko'
+  }
+  mode: null
 }
 
-const keyModMap = {
+const keyModMap: { [key: string]: string } = {
   Q: 'mod-ez',
   W: 'mod-nf',
   E: 'mod-ht',
@@ -98,13 +111,16 @@ const keyModMap = {
 const MODE_STANDARD = 0
 const MODE_TAIKO = 1
 
-const clamp = (x, min, max) => Math.min(Math.max(x, min), max)
+const clamp = (x: number, min: number, max: number): number =>
+  Math.min(Math.max(x, min), max)
 
-const setSongDetails = (metadataInOriginalLanguage) => {
+const setSongDetails = (metadataInOriginalLanguage: boolean) => {
   if (!cleanBeatmap) return
 
   const unicode = metadataInOriginalLanguage ? '_unicode' : ''
+  // @ts-expect-error
   titleElement.innerText = cleanBeatmap['title' + unicode]
+  // @ts-expect-error
   artistElement.innerText = cleanBeatmap['artist' + unicode]
 }
 
@@ -114,7 +130,7 @@ const getMaxCombo = () => {
     return cleanBeatmap.max_combo()
   }
   if (cleanBeatmap.mode === MODE_TAIKO) {
-    return pageInfo.beatmap.max_combo
+    return pageInfo.beatmap.max_combo || 0
   }
 
   return -1
@@ -122,7 +138,7 @@ const getMaxCombo = () => {
 
 const getCalculationSettings = () => {
   // Bitwise OR the mods together
-  const modifiers = modifierElements.reduce(
+  const modifiers: number = modifierElements.reduce(
     (num, element) => num | (element.checked ? parseInt(element.value) : 0),
     0
   )
@@ -135,7 +151,11 @@ const getCalculationSettings = () => {
     0,
     100
   )
-  const combo = clamp(parseInt(comboElement.value) || maxCombo, 0, maxCombo)
+  const combo = clamp(
+    parseInt(comboElement.value) || maxCombo,
+    0,
+    maxCombo || 0
+  )
   const misses = clamp(parseInt(missesElement.value) || 0, 0, maxCombo)
 
   return {
@@ -146,11 +166,13 @@ const getCalculationSettings = () => {
   }
 }
 
-const trackError = (error) => {
+const trackError = (error: ErrorEvent | Error): any => {
   // Don't report unsupported gamemode errors.
   if (error.message === UNSUPPORTED_GAMEMODE) {
     return
   }
+  const name = error instanceof ErrorEvent ? error.error.name : error.name
+  const stack = error instanceof ErrorEvent ? error.error.stack : error.stack
 
   const report = {
     version: manifest.version,
@@ -160,10 +182,12 @@ const trackError = (error) => {
 
     error: {
       message: error.message,
+      // @ts-ignore
       arguments: error.arguments,
+      // @ts-ignore
       type: error.type,
-      name: error.name,
-      stack: error.stack,
+      name,
+      stack,
     },
 
     navigator: {
@@ -174,26 +198,30 @@ const trackError = (error) => {
   _gaq.push(['_trackEvent', 'error', JSON.stringify(report)])
 }
 
-const displayError = (error) => {
+const displayError = (error: Error) => {
   trackError(error)
   errorElement.innerText = error.message
   containerElement.classList.toggle('error', true)
   containerElement.classList.toggle('preloading', false)
 }
 
-const debounce = (fn, timeout) => {
-  let debounceTimeout = null
+const debounce = (
+  fn: (args: Array<any>) => void,
+  timeout: number
+): ((args: any) => void) => {
+  let debounceTimeout: number
 
   return (...args) => {
     clearTimeout(debounceTimeout)
+    // @ts-ignore it's actually number
     debounceTimeout = setTimeout(() => fn(...args), timeout)
   }
 }
 
 const trackCalculate = (() => {
-  let lastData = {}
+  let lastData: { [key: string]: any } = {}
 
-  return (analyticsData) => {
+  return (analyticsData: { [key: string]: any }) => {
     // Don't repeat calculation analytics
     const isClean = Object.keys(analyticsData).every(
       (key) => lastData[key] === analyticsData[key]
@@ -234,11 +262,13 @@ const calculate = () => {
         pp = stdResult.pp
         stars = stdResult.stars
         arElement.innerText =
-          cleanBeatmap.ar === null
+          cleanBeatmap.ar === undefined
             ? '?'
-            : Math.round(
-                std.calculateApproachRate(modifiers, cleanBeatmap.ar) * 10
-              ) / 10
+            : (
+                Math.round(
+                  std.calculateApproachRate(modifiers, cleanBeatmap.ar) * 10
+                ) / 10
+              ).toString()
         break
 
       case MODE_TAIKO:
@@ -259,7 +289,12 @@ const calculate = () => {
           stars = { total: pageInfo.convert.difficulty_rating }
           attr.starRating = pageInfo.convert.difficulty_rating
         } else {
-          attr = taiko.calculate(cleanBeatmap, modifiers, taikoObjects)
+          attr = taiko.calculate(
+            cleanBeatmap,
+            modifiers,
+            parsedTaikoResult,
+            !!pageInfo.convert
+          )
           stars = { total: attr.starRating }
         }
         pp = taiko.calculatePerformance(
@@ -274,15 +309,16 @@ const calculate = () => {
 
       default:
     }
+    if (!pp) throw new Error('pp is null') // this shouldn't happen
 
     const { beatmapId } = pageInfo
 
     const analyticsData = {
       beatmapId: parseInt(beatmapId),
-      modifiers: parseInt(modifiers),
-      accuracy: parseFloat(accuracy),
-      combo: parseInt(combo),
-      misses: parseInt(misses),
+      modifiers,
+      accuracy,
+      combo,
+      misses,
       stars: parseFloat(stars.total.toFixed(1)),
       pp: parseFloat(pp.total.toFixed(2)),
     }
@@ -291,12 +327,11 @@ const calculate = () => {
     trackCalculateDebounced(analyticsData)
 
     difficultyStarsElement.innerText = stars.total.toFixed(2)
-    bpmElement.innerText = Math.round(bpm * 10) / 10
+    bpmElement.innerText = (Math.round(bpm * 10) / 10).toString()
 
     setResultText(Math.round(pp.total))
   } catch (error) {
     displayError(error)
-    console.error('Error in popup: ' + (error.stack || error))
   }
 }
 
@@ -305,7 +340,7 @@ const opposingModifiers = [
   ['mod-ht', 'mod-dt'],
 ]
 
-const toggleOpposingModifiers = (mod) => {
+const toggleOpposingModifiers = (mod: string) => {
   opposingModifiers.forEach((mods) => {
     const index = mods.indexOf(mod)
     if (index !== -1) {
@@ -319,22 +354,77 @@ const resetCombo = () => {
   comboElement.value = getMaxCombo()
 }
 
-const fetchBeatmapById = (id) =>
+const fetchBeatmapById = (id: number) =>
   fetch(`https://osu.ppy.sh/osu/${id}`, {
     credentials: 'include',
   }).then((res) => res.text())
 
-const getPageInfo = (url, tabId) =>
+const getPageInfo = (
+  url: string,
+  tabId: number
+): Promise<{
+  // TODO: maybe create a class that holds pageInfo?
+  isOldSite: boolean
+  beatmapSetId: string
+  beatmapId: string
+  beatmap: {
+    accuracy: number
+    ar: number
+    beatmapset_id: number
+    bpm: number
+    checksum: string
+    convert: boolean
+    count_circles: number
+    count_sliders: number
+    count_spinners: number
+    cs: number
+    deleted_at?: Date
+    difficulty_rating: number
+    drain: number
+    failtimes: {
+      fail: Array<number>
+      exit: Array<number>
+    }
+    hit_length: number
+    id: number
+    is_scoreable: boolean
+    last_updated: string
+    max_combo: number | null
+    mode: 'osu' | 'taiko' | 'fruits' | 'mania'
+    mode_int: 0 | 1 | 2 | 3
+    passcount: number
+    playcount: number
+    ranked: number
+    status:
+      | 'ranked'
+      | 'loved'
+      | 'graveyard'
+      | 'wip'
+      | 'pending'
+      | 'qualified'
+      | 'approved'
+    total_length: 0
+    url: ''
+    version: ''
+  }
+  convert?: {
+    difficulty_rating: 0
+    mode: 'taiko'
+  }
+  mode: null
+}> =>
   new Promise((resolve, reject) => {
     const info = {
-      isOldSite: null,
-      beatmapSetId: null,
-      beatmapId: null,
+      isOldSite: false,
+      beatmapSetId: '',
+      beatmapId: '',
       stars: 0,
       beatmap: {},
+      mode: '',
+      convert: {},
     }
 
-    const match = url.match(BEATMAP_URL_REGEX)
+    const match = url.match(BEATMAP_URL_REGEX)!
     info.isOldSite = match[2] !== 'beatmapsets'
 
     if (!info.isOldSite) {
@@ -362,6 +452,7 @@ const getPageInfo = (url, tabId) =>
 
           info.beatmap = response.beatmap
           info.convert = response.convert
+          // @ts-ignore
           resolve(info)
         }
       )
@@ -380,14 +471,14 @@ const getPageInfo = (url, tabId) =>
           const { beatmapId, beatmapSetId } = response
           info.beatmapSetId = beatmapSetId
           info.beatmapId = beatmapId
-
+          // @ts-ignore
           resolve(info)
         }
       )
     }
   })
 
-const attemptToFetchBeatmap = (id, attempts) =>
+const attemptToFetchBeatmap = (id: number, attempts: number): Promise<string> =>
   fetchBeatmapById(id).catch((error) => {
     // Retry fetching until no attempts are left.
     if (attempts) return attemptToFetchBeatmap(id, attempts - 1)
@@ -395,9 +486,9 @@ const attemptToFetchBeatmap = (id, attempts) =>
     throw error
   })
 
-const processBeatmap = (rawBeatmap) => {
+const processBeatmap = (rawBeatmap: string) => {
   const { map } = new ojsama.parser().feed(rawBeatmap)
-  taikoObjects = taikoReader.feed(rawBeatmap)
+  parsedTaikoResult = taikoReader.feed(rawBeatmap)
 
   cleanBeatmap = map
 
@@ -412,17 +503,19 @@ const processBeatmap = (rawBeatmap) => {
   }
 }
 
-const fetchBeatmapBackground = (beatmapSetId) =>
+const fetchBeatmapBackground = (
+  beatmapSetId: string
+): Promise<HTMLImageElement | null> =>
   new Promise((resolve) => {
     // Preload beatmap cover
     const cover = new Image()
     cover.src = `https://assets.ppy.sh/beatmaps/${beatmapSetId}/covers/cover@2x.jpg`
     cover.onload = () => resolve(cover)
-    cover.onerror = () => resolve()
-    cover.onabort = () => resolve()
+    cover.onerror = () => resolve(null)
+    cover.onabort = () => resolve(null)
   })
 
-const handleSettings = (settings) => {
+const handleSettings = (settings: { [key: string]: any }) => {
   document.documentElement.classList.toggle('darkmode', settings.darkmode)
 
   setLanguage(settings.language)
@@ -434,18 +527,24 @@ const handleSettings = (settings) => {
   }
 }
 
-const initializeExtension = async ({ url: tabUrl, id: tabId }) => {
+const initializeExtension = async ({
+  url: tabUrl,
+  id: tabId,
+}: {
+  url?: string
+  id?: number
+}) => {
   try {
     const settings = await loadSettings()
 
     handleSettings(settings)
     onSettingsChange(handleSettings)
 
-    currentUrl = tabUrl
-    pageInfo = await getPageInfo(tabUrl, tabId)
+    currentUrl = tabUrl!
+    pageInfo = await getPageInfo(tabUrl!, tabId!)
 
     const [, backgroundImage] = await Promise.all([
-      attemptToFetchBeatmap(pageInfo.beatmapId, FETCH_ATTEMPTS).then(
+      attemptToFetchBeatmap(parseInt(pageInfo.beatmapId), FETCH_ATTEMPTS).then(
         processBeatmap
       ),
       fetchBeatmapBackground(pageInfo.beatmapSetId),
@@ -464,10 +563,13 @@ const initializeExtension = async ({ url: tabUrl, id: tabId }) => {
     containerElement.classList.toggle('preloading', false)
 
     modifierElements.forEach((modElement) => {
-      modElement.addEventListener('click', ({ target }) => {
-        toggleOpposingModifiers(target.id)
-        calculate()
-      })
+      modElement.addEventListener(
+        'click',
+        ({ target }: { target: Element }) => {
+          toggleOpposingModifiers(target.id)
+          calculate()
+        }
+      )
     })
 
     window.addEventListener('keydown', ({ key = '' }) => {

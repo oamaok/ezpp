@@ -1,4 +1,4 @@
-import ojsama from 'ojsama'
+import ojsama, { beatmap } from 'ojsama'
 import TaikoDifficultyAttributes from '../objects/taiko/taikoDifficultyAttributes'
 import TaikoDifficultyHitObject from '../objects/taiko/taikoDifficultyHitObject'
 import TaikoObject from '../objects/taiko/taikoObject'
@@ -7,6 +7,8 @@ import StaminaCheeseDetector from '../skills/taiko/staminaCheeseDetector'
 import Colour from '../skills/taiko/colour'
 import Rhythm from '../skills/taiko/rhythm'
 import Stamina from '../skills/taiko/stamina'
+import * as taikoConverter from '../converters/taiko'
+import ParsedTaikoResult from '../objects/taiko/parsedTaikoResult'
 
 export const GREAT_MIN = 50
 export const GREAT_MID = 35
@@ -16,80 +18,46 @@ export const COLOUR_SKILL_MULTIPLIER = 0.01
 export const RHYTHM_SKILL_MULTIPLIER = 0.014
 export const STAMINA_SKILL_MULTIPLIER = 0.02
 
-/**
- * @param {Array<TaikoObject>} objects
- * @param {ojsama.beatmap} map
- * @returns {Array<TaikoObject>}
- */
-/*
-export const convertHitObjects = (objects, map) => {
-  // not executed because star rating calculation for conversion maps are disabled
-  const result = []
-  objects.forEach((obj) => {
-    convertHitObject(obj, map).forEach((e) => {
-      result.push(e)
-    })
-  })
-  return result.sort((a, b) => a.time - b.time)
-}
-*/
-
-/**
- * @param {TaikoObject} obj
- * @param {ojsama.beatmap} map
- */
-/*
-export const convertHitObject = (obj, map) => {
-  const result = []
-  const strong = original.hitSounds & 4
-  if (obj.type & ojsama.objtypes.slider) {
-    //
-  }
-}
-*/
-
-/**
- * @param {number} difficulty
- * @param {number} min
- * @param {number} mid
- * @param {number} max
- */
-export const difficltyRange = (difficulty, min, mid, max) => {
+export const difficltyRange = (
+  difficulty: number,
+  min: number,
+  mid: number,
+  max: number
+): number => {
   if (difficulty > 5) return mid + ((max - mid) * (difficulty - 5)) / 5
   if (difficulty < 5) return mid - ((mid - min) * (5 - difficulty)) / 5
   return mid
 }
 
-/**
- * @param {ojsama.beatmap} map
- * @param {{ time: number, type: number, hitSounds: number, hitType: number }[]} taikoObjects
- */
-export const createDifficultyHitObjects = (map, taikoObjects, clockRate) => {
-  const rawTaikoObjects = []
-  for (let i = 0; i < map.objects.length; i++) {
-    rawTaikoObjects.push(
+export const createDifficultyHitObjects = (
+  map: beatmap,
+  parsedTaikoResult: ParsedTaikoResult,
+  clockRate: number,
+  convert: boolean
+) => {
+  const rawTaikoObjects = map.objects.map(
+    (obj, i) =>
       new TaikoObject(
-        map.objects[i],
-        taikoObjects[i].hitType,
-        taikoObjects[i].hitSounds
+        obj,
+        parsedTaikoResult.objects[i].objectType,
+        parsedTaikoResult.objects[i].hitType,
+        parsedTaikoResult.objects[i].hitSounds
       )
-    )
-  }
-  const convertedObjects = map.convert
-    ? convertHitObjects(rawTaikoObjects, map)
+  )
+  const convertedObjects = convert
+    ? taikoConverter.convertHitObjects(rawTaikoObjects, map)
     : rawTaikoObjects
-  const objects = []
-  for (let i = 2; i < convertedObjects.length; i++) {
-    objects.push(
-      new TaikoDifficultyHitObject(
-        convertedObjects[i],
-        convertedObjects[i - 1],
-        convertedObjects[i - 2],
-        clockRate,
-        i
-      )
-    )
-  }
+  const objects = convertedObjects.flatMap((obj, i) =>
+    i < 2
+      ? []
+      : new TaikoDifficultyHitObject(
+          obj,
+          convertedObjects[i - 1],
+          convertedObjects[i - 2],
+          clockRate,
+          i
+        )
+  )
   new StaminaCheeseDetector(objects).findCheese() // this method name makes me hungry...
   return objects
 }
@@ -98,7 +66,12 @@ export const createDifficultyHitObjects = (map, taikoObjects, clockRate) => {
  * @param {ojsama.beatmap} map
  * @param {ojsama.modbits | number} mods
  */
-export const calculate = (map, mods, taikoObjects) => {
+export const calculate = (
+  map: beatmap,
+  mods: number,
+  parsedTaikoResult: ParsedTaikoResult,
+  convert: boolean
+) => {
   const originalOverallDifficulty = map.od
   let clockRate = 1
   if (mods & ojsama.modbits.dt) clockRate = 1.5
@@ -123,8 +96,9 @@ export const calculate = (map, mods, taikoObjects) => {
 
   const difficultyHitObjects = createDifficultyHitObjects(
     map,
-    taikoObjects,
-    clockRate
+    parsedTaikoResult,
+    clockRate,
+    convert
   )
   const sectionLength = 400 * clockRate
   let currentSectionEnd =
@@ -157,14 +131,19 @@ export const calculate = (map, mods, taikoObjects) => {
  * @param {Skill[]} skills
  * @param {number} clockRate
  */
-export const createDifficultyAttributes = (map, mods, skills, clockRate) => {
+export const createDifficultyAttributes = (
+  map: beatmap,
+  mods: number,
+  skills: Array<Skill<TaikoDifficultyHitObject>>,
+  clockRate: number
+): TaikoDifficultyAttributes => {
   if (map.objects.length === 0) {
     return new TaikoDifficultyAttributes(0, mods, 0, 0, 0, 0, 0, skills)
   }
-  const colour = skills[0]
-  const rhythm = skills[1]
-  const staminaRight = skills[2]
-  const staminaLeft = skills[3]
+  const colour = skills[0] as Colour
+  const rhythm = skills[1] as Rhythm
+  const staminaRight = skills[2] as Stamina
+  const staminaLeft = skills[3] as Stamina
 
   const colourRating = colour.getDifficultyValue() * COLOUR_SKILL_MULTIPLIER
   const rhythmRating = rhythm.getDifficultyValue() * RHYTHM_SKILL_MULTIPLIER
@@ -182,7 +161,7 @@ export const createDifficultyAttributes = (map, mods, skills, clockRate) => {
     staminaLeft,
     staminaPenalty
   )
-  const separatedRating = norm(1.5, [colourRating, rhythmRating, staminaRating])
+  const separatedRating = norm(1.5, colourRating, rhythmRating, staminaRating)
   let starRating = 1.4 * separatedRating + 0.5 * combinedRating
   starRating = rescale(starRating)
 
@@ -201,18 +180,17 @@ export const createDifficultyAttributes = (map, mods, skills, clockRate) => {
   )
 }
 
-export const simpleColourPenalty = (staminaDifficulty, colorDifficulty) => {
+export const simpleColourPenalty = (
+  staminaDifficulty: number,
+  colorDifficulty: number
+): number => {
   if (colorDifficulty <= 0) return 0.79 - 0.25
   return (
     0.79 - Math.atan(staminaDifficulty / colorDifficulty - 12) / Math.PI / 2
   )
 }
 
-/**
- * @param {number} p
- * @param {number[]} values
- */
-export const norm = (p, values) => {
+export const norm = (p: number, ...values: Array<number>) => {
   let e = 0
   values.forEach((n) => {
     e += Math.pow(n, p)
@@ -220,30 +198,22 @@ export const norm = (p, values) => {
   return Math.pow(e, 1 / p)
 }
 
-/**
- * @param {Skill} colour
- * @param {Skill} rhythm
- * @param {Skill} staminaRight
- * @param {Skill} staminaLeft
- * @param {number} staminaPenalty
- */
 export const locallyCombinedDifficulty = (
-  colour,
-  rhythm,
-  staminaRight,
-  staminaLeft,
-  staminaPenalty
+  colour: Colour,
+  rhythm: Rhythm,
+  staminaRight: Stamina,
+  staminaLeft: Stamina,
+  staminaPenalty: number
 ) => {
-  const peaks = []
-  for (let i = 0; i < colour.strainPeaks.length; i++) {
-    const colourPeak = colour.strainPeaks[i] * COLOUR_SKILL_MULTIPLIER
+  const peaks = colour.strainPeaks.map((colour, i) => {
+    const colourPeak = colour * COLOUR_SKILL_MULTIPLIER
     const rhythmPeak = rhythm.strainPeaks[i] * RHYTHM_SKILL_MULTIPLIER
     const staminaPeak =
       (staminaRight.strainPeaks[i] + staminaLeft.strainPeaks[i]) *
       STAMINA_SKILL_MULTIPLIER *
       staminaPenalty
-    peaks.push(norm(2, [colourPeak, rhythmPeak, staminaPeak]))
-  }
+    return norm(2, colourPeak, rhythmPeak, staminaPeak)
+  })
   let difficulty = 0
   let weight = 1
   peaks
@@ -255,22 +225,22 @@ export const locallyCombinedDifficulty = (
   return difficulty
 }
 
-export const rescale = (sr) => (sr < 0 ? sr : 10.43 * Math.log(sr / 8 + 1))
+export const rescale = (sr: number): number =>
+  sr < 0 ? sr : 10.43 * Math.log(sr / 8 + 1)
 
 // javascript implementation of osu!lazer's pp calculator implementation: https://github.com/ppy/osu/blob/master/osu.Game.Rulesets.Taiko/Difficulty/TaikoPerformanceCalculator.cs
-/**
- * @param {ojsama.beatmap} map
- * @param {TaikoDifficultyAttributes} attr
- * @param {ojsama.modbits} mods
- */
 export const calculatePerformance = (
-  map,
-  attr,
-  mods,
-  combo,
-  misses,
-  accuracy
-) => {
+  map: beatmap,
+  attr: TaikoDifficultyAttributes,
+  mods: number,
+  combo: number,
+  misses: number,
+  accuracy: number
+): {
+  total: number
+  strain: number
+  accuracy: number
+} => {
   let multiplier = 1.1
   if (mods & ojsama.modbits.nf) multiplier *= 0.9
   if (mods & ojsama.modbits.hd) multiplier *= 1.1
@@ -299,12 +269,12 @@ export const calculatePerformance = (
 }
 
 export const calculateStrainPerformance = (
-  stars,
-  mods,
-  misses,
-  accuracy,
-  combo
-) => {
+  stars: number,
+  mods: number,
+  misses: number,
+  accuracy: number,
+  combo: number
+): number => {
   let strainValue =
     Math.pow(5.0 * Math.max(1.0, stars / 0.0075) - 4.0, 2.0) / 100000.0
   const lengthBonus = 1 + 0.1 * Math.min(1.0, combo / 1500.0)
@@ -316,10 +286,10 @@ export const calculateStrainPerformance = (
 }
 
 export const calculateAccuracyPerformance = (
-  greatHitWindow,
-  accuracy,
-  combo
-) => {
+  greatHitWindow: number,
+  accuracy: number,
+  combo: number
+): number => {
   if (greatHitWindow <= 0) return 0
   const accValue =
     Math.pow(150.0 / greatHitWindow, 1.1) * Math.pow(accuracy, 15) * 22.0

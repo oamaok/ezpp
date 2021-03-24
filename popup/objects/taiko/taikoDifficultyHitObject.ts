@@ -1,7 +1,7 @@
 import DifficultyHitObject from '../difficultyHitObject'
-import { hitobject } from 'ojsama'
 import TaikoDifficultyHitObjectRhythm from './taikoDifficultyHitObjectRhythm'
 import TaikoObject from './taikoObject'
+import { HitType } from './hitType'
 
 export const COMMON_RHYTHMS = [
   new TaikoDifficultyHitObjectRhythm(1, 1, 0.0),
@@ -16,33 +16,44 @@ export const COMMON_RHYTHMS = [
 ]
 
 export default class TaikoDifficultyHitObject extends DifficultyHitObject {
+  // overrides properties on super class
+  public baseObject: TaikoObject
+  public lastObject: TaikoObject
+  public lastLastObject: TaikoObject
+
+  public rhythm: TaikoDifficultyHitObjectRhythm
+  public hitType: HitType
+  public objectIndex: number
+  public staminaCheese = false
+
   /**
-   * @param {TaikoObject} hitObject
-   * @param {TaikoObject} lastObject
-   * @param {TaikoObject} lastLastObject
-   * @param {number} clockRate 1 = 100%, 1.5 = 150% (DT), 0.75 = 75% (HT)
-   * @param {number} objectIndex
+   * @param clockRate 1 = 100%, 1.5 = 150% (DT), 0.75 = 75% (HT)
    */
-  constructor(hitObject, lastObject, lastLastObject, clockRate, objectIndex) {
-    super(hitObject, lastObject, clockRate)
+  constructor(
+    baseObject: TaikoObject,
+    lastObject: TaikoObject,
+    lastLastObject: TaikoObject,
+    clockRate: number,
+    objectIndex: number
+  ) {
+    super(baseObject, lastObject, clockRate)
+    this.baseObject = baseObject
+    this.lastObject = lastObject
+    this.lastLastObject = lastLastObject
     this.rhythm = this.getClosestRhythm(lastObject, lastLastObject, clockRate)
-    /**
-     * 0 = centre, 1 = rim
-     */
-    this.hitType = hitObject.hitType
     this.objectIndex = objectIndex
+    this.hitType = baseObject.hitType
     this.staminaCheese = false
   }
 
-  /**
-   * @param {TaikoObject} lastObject
-   * @param {TaikoObject} lastLastObject
-   * @param {number} clockRate
-   */
-  getClosestRhythm(lastObject, lastLastObject, clockRate) {
+  public getClosestRhythm(
+    lastObject: TaikoObject,
+    lastLastObject: TaikoObject,
+    clockRate: number
+  ) {
     const prevLength = (lastObject.time - lastLastObject.time) / clockRate
     const ratio = this.deltaTime / prevLength
-    let currentRhythm = null
+    let currentRhythm: TaikoDifficultyHitObjectRhythm = COMMON_RHYTHMS[0] // fallback
     let currentRatio = Number.MAX_VALUE
     COMMON_RHYTHMS.forEach((r) => {
       if (Math.abs(r.ratio - ratio) < currentRatio) {

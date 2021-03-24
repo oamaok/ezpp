@@ -9,11 +9,11 @@ module.exports = {
   entry: {
     popup: [
       'regenerator-runtime/runtime',
-      path.resolve(__dirname, 'popup/index.js'),
+      path.resolve(__dirname, 'popup/index.ts'),
       path.resolve(__dirname, 'popup/styles/main.sass'),
     ],
-    background: path.resolve(__dirname, 'background/background.js'),
-    content: path.resolve(__dirname, 'background/content.js'),
+    background: path.resolve(__dirname, 'background/background.ts'),
+    content: path.resolve(__dirname, 'background/content.ts'),
   },
 
   stats: {
@@ -31,9 +31,9 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.(ts|js)x?$/,
         exclude: /(node_modules|bower_components)/,
-        use: 'babel-loader',
+        use: 'ts-loader',
       },
       {
         test: /\.s[ac]ss$/,
@@ -76,6 +76,6 @@ module.exports = {
   ],
 
   resolve: {
-    extensions: ['.js', '.sass', '.scss'],
+    extensions: ['.ts', '.tsx', '.js', '.json', '.sass', '.scss'],
   },
 }

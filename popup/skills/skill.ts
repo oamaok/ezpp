@@ -1,11 +1,17 @@
 import ojsama from 'ojsama'
-import DifficultyHitObject from '../objects/difficultyHitObject'
+import DifficultyHitObject from '../objects/difficultyHitObject.js'
 
-export default class Skill {
-  /**
-   * @param {ojsama.modbits} mods
-   */
-  constructor(mods) {
+export default abstract class Skill<T extends DifficultyHitObject> {
+  public strainPeaks: Array<number> = []
+  public skillMultiplier = 1.0
+  public strainDecayBase = 1.0
+  public decayWeight = 0.9
+  public currentStrain = 1
+  public mods: number
+  public currentSectionPeak = 1
+  public previous?: T
+
+  public constructor(mods: number) {
     this.strainPeaks = []
     this.skillMultiplier = 1.0
     this.strainDecayBase = 1.0
@@ -13,13 +19,9 @@ export default class Skill {
     this.currentStrain = 1
     this.mods = mods
     this.currentSectionPeak = 1
-    this.previous = null
   }
 
-  /**
-   * @param {DifficultyHitObject} current
-   */
-  process(current) {
+  public process(current: T): void {
     this.currentStrain *= this.strainDecay(current.deltaTime)
     this.currentStrain += this.strainValueOf(current) * this.skillMultiplier
     this.currentSectionPeak = Math.max(
@@ -29,7 +31,7 @@ export default class Skill {
     this.previous = current
   }
 
-  saveCurrentPeak() {
+  public saveCurrentPeak(): void {
     if (this.previous) {
       this.strainPeaks.push(this.currentSectionPeak)
     }
@@ -37,9 +39,9 @@ export default class Skill {
 
   /**
    * Sets the initial strain level for a new section.
-   * @param {number} time The beginning of the new section in milliseconds.
+   * @param time The beginning of the new section in milliseconds.
    */
-  startNewSectionFrom(time) {
+  public startNewSectionFrom(time: number): void {
     if (this.previous) {
       this.currentSectionPeak = this.getPeakStrain(time)
     }
@@ -47,28 +49,23 @@ export default class Skill {
 
   /**
    * Retrieves the peak strain at a point in time.
-   * @param {number} time The time to retrieve the peak strain at.
+   * @param time The time to retrieve the peak strain at.
    */
-  getPeakStrain(time) {
+  public getPeakStrain(time: number): number {
+    if (!this.previous) return 0
     return (
       this.currentStrain *
       this.strainDecay(time - this.previous.baseObject.time)
     )
   }
 
-  strainDecay(ms) {
+  public strainDecay(ms: number): number {
     return Math.pow(this.strainDecayBase, ms / 1000)
   }
 
-  /**
-   * @param {DifficultyHitObject} current
-   */
-  // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  strainValueOf(current) {
-    throw new Error('abstract')
-  }
+  public abstract strainValueOf(current: T): number
 
-  getDifficultyValue() {
+  public getDifficultyValue(): number {
     let difficulty = 0
     let weight = 1
     this.copyArray(this.strainPeaks)
@@ -81,20 +78,16 @@ export default class Skill {
   }
 
   /* utility methods */
-  clamp(num, min, max) {
+  public clamp(num: number, min: number, max: number): number {
     if (num > max) return max
     if (num < min) return min
     return num
   }
 
   /**
-   * @param {any[]} array
+   * Creates a shallow copy of an array and returns it.
    */
-  copyArray(array) {
-    const arr = []
-    array.forEach((a) => {
-      arr.push(a)
-    })
-    return arr
+  copyArray<E>(array: E[]): E[] {
+    return [...array]
   }
 }
