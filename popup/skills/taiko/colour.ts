@@ -67,8 +67,9 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
     ) {
       if (!this.isSamePattern(start, mostRecentPatternsToCompare)) continue
       let notesSince = 0
-      for (let i = start; i < this.monoHistory.count; i++)
-        notesSince += this.monoHistory.get(i)
+      this.monoHistory.array.forEach((num, i) => {
+        if (i >= start) notesSince += num
+      })
       penalty *= this.repetitionPenalty(notesSince)
       break
     }

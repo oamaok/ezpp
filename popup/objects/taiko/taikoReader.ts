@@ -9,15 +9,14 @@ export const REGEX = /^(\d+),(\d+),(\d+),(\d+),(\d+)/
 export const feed = (rawBeatmap: string): ParsedTaikoResult => {
   const objects = [] as Array<ParsedTaikoObject>
   let doRead = false
-  for (const s of rawBeatmap.split('\n')) {
+  rawBeatmap.split('\n').forEach((s) => {
     if (s.startsWith('[HitObjects]')) {
       doRead = true
-      continue
+      return
     }
-    if (!doRead) continue
-    if (!REGEX.test(s)) continue
+    if (!doRead) return
     const match = s.match(REGEX)
-    if (!match) continue
+    if (!match) return
     try {
       const time: number = parseInt(match[3])
       const type: number = parseInt(match[4])
@@ -51,6 +50,6 @@ export const feed = (rawBeatmap: string): ParsedTaikoResult => {
     } catch (e) {
       throw new Error('Error trying to read "' + s + '"')
     }
-  }
+  })
   return new ParsedTaikoResult(objects)
 }

@@ -28,18 +28,18 @@ export default class StaminaCheeseDetector {
     )
     let indexBeforeLastRepeat = -1
     let lastMarkEnd = 0
-    for (let i = 0; i < this.objects.length; i++) {
-      history.enqueue(this.objects[i])
-      if (!history.isFull()) continue
+    this.objects.forEach((obj, i) => {
+      history.enqueue(obj)
+      if (!history.isFull()) return
       if (!this.containsPatternRepeat(history, patternLength)) {
         indexBeforeLastRepeat = i - history.count + 1
-        continue
+        return
       }
       const repeatedLength = i - indexBeforeLastRepeat
-      if (repeatedLength < ROLL_MIN_REPETITIONS) continue
+      if (repeatedLength < ROLL_MIN_REPETITIONS) return
       this.markObjectsAsCheese(Math.max(lastMarkEnd, i - repeatedLength + 1), i)
       lastMarkEnd = i
-    }
+    })
   }
 
   private containsPatternRepeat(
@@ -59,18 +59,17 @@ export default class StaminaCheeseDetector {
   private findTlTap(parity: number, hitType: number): void {
     let tlLength = -2
     let lastMarkEnd = 0
-    for (let i = parity; i < this.objects.length; i++) {
-      if (this.objects[i].hitType === hitType) {
+    this.objects.forEach((obj, i) => {
+      if (i < parity) return
+      if (obj.hitType === hitType) {
         tlLength += 2
       } else {
         tlLength = -2
       }
-      if (tlLength < TL_MIN_REPETITIONS) {
-        continue
-      }
+      if (tlLength < TL_MIN_REPETITIONS) return
       this.markObjectsAsCheese(Math.max(lastMarkEnd, i - tlLength + 1), i)
       lastMarkEnd = i
-    }
+    })
   }
 
   /**

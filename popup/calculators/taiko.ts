@@ -47,18 +47,17 @@ export const createDifficultyHitObjects = (
   const convertedObjects = convert
     ? taikoConverter.convertHitObjects(rawTaikoObjects, map)
     : rawTaikoObjects
-  const objects = [] as Array<TaikoDifficultyHitObject>
-  for (let i = 2; i < convertedObjects.length; i++) {
-    objects.push(
-      new TaikoDifficultyHitObject(
-        convertedObjects[i],
-        convertedObjects[i - 1],
-        convertedObjects[i - 2],
-        clockRate,
-        i
-      )
-    )
-  }
+  const objects = convertedObjects.flatMap((obj, i) =>
+    i < 2
+      ? []
+      : new TaikoDifficultyHitObject(
+          obj,
+          convertedObjects[i - 1],
+          convertedObjects[i - 2],
+          clockRate,
+          i
+        )
+  )
   new StaminaCheeseDetector(objects).findCheese() // this method name makes me hungry...
   return objects
 }
@@ -206,7 +205,8 @@ export const locallyCombinedDifficulty = (
   staminaLeft: Stamina,
   staminaPenalty: number
 ) => {
-  const peaks = colour.strainPeaks.map((colourPeak, i) => {
+  const peaks = colour.strainPeaks.map((colour, i) => {
+    const colourPeak = colour * COLOUR_SKILL_MULTIPLIER
     const rhythmPeak = rhythm.strainPeaks[i] * RHYTHM_SKILL_MULTIPLIER
     const staminaPeak =
       (staminaRight.strainPeaks[i] + staminaLeft.strainPeaks[i]) *

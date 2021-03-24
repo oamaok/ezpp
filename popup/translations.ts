@@ -2,6 +2,8 @@
 import languages from '../translations/languages.json'
 export { languages }
 
+type TranslatableProperties = 'innerHTML' | 'innerText' | 'textContent'
+
 const FALLBACK_LANGUAGE = 'en'
 
 const languageSelector = document.getElementById('language-selector')!
@@ -27,9 +29,9 @@ export const translations: Record<
 
 let currentLanguage: string
 const setterHooks: {
-  element: Element
+  element: HTMLElement
   translationKey: string
-  property: string
+  property: TranslatableProperties
   args: any[]
 }[] = []
 
@@ -46,20 +48,19 @@ export const getTranslation = (translationKey: string, ...args: any[]) => {
   )
 }
 
-/* eslint-disable no-param-reassign */
 export const createTextSetter = (
-  element: Element,
+  element: HTMLElement,
   translationKey: string,
-  property: keyof HTMLElement = 'innerText'
+  property: TranslatableProperties = 'innerText'
 ) => {
   if (setterHooks.some((hook) => hook.element === element)) {
     throw new Error('This element already has a text setter')
   }
 
   const hook: {
-    element: Element
+    element: HTMLElement
     translationKey: string
-    property: keyof HTMLElement
+    property: TranslatableProperties
     args: any[]
   } = {
     element,
@@ -72,7 +73,6 @@ export const createTextSetter = (
 
   return (...args: any[]) => {
     hook.args = args
-    // @ts-ignore
     element[property] = getTranslation(translationKey, ...args)
   }
 }
@@ -88,7 +88,6 @@ export const setLanguage = (language: string) => {
   currentLanguage = language
 
   setterHooks.forEach(({ element, translationKey, property, args }) => {
-    // @ts-ignore
     element[property] = getTranslation(translationKey, ...args)
   })
   document.querySelectorAll('[data-t]').forEach((element) => {
