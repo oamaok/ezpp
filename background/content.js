@@ -35,10 +35,16 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       const beatmap = beatmapSet.beatmaps.find(
         (map) => map.id.toString() === request.beatmapId.toString()
       )
+      const convert = beatmapSet.converts.find(
+        (map) =>
+          map.id.toString() === request.beatmapId.toString() &&
+          map.mode === request.mode
+      )
 
       sendResponse({
         status: 'SUCCESS',
         beatmap,
+        convert,
       })
     } catch (error) {
       sendResponse({

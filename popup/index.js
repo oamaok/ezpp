@@ -7,6 +7,8 @@ import { BEATMAP_URL_REGEX } from '../common/constants'
 import { loadAnalytics } from './analytics'
 import * as taiko from './calculators/taiko'
 import * as std from './calculators/standard'
+import * as taikoReader from './objects/taiko/taikoReader'
+import TaikoDifficultyAttributes from './objects/taiko/taikoDifficultyAttributes'
 
 require('./notifications')
 
@@ -37,6 +39,10 @@ versionElement.innerText = `ezpp! v${manifest.version}`
 // Set after the extension initializes, used for additional error information.
 let currentUrl = null
 let cleanBeatmap = null
+/**
+ * @type {{ time: number, type: number, hitSounds: number, hitType: number }[]}
+ */
+let taikoObjects = null
 let pageInfo = {
   isOldSite: null,
   beatmapSetId: null,
@@ -69,6 +75,11 @@ let pageInfo = {
     total_length: 0,
     url: '',
     version: '',
+  },
+  // convert may be null!
+  convert: {
+    difficulty_rating: 0,
+    mode: 'taiko',
   },
   mode: null,
 }
@@ -232,11 +243,28 @@ const calculate = () => {
 
       case MODE_TAIKO:
         document.documentElement.classList.add('mode-taiko')
-        // TOOD: implement star rating calculator
-        stars = { total: pageInfo.beatmap.difficulty_rating }
+        let attr = new TaikoDifficultyAttributes(
+          pageInfo.beatmap.difficulty_rating,
+          modifiers,
+          0,
+          0,
+          0,
+          -1,
+          getMaxCombo(),
+          []
+        )
+        if (pageInfo.convert) {
+          // TODO: implement hit objects converter for conversion maps
+          document.documentElement.classList.add('mode-taiko-converted')
+          stars = { total: pageInfo.convert.difficulty_rating }
+          attr.starRating = pageInfo.convert.difficulty_rating
+        } else {
+          attr = taiko.calculate(cleanBeatmap, modifiers, taikoObjects)
+          stars = { total: attr.starRating }
+        }
         pp = taiko.calculatePerformance(
           cleanBeatmap,
-          stars.total,
+          attr,
           modifiers,
           combo,
           misses,
@@ -268,6 +296,7 @@ const calculate = () => {
     setResultText(Math.round(pp.total))
   } catch (error) {
     displayError(error)
+    console.error('Error in popup: ' + (error.stack || error))
   }
 }
 
@@ -318,7 +347,7 @@ const getPageInfo = (url, tabId) =>
 
       chrome.tabs.sendMessage(
         tabId,
-        { action: 'GET_BEATMAP_STATS', beatmapId },
+        { action: 'GET_BEATMAP_STATS', beatmapId, mode },
         (response) => {
           if (!response) {
             // FIXME(acrylic-style): I don't know why but it happened to me multiple times
@@ -332,6 +361,7 @@ const getPageInfo = (url, tabId) =>
           }
 
           info.beatmap = response.beatmap
+          info.convert = response.convert
           resolve(info)
         }
       )
@@ -367,6 +397,7 @@ const attemptToFetchBeatmap = (id, attempts) =>
 
 const processBeatmap = (rawBeatmap) => {
   const { map } = new ojsama.parser().feed(rawBeatmap)
+  taikoObjects = taikoReader.feed(rawBeatmap)
 
   cleanBeatmap = map
 
