@@ -22,8 +22,8 @@ export default class Colour extends Skill {
   strainValueOf(current) {
     if (
       !(
-        (current.lastObject.type & ObjectType.Hit) &&
-        (current.baseObject.type & ObjectType.Hit) &&
+        current.lastObject.type & ObjectType.Hit &&
+        current.baseObject.type & ObjectType.Hit &&
         current.deltaTime < 1000
       )
     ) {
