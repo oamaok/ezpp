@@ -9,7 +9,7 @@ export const convertHitObjects = (
   map: ojsama.beatmap
 ): Array<TaikoObject> => {
   // not executed because star rating calculation for conversion maps are disabled
-  const result = []
+  const result: Array<TaikoObject> = []
   objects.forEach((obj) => {
     convertHitObject(obj, map).forEach((e) => {
       result.push(e)
@@ -75,7 +75,7 @@ export const getNearestTimingPoint = (
   time: number
 ): ojsama.timing => {
   let i = Number.MAX_VALUE
-  let value = null
+  let value: ojsama.timing = map.timing_points[0] // default
   map.timing_points.forEach((timing) => {
     let n = Math.abs(timing.time - time)
     if (n < i) {

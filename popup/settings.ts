@@ -25,18 +25,22 @@ const SETTINGS = [
   },
 ]
 
-let currentSettings = {}
-const settingsChangeListeners = []
+let currentSettings: {
+  [key: string]: any
+} = {}
+const settingsChangeListeners: Array<(settings: {}) => void> = []
 
 SETTINGS.forEach((setting) => {
   // Initialize currentSettings to default values
   currentSettings[setting.key] = setting.default
 
   // Add event listeneres for all the setting elements
-  setting.element.addEventListener('change', (evt) => {
+  setting.element?.addEventListener('change', (evt) => {
     let value
-    if (setting.type === 'boolean') value = evt.target.checked
-    if (setting.type === 'string') value = evt.target.value
+    if (setting.type === 'boolean')
+      value = (evt.target as HTMLFormElement)?.checked
+    if (setting.type === 'string')
+      value = (evt.target as HTMLFormElement)?.value
 
     chrome.storage.local.set({ [setting.key]: value })
     currentSettings[setting.key] = value
@@ -49,11 +53,13 @@ export const loadSettings = async () => {
   const keys = SETTINGS.map((setting) => setting.key)
   currentSettings = await new Promise((resolve) =>
     chrome.storage.local.get(keys, (storedSettings) => {
-      const settings = {}
+      const settings: { [key: string]: any } = {}
       SETTINGS.forEach((setting) => {
-        const value = storedSettings[setting.key] ?? settings.default
-        if (setting.type === 'string') setting.element.value = value
-        if (setting.type === 'boolean') setting.element.checked = value
+        const value = storedSettings[setting.key] ?? setting.default // TODO(acrylic-style) 2021-03-24: fixed potential typo: settings -> setting - remove this comment if you're ok with this
+        if (setting.type === 'string')
+          (setting.element as HTMLFormElement).value = value
+        if (setting.type === 'boolean')
+          (setting.element as HTMLFormElement).checked = value
         settings[setting.key] = value
       })
       resolve(settings)
@@ -63,13 +69,13 @@ export const loadSettings = async () => {
   return currentSettings
 }
 
-export const onSettingsChange = (fn) => {
+export const onSettingsChange = (fn: (settings: {}) => void) => {
   settingsChangeListeners.push(fn)
 }
 
-const settingsOpenButton = document.getElementById('open-settings')
-const settingsCloseButton = document.getElementById('close-settings')
-const settingsContainer = document.getElementById('settings')
+const settingsOpenButton = document.getElementById('open-settings')!
+const settingsCloseButton = document.getElementById('close-settings')!
+const settingsContainer = document.getElementById('settings')!
 
 settingsOpenButton.addEventListener('click', () => {
   _gaq.push(['_trackEvent', 'settings', 'open'])

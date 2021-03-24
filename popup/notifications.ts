@@ -1,9 +1,9 @@
 import manifest from '../static/manifest.json'
 import { createTextSetter } from './translations'
 
-const notificationElement = document.getElementById('notification')
-const notificationClearElement = document.getElementById('notification-clear')
-const versionElement = document.getElementById('notification-version')
+const notificationElement = document.getElementById('notification')!
+const notificationClearElement = document.getElementById('notification-clear')!
+const versionElement = document.getElementById('notification-version')!
 
 const setVersionText = createTextSetter(
   versionElement,

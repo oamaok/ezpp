@@ -9,7 +9,7 @@ export default class TaikoObject {
   public hitSounds: number
   public type: number
   public time: number
-  public data: circle | slider
+  public data?: circle | slider
 
   public constructor(
     hitObject: hitobject,

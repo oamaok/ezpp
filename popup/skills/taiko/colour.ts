@@ -8,7 +8,7 @@ export const MONO_HISTORY_MAX_LENGTH = 5
 
 export default class Colour extends Skill<TaikoDifficultyHitObject> {
   public monoHistory = new LimitedCapacityQueue<number>(MONO_HISTORY_MAX_LENGTH)
-  public previousHitType: HitType = null
+  public previousHitType?: HitType
   public currentMonoLength = 0
 
   public constructor(mods: number) {
@@ -33,7 +33,7 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
     }
     let objectStrain = 0.0
     if (
-      this.previousHitType != null &&
+      this.previousHitType !== undefined &&
       current.hitType !== this.previousHitType
     ) {
       objectStrain = 1.0

@@ -53,7 +53,7 @@ export default class TaikoDifficultyHitObject extends DifficultyHitObject {
   ) {
     const prevLength = (lastObject.time - lastLastObject.time) / clockRate
     const ratio = this.deltaTime / prevLength
-    let currentRhythm = null
+    let currentRhythm: TaikoDifficultyHitObjectRhythm = COMMON_RHYTHMS[0] // fallback
     let currentRatio = Number.MAX_VALUE
     COMMON_RHYTHMS.forEach((r) => {
       if (Math.abs(r.ratio - ratio) < currentRatio) {

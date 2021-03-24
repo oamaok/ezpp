@@ -8,7 +8,6 @@ import Colour from '../skills/taiko/colour'
 import Rhythm from '../skills/taiko/rhythm'
 import Stamina from '../skills/taiko/stamina'
 import * as taikoConverter from '../converters/taiko'
-import ParsedTaikoObject from '../objects/taiko/parsedTaikoObject'
 import ParsedTaikoResult from '../objects/taiko/parsedTaikoResult'
 
 export const GREAT_MIN = 50

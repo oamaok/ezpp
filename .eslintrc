@@ -1,6 +1,5 @@
 {
   "extends": ["prettier"],
-  //"parser": "@babel/eslint-parser",
   "parser": "@typescript-eslint/parser",
   "env": {
     "webextensions": true,

@@ -9,7 +9,7 @@ export default abstract class Skill<T extends DifficultyHitObject> {
   public currentStrain = 1
   public mods: number
   public currentSectionPeak = 1
-  public previous: T
+  public previous?: T
 
   public constructor(mods: number) {
     this.strainPeaks = []
@@ -19,7 +19,6 @@ export default abstract class Skill<T extends DifficultyHitObject> {
     this.currentStrain = 1
     this.mods = mods
     this.currentSectionPeak = 1
-    this.previous = null
   }
 
   public process(current: T): void {
@@ -53,6 +52,7 @@ export default abstract class Skill<T extends DifficultyHitObject> {
    * @param time The time to retrieve the peak strain at.
    */
   public getPeakStrain(time: number): number {
+    if (!this.previous) return 0
     return (
       this.currentStrain *
       this.strainDecay(time - this.previous.baseObject.time)
