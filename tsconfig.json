@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "lib": ["ES2019", "DOM"],
     "esModuleInterop": true,
     "module": "commonjs",
     "noImplicitAny": true,

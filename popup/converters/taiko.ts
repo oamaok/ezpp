@@ -9,12 +9,9 @@ export const convertHitObjects = (
   map: ojsama.beatmap
 ): Array<TaikoObject> => {
   // not executed because star rating calculation for conversion maps are disabled
-  const result: Array<TaikoObject> = []
-  objects.forEach((obj) => {
-    convertHitObject(obj, map).forEach((e) => {
-      result.push(e)
-    })
-  })
+  const result: Array<TaikoObject> = objects.flatMap((obj) =>
+    convertHitObject(obj, map)
+  )
   return result.sort((a, b) => a.time - b.time)
 }
 

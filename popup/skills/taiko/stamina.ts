@@ -20,7 +20,7 @@ export default class Stamina extends Skill<TaikoDifficultyHitObject> {
   }
 
   public strainValueOf(current: TaikoDifficultyHitObject): number {
-    if (!(current.baseObject.objectType === ObjectType.Hit)) {
+    if (current.baseObject.objectType !== ObjectType.Hit) {
       return 0.0
     }
 

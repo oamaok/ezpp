@@ -25,9 +25,7 @@ const SETTINGS = [
   },
 ]
 
-let currentSettings: {
-  [key: string]: any
-} = {}
+let currentSettings: Record<string, any> = {}
 const settingsChangeListeners: Array<(settings: {}) => void> = []
 
 SETTINGS.forEach((setting) => {

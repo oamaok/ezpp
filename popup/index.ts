@@ -209,10 +209,11 @@ const debounce = (
   fn: (args: Array<any>) => void,
   timeout: number
 ): ((args: any) => void) => {
-  let debounceTimeout: NodeJS.Timeout
+  let debounceTimeout: number
 
   return (...args) => {
     clearTimeout(debounceTimeout)
+    // @ts-ignore it's actually number
     debounceTimeout = setTimeout(() => fn(...args), timeout)
   }
 }

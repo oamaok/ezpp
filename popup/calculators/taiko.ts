@@ -35,17 +35,15 @@ export const createDifficultyHitObjects = (
   clockRate: number,
   convert: boolean
 ) => {
-  const rawTaikoObjects = [] as Array<TaikoObject>
-  for (let i = 0; i < map.objects.length; i++) {
-    rawTaikoObjects.push(
+  const rawTaikoObjects = map.objects.map(
+    (obj, i) =>
       new TaikoObject(
-        map.objects[i],
+        obj,
         parsedTaikoResult.objects[i].objectType,
         parsedTaikoResult.objects[i].hitType,
         parsedTaikoResult.objects[i].hitSounds
       )
-    )
-  }
+  )
   const convertedObjects = convert
     ? taikoConverter.convertHitObjects(rawTaikoObjects, map)
     : rawTaikoObjects
@@ -208,16 +206,14 @@ export const locallyCombinedDifficulty = (
   staminaLeft: Stamina,
   staminaPenalty: number
 ) => {
-  const peaks = []
-  for (let i = 0; i < colour.strainPeaks.length; i++) {
-    const colourPeak = colour.strainPeaks[i] * COLOUR_SKILL_MULTIPLIER
+  const peaks = colour.strainPeaks.map((colourPeak, i) => {
     const rhythmPeak = rhythm.strainPeaks[i] * RHYTHM_SKILL_MULTIPLIER
     const staminaPeak =
       (staminaRight.strainPeaks[i] + staminaLeft.strainPeaks[i]) *
       STAMINA_SKILL_MULTIPLIER *
       staminaPenalty
-    peaks.push(norm(2, colourPeak, rhythmPeak, staminaPeak))
-  }
+    return norm(2, colourPeak, rhythmPeak, staminaPeak)
+  })
   let difficulty = 0
   let weight = 1
   peaks

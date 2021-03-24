@@ -14,11 +14,10 @@ languages
     languageSelector.appendChild(option)
   })
 
-export const translations: {
-  [code: string]: {
-    [key: string]: string
-  }
-} = languages.reduce(
+export const translations: Record<
+  string,
+  Record<string, string>
+> = languages.reduce(
   (acc, lang) => ({
     ...acc,
     [lang.code]: require(`../translations/${lang.code}.json`),
@@ -51,7 +50,7 @@ export const getTranslation = (translationKey: string, ...args: any[]) => {
 export const createTextSetter = (
   element: Element,
   translationKey: string,
-  property = 'innerText'
+  property: keyof HTMLElement = 'innerText'
 ) => {
   if (setterHooks.some((hook) => hook.element === element)) {
     throw new Error('This element already has a text setter')
@@ -60,7 +59,7 @@ export const createTextSetter = (
   const hook: {
     element: Element
     translationKey: string
-    property: string
+    property: keyof HTMLElement
     args: any[]
   } = {
     element,

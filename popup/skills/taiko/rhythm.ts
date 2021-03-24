@@ -20,7 +20,7 @@ export default class Rhythm extends Skill<TaikoDifficultyHitObject> {
   }
 
   public strainValueOf(current: TaikoDifficultyHitObject): number {
-    if (!(current.baseObject.objectType === ObjectType.Hit)) {
+    if (current.baseObject.objectType !== ObjectType.Hit) {
       this.resetRhythmAndStrain()
       return 0.0
     }

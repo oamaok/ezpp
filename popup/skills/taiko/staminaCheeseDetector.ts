@@ -2,8 +2,8 @@ import { HitType } from '../../objects/taiko/hitType'
 import TaikoDifficultyHitObject from '../../objects/taiko/taikoDifficultyHitObject'
 import LimitedCapacityQueue from '../../util/limitedCapacityQueue'
 
-export const roll_min_repetitions = 12
-export const tl_min_repetitions = 16
+export const ROLL_MIN_REPETITIONS = 12
+export const TL_MIN_REPETITIONS = 16
 
 export default class StaminaCheeseDetector {
   public objects: Array<TaikoDifficultyHitObject>
@@ -36,7 +36,7 @@ export default class StaminaCheeseDetector {
         continue
       }
       const repeatedLength = i - indexBeforeLastRepeat
-      if (repeatedLength < roll_min_repetitions) continue
+      if (repeatedLength < ROLL_MIN_REPETITIONS) continue
       this.markObjectsAsCheese(Math.max(lastMarkEnd, i - repeatedLength + 1), i)
       lastMarkEnd = i
     }
@@ -65,7 +65,7 @@ export default class StaminaCheeseDetector {
       } else {
         tlLength = -2
       }
-      if (tlLength < tl_min_repetitions) {
+      if (tlLength < TL_MIN_REPETITIONS) {
         continue
       }
       this.markObjectsAsCheese(Math.max(lastMarkEnd, i - tlLength + 1), i)
