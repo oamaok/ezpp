@@ -19,6 +19,7 @@
       "semi": false,
       "quoteProps": "consistent"
     }],
-    "prefer-arrow/prefer-arrow-functions": ["error", {} ]
+    "prefer-arrow/prefer-arrow-functions": ["error", {} ],
+    "no-console": ["error", {}]
   }
 }

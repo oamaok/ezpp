@@ -50,8 +50,6 @@ export const createDifficultyHitObjects = (
   const convertedObjects = convert
     ? taikoConverter.convertHitObjects(rawTaikoObjects, map)
     : rawTaikoObjects
-  console.log(rawTaikoObjects)
-  console.log(convertedObjects)
   const objects = [] as Array<TaikoDifficultyHitObject>
   for (let i = 2; i < convertedObjects.length; i++) {
     objects.push(
@@ -111,7 +109,6 @@ export const calculate = (
     Math.ceil(map.objects[0].time / sectionLength) * sectionLength
 
   difficultyHitObjects.forEach((h) => {
-    console.log(h)
     while (h.baseObject.time > currentSectionEnd) {
       skills.forEach((s) => {
         s.saveCurrentPeak()

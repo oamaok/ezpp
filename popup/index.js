@@ -266,7 +266,6 @@ const calculate = () => {
             parsedTaikoResult,
             !!pageInfo.convert
           )
-          console.log(attr)
           stars = { total: attr.starRating }
         }
         pp = taiko.calculatePerformance(
@@ -303,7 +302,6 @@ const calculate = () => {
     setResultText(Math.round(pp.total))
   } catch (error) {
     displayError(error)
-    console.error('Error in popup: ' + (error.stack || error))
   }
 }
 

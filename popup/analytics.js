@@ -2,6 +2,7 @@ window._gaq = []
 
 if (__DEV__) {
   window._gaq.push = (data) => {
+    // eslint-disable-next-line no-console
     console.log('Analytics event:', JSON.stringify(data, null, 2))
   }
 }

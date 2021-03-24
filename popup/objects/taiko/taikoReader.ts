@@ -17,6 +17,7 @@ export const feed = (rawBeatmap: string): ParsedTaikoResult => {
     if (!doRead) continue
     if (!REGEX.test(s)) continue
     const match = s.match(REGEX)
+    if (!match) continue
     try {
       const time: number = parseInt(match[3])
       const type: number = parseInt(match[4])
@@ -48,7 +49,6 @@ export const feed = (rawBeatmap: string): ParsedTaikoResult => {
         )
       )
     } catch (e) {
-      console.error('Failed to read line "' + s + '"', match)
       throw new Error('Error trying to read "' + s + '"')
     }
   }
