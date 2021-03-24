@@ -8,6 +8,7 @@ import { loadAnalytics } from './analytics'
 import * as taiko from './calculators/taiko'
 import * as std from './calculators/standard'
 import * as taikoReader from './objects/taiko/taikoReader'
+import TaikoDifficultyAttributes from './objects/taiko/taikoDifficultyAttributes'
 
 require('./notifications')
 
@@ -74,6 +75,11 @@ let pageInfo = {
     total_length: 0,
     url: '',
     version: '',
+  },
+  // convert may be null!
+  convert: {
+    difficulty_rating: 0,
+    mode: 'taiko',
   },
   mode: null,
 }
@@ -237,8 +243,25 @@ const calculate = () => {
 
       case MODE_TAIKO:
         document.documentElement.classList.add('mode-taiko')
-        const attr = taiko.calculate(cleanBeatmap, modifiers, taikoObjects)
-        stars = { total: attr.starRating }
+        let attr = new TaikoDifficultyAttributes(
+          pageInfo.beatmap.difficulty_rating,
+          modifiers,
+          0,
+          0,
+          0,
+          -1,
+          getMaxCombo(),
+          []
+        )
+        if (pageInfo.convert) {
+          // TODO: implement hit objects converter for conversion maps
+          document.documentElement.classList.add('mode-taiko-converted')
+          stars = { total: pageInfo.convert.difficulty_rating }
+          attr.starRating = pageInfo.convert.difficulty_rating
+        } else {
+          attr = taiko.calculate(cleanBeatmap, modifiers, taikoObjects)
+          stars = { total: attr.starRating }
+        }
         pp = taiko.calculatePerformance(
           cleanBeatmap,
           attr,
@@ -324,7 +347,7 @@ const getPageInfo = (url, tabId) =>
 
       chrome.tabs.sendMessage(
         tabId,
-        { action: 'GET_BEATMAP_STATS', beatmapId },
+        { action: 'GET_BEATMAP_STATS', beatmapId, mode },
         (response) => {
           if (!response) {
             // FIXME(acrylic-style): I don't know why but it happened to me multiple times
@@ -338,6 +361,7 @@ const getPageInfo = (url, tabId) =>
           }
 
           info.beatmap = response.beatmap
+          info.convert = response.convert
           resolve(info)
         }
       )

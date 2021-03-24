@@ -16,6 +16,44 @@ export const COLOUR_SKILL_MULTIPLIER = 0.01
 export const RHYTHM_SKILL_MULTIPLIER = 0.014
 export const STAMINA_SKILL_MULTIPLIER = 0.02
 
+/**
+ * @param {Array<TaikoObject>} objects
+ * @param {ojsama.beatmap} map
+ * @returns {Array<TaikoObject>}
+ */
+/*
+export const convertHitObjects = (objects, map) => {
+  // not executed because star rating calculation for conversion maps are disabled
+  const result = []
+  objects.forEach((obj) => {
+    convertHitObject(obj, map).forEach((e) => {
+      result.push(e)
+    })
+  })
+  return result.sort((a, b) => a.time - b.time)
+}
+*/
+
+/**
+ * @param {TaikoObject} obj
+ * @param {ojsama.beatmap} map
+ */
+/*
+export const convertHitObject = (obj, map) => {
+  const result = []
+  const strong = original.hitSounds & 4
+  if (obj.type & ojsama.objtypes.slider) {
+    //
+  }
+}
+*/
+
+/**
+ * @param {number} difficulty
+ * @param {number} min
+ * @param {number} mid
+ * @param {number} max
+ */
 export const difficltyRange = (difficulty, min, mid, max) => {
   if (difficulty > 5) return mid + ((max - mid) * (difficulty - 5)) / 5
   if (difficulty < 5) return mid - ((mid - min) * (5 - difficulty)) / 5
@@ -27,13 +65,26 @@ export const difficltyRange = (difficulty, min, mid, max) => {
  * @param {{ time: number, type: number, hitSounds: number, hitType: number }[]} taikoObjects
  */
 export const createDifficultyHitObjects = (map, taikoObjects, clockRate) => {
+  const rawTaikoObjects = []
+  for (let i = 0; i < map.objects.length; i++) {
+    rawTaikoObjects.push(
+      new TaikoObject(
+        map.objects[i],
+        taikoObjects[i].hitType,
+        taikoObjects[i].hitSounds
+      )
+    )
+  }
+  const convertedObjects = map.convert
+    ? convertHitObjects(rawTaikoObjects, map)
+    : rawTaikoObjects
   const objects = []
-  for (let i = 2; i < map.objects.length; i++) {
+  for (let i = 2; i < convertedObjects.length; i++) {
     objects.push(
       new TaikoDifficultyHitObject(
-        new TaikoObject(map.objects[i], taikoObjects[i].hitType),
-        new TaikoObject(map.objects[i - 1], taikoObjects[i - 1].hitType),
-        new TaikoObject(map.objects[i - 2], taikoObjects[i - 2].hitType),
+        convertedObjects[i],
+        convertedObjects[i - 1],
+        convertedObjects[i - 2],
         clockRate,
         i
       )
@@ -230,11 +281,15 @@ export const calculatePerformance = (
     accuracy / 100,
     combo
   )
+  const greatHitWindow =
+    attr.greatHitWindow !== -1
+      ? attr.greatHitWindow
+      : difficltyRange(map.od, GREAT_MIN, GREAT_MID, GREAT_MAX) | 0
   const accuracyValue = calculateAccuracyPerformance(
-    attr.greatHitWindow,
+    greatHitWindow,
     accuracy / 100,
     combo
-  ) // todo: clockRate, see DifficultyCalculator.cs:47, TaikoDifficultyCalculator.cs:65
+  )
   const total =
     Math.pow(
       Math.pow(strainValue, 1.1) + Math.pow(accuracyValue, 1.1),
