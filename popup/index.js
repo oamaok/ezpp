@@ -7,6 +7,7 @@ import { BEATMAP_URL_REGEX } from '../common/constants'
 import { loadAnalytics } from './analytics'
 import * as taiko from './calculators/taiko'
 import * as std from './calculators/standard'
+import * as taikoReader from './objects/taiko/taikoReader'
 
 require('./notifications')
 
@@ -37,6 +38,10 @@ versionElement.innerText = `ezpp! v${manifest.version}`
 // Set after the extension initializes, used for additional error information.
 let currentUrl = null
 let cleanBeatmap = null
+/**
+ * @type {{ time: number, type: number, hitSounds: number, hitType: number }[]}
+ */
+let taikoObjects = null
 let pageInfo = {
   isOldSite: null,
   beatmapSetId: null,
@@ -232,11 +237,11 @@ const calculate = () => {
 
       case MODE_TAIKO:
         document.documentElement.classList.add('mode-taiko')
-        // TOOD: implement star rating calculator
-        stars = { total: pageInfo.beatmap.difficulty_rating }
+        const attr = taiko.calculate(cleanBeatmap, modifiers, taikoObjects)
+        stars = { total: attr.starRating }
         pp = taiko.calculatePerformance(
           cleanBeatmap,
-          stars.total,
+          attr,
           modifiers,
           combo,
           misses,
@@ -268,6 +273,7 @@ const calculate = () => {
     setResultText(Math.round(pp.total))
   } catch (error) {
     displayError(error)
+    console.error('Error in popup: ' + (error.stack || error))
   }
 }
 
@@ -367,6 +373,7 @@ const attemptToFetchBeatmap = (id, attempts) =>
 
 const processBeatmap = (rawBeatmap) => {
   const { map } = new ojsama.parser().feed(rawBeatmap)
+  taikoObjects = taikoReader.feed(rawBeatmap)
 
   cleanBeatmap = map
 
