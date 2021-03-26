@@ -1,10 +1,14 @@
 import { HitType } from './hitType'
 import { ObjectType } from './objectType'
-import ParsedTaikoObject from './parsedTaikoObject'
-import ParsedTaikoResult from './parsedTaikoResult'
+import { ParsedTaikoObject } from './parsedTaikoObject'
+import { ParsedTaikoResult } from './parsedTaikoResult'
 
-// x,y,time,type,hit sounds
-export const REGEX = /^(\d+),(\d+),(\d+),(\d+),(\d+)/
+// x,y,time,type,hit sounds,extra
+export const REGEX = /^(\d+),(\d+),(\d+),(\d+),(\d+),?(.*?)?,?/
+//                     ^     ^     ^     ^     ^     ^
+//                    x[1]  y[2] time[3] |     |  extra[6]
+//                                    type[4]  |
+//                                       hitSounds[5]
 
 export const feed = (rawBeatmap: string): ParsedTaikoResult => {
   const objects = [] as Array<ParsedTaikoObject>
@@ -21,6 +25,12 @@ export const feed = (rawBeatmap: string): ParsedTaikoResult => {
       const time: number = parseInt(match[3])
       const type: number = parseInt(match[4])
       const hitSounds: number = parseInt(match[5])
+      const extra: string | undefined = match[6]
+      const objectType = ObjectType.fromNumber(type)
+      let spinnerEndTime: number | undefined
+      if (objectType === ObjectType.Swell) {
+        spinnerEndTime = parseInt(extra)
+      }
       /*
        * type (ObjectType, equivalent to ojsama.)
        * & 1 = circle
@@ -38,18 +48,18 @@ export const feed = (rawBeatmap: string): ParsedTaikoResult => {
        * & 4 = big
        * & 8 = blue (kats) (rim)
        */
-      objects.push(
-        new ParsedTaikoObject(
-          time,
-          type,
-          hitSounds,
-          ObjectType.fromNumber(type),
-          hitSounds & 8 ? HitType.Rim : HitType.Centre
-        )
-      )
+      objects.push({
+        time,
+        type,
+        hitSounds,
+        objectType,
+        hitType: hitSounds & 8 ? HitType.Rim : HitType.Centre,
+        spinnerEndTime,
+        typestr: () => type.toString(), // we don't use typestr anyway
+      })
     } catch (e) {
       throw new Error('Error trying to read "' + s + '"')
     }
   })
-  return new ParsedTaikoResult(objects)
+  return { objects }
 }

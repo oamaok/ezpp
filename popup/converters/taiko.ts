@@ -1,57 +1,133 @@
 import TaikoObject from '../objects/taiko/taikoObject'
-import ojsama from 'ojsama'
+import ojsama, { slider } from 'ojsama'
+import { beatmaps } from '../util/beatmaps'
+import { Precision } from '../util/precision'
+import { ObjectType } from '../objects/taiko/objectType'
+import Mth from '../util/mth'
+import Swell from '../objects/taiko/swell'
 
-export const LEGACY_VELOCITY_MULTIPLIER = 1.4
-export const BASE_SCORING_DISTANCE = 100
+// Do NOT remove Math.fround, this is VERY IMPORTANT.
+// taiko conversion will fail if you remove Math.fround.
+export const LEGACY_VELOCITY_MULTIPLIER = Math.fround(1.4)
+export const BASE_SCORING_DISTANCE = Math.fround(100)
+export const SWELL_HIT_MULTIPLIER = Math.fround(1.65)
 
 export const convertHitObjects = (
   objects: Array<TaikoObject>,
-  map: ojsama.beatmap
+  map: ojsama.beatmap,
+  mods: number,
+  isForCurrentRuleset: boolean
 ): Array<TaikoObject> => {
-  // not executed because star rating calculation for conversion maps are disabled
-  const result: Array<TaikoObject> = objects.flatMap((obj) =>
-    convertHitObject(obj, map)
+  const result = objects.flatMap((obj) =>
+    convertHitObject(obj, map, mods, isForCurrentRuleset)
   )
   return result.sort((a, b) => a.time - b.time)
 }
 
-export const convertHitObject = (obj: TaikoObject, map: ojsama.beatmap) => {
-  const result = [obj]
-  const strong = obj.hitSounds & 4
+export const convertHitObject = (
+  obj: TaikoObject,
+  map: ojsama.beatmap,
+  mods: number,
+  isForCurrentRuleset: boolean
+): Array<TaikoObject> => {
+  const result: Array<TaikoObject> = []
+  // const strong = obj.hitSounds & 4 // we don't need this thing
   if (obj.type & ojsama.objtypes.slider) {
+    const res = shouldConvertSliderToHits(obj, map, mods, isForCurrentRuleset)
+    if (res.shouldConvertSliderToHits) {
+      // int i = 0; here on osu!lazer, but not required because we have hitsounds property on TaikoObject.
+      for (
+        let j = obj.time;
+        j <= obj.time + res.taikoDuration + res.tickSpacing / 8;
+        j += res.tickSpacing
+      ) {
+        const taikoObject = new TaikoObject(
+          {
+            time: j,
+            type: obj.type,
+            typestr: obj.typestr,
+          },
+          ObjectType.Hit,
+          obj.hitType,
+          obj.hitSounds
+        )
+        taikoObject.time = j
+        result.push(taikoObject)
+        if (Precision.almostEquals(0, res.tickSpacing)) break
+      }
+    } else {
+      const taikoObject = new TaikoObject(
+        obj.hitObject,
+        ObjectType.DrumRoll,
+        obj.hitType,
+        obj.hitSounds
+      )
+      const sl = obj.data as slider
+      taikoObject.data = {
+        pos: sl.pos,
+        distance: sl.distance,
+        repetitions: sl.repetitions,
+      }
+      result.push(taikoObject)
+    }
+  } else if (obj.type & ojsama.objtypes.spinner) {
+    const hitMultiplier =
+      Mth.difficultyRange(Math.fround(map.od), 3, 5, 7.5) * SWELL_HIT_MULTIPLIER
+
+    const swell = new Swell(obj.hitObject, obj.hitType, obj.hitSounds)
+    swell.duration = swell.spinnerEndTime! - swell.time
+    swell.requiredHits =
+      Math.max(1, (swell.duration / 1000) * hitMultiplier) | 0
+    result.push(swell)
+  } else {
+    result.push(
+      new TaikoObject(obj.hitObject, ObjectType.Hit, obj.hitType, obj.hitSounds)
+    )
   }
   return result
 }
 
 export const shouldConvertSliderToHits = (
   obj: TaikoObject,
-  map: ojsama.beatmap
+  map: ojsama.beatmap,
+  mods: number,
+  isForCurrentRuleset: boolean
 ) => {
-  // from osu!lazer source code:
   // DO NOT CHANGE OR REFACTOR ANYTHING IN HERE WITHOUT TESTING AGAINST _ALL_ BEATMAPS.
   // Some of these calculations look redundant, but they are not - extremely small floating point errors are introduced to maintain 1:1 compatibility with stable.
   // Rounding cannot be used as an alternative since the error deltas have been observed to be between 1e-2 and 1e-6.
+  // You should not remove Math.fround, or you'll see wrong result!
 
   const slider = obj.hitObject.data as ojsama.slider
 
   // The true distance, accounting for any repeats. This ends up being the drum roll distance later
-  const spans = slider.repetitions + 1 || 1
+  const spans = slider.repetitions ?? 1
   const distance = slider.distance * spans * LEGACY_VELOCITY_MULTIPLIER
 
-  const timingPoint = getNearestTimingPoint(map, obj.time)
-  const difficultyPoint = { speedMultiplier: 0.0 } // getDifficultyPoint(map, obj.time) // TODO: what is difficulty point... (it is invoking undefined function so it will be an error)
+  const ms_per_beat = beatmaps.getAdjustedMsPerBeatAt(map, obj.time)
+  const speedMultiplier = beatmaps.getSpeedMultiplierAt(map, obj.time)
 
-  let beatLength = timingPoint.ms_per_beat / difficultyPoint.speedMultiplier
+  let beatLength = ms_per_beat / speedMultiplier
 
   let sliderScoringPointDistance =
-    (BASE_SCORING_DISTANCE * map.sv) / map.tick_rate
+    (BASE_SCORING_DISTANCE * (map.sv * LEGACY_VELOCITY_MULTIPLIER)) /
+    map.tick_rate
 
   const taikoVelocity = sliderScoringPointDistance * map.tick_rate
   const taikoDuration = ((distance / taikoVelocity) * beatLength) | 0
+
+  if (isForCurrentRuleset) {
+    return {
+      shouldConvertSliderToHits: false,
+      taikoDuration,
+      tickSpacing: 0,
+    }
+  }
+
   const osuVelocity = taikoVelocity * (1000 / beatLength)
 
   if (map.format_version >= 8) {
-    beatLength = timingPoint.ms_per_beat
+    beatLength = ms_per_beat
   }
 
   const tickSpacing = Math.min(
@@ -65,20 +141,4 @@ export const shouldConvertSliderToHits = (
     taikoDuration,
     tickSpacing,
   }
-}
-
-export const getNearestTimingPoint = (
-  map: ojsama.beatmap,
-  time: number
-): ojsama.timing => {
-  let i = Number.MAX_VALUE
-  let value: ojsama.timing = map.timing_points[0] // default
-  map.timing_points.forEach((timing) => {
-    let n = Math.abs(timing.time - time)
-    if (n < i) {
-      i = n
-      value = timing
-    }
-  })
-  return value
 }

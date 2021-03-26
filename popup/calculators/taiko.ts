@@ -8,7 +8,10 @@ import Colour from '../skills/taiko/colour'
 import Rhythm from '../skills/taiko/rhythm'
 import Stamina from '../skills/taiko/stamina'
 import * as taikoConverter from '../converters/taiko'
-import ParsedTaikoResult from '../objects/taiko/parsedTaikoResult'
+import { ParsedTaikoResult } from '../objects/taiko/parsedTaikoResult'
+import Mth from '../util/mth'
+import { beatmaps } from '../util/beatmaps'
+import { ObjectType } from '../objects/taiko/objectType'
 
 export const GREAT_MIN = 50
 export const GREAT_MID = 35
@@ -18,54 +21,64 @@ export const COLOUR_SKILL_MULTIPLIER = 0.01
 export const RHYTHM_SKILL_MULTIPLIER = 0.014
 export const STAMINA_SKILL_MULTIPLIER = 0.02
 
-export const difficltyRange = (
-  difficulty: number,
-  min: number,
-  mid: number,
-  max: number
-): number => {
-  if (difficulty > 5) return mid + ((max - mid) * (difficulty - 5)) / 5
-  if (difficulty < 5) return mid - ((mid - min) * (5 - difficulty)) / 5
-  return mid
-}
-
 export const createDifficultyHitObjects = (
   map: beatmap,
   parsedTaikoResult: ParsedTaikoResult,
   clockRate: number,
-  convert: boolean
-) => {
-  const rawTaikoObjects = map.objects.map(
-    (obj, i) =>
+  convert: boolean,
+  mods: number
+): {
+  objects: Array<TaikoDifficultyHitObject>
+  rawObjects: Array<TaikoObject>
+} => {
+  let rawTaikoObjects: Array<TaikoObject>
+  if (convert) {
+    rawTaikoObjects = parsedTaikoResult.objects
+      .sort((a, b) => a.time - b.time)
+      .map((obj) =>
+        new TaikoObject(
+          beatmaps.getHitObjectOrDefaultAt(map, obj.time, obj),
+          obj.objectType,
+          obj.hitType,
+          obj.hitSounds
+        ).setSpinnerEndTime(obj.spinnerEndTime)
+      )
+  } else {
+    rawTaikoObjects = map.objects.map((obj, i) =>
       new TaikoObject(
         obj,
         parsedTaikoResult.objects[i].objectType,
         parsedTaikoResult.objects[i].hitType,
         parsedTaikoResult.objects[i].hitSounds
-      )
+      ).setSpinnerEndTime(parsedTaikoResult.objects[i].spinnerEndTime)
+    )
+  }
+  const rawObjects = taikoConverter.convertHitObjects(
+    rawTaikoObjects,
+    map,
+    mods,
+    !convert
   )
-  const convertedObjects = convert
-    ? taikoConverter.convertHitObjects(rawTaikoObjects, map)
-    : rawTaikoObjects
-  const objects = convertedObjects.flatMap((obj, i) =>
+  const objects = rawObjects.flatMap((obj, i) =>
     i < 2
       ? []
       : new TaikoDifficultyHitObject(
           obj,
-          convertedObjects[i - 1],
-          convertedObjects[i - 2],
+          rawObjects[i - 1],
+          rawObjects[i - 2],
           clockRate,
           i
         )
   )
+  // Remember: objects.length = rawObjects.length - 2
+  if (objects.length + 2 !== rawObjects.length)
+    throw new Error(
+      `objects count and raw objects count does not match: ${objects.length}, ${rawObjects.length}`
+    )
   new StaminaCheeseDetector(objects).findCheese() // this method name makes me hungry...
-  return objects
+  return { objects, rawObjects }
 }
 
-/**
- * @param {ojsama.beatmap} map
- * @param {ojsama.modbits | number} mods
- */
 export const calculate = (
   map: beatmap,
   mods: number,
@@ -92,19 +105,20 @@ export const calculate = (
     new Stamina(mods, false),
   ]
   if (map.objects.length === 0)
-    return createDifficultyAttributes(map, mods, skills, clockRate)
+    return createDifficultyAttributes(map, mods, skills, clockRate, [])
 
   const difficultyHitObjects = createDifficultyHitObjects(
     map,
     parsedTaikoResult,
     clockRate,
-    convert
+    convert,
+    mods
   )
   const sectionLength = 400 * clockRate
   let currentSectionEnd =
     Math.ceil(map.objects[0].time / sectionLength) * sectionLength
 
-  difficultyHitObjects.forEach((h) => {
+  difficultyHitObjects.objects.forEach((h) => {
     while (h.baseObject.time > currentSectionEnd) {
       skills.forEach((s) => {
         s.saveCurrentPeak()
@@ -120,22 +134,23 @@ export const calculate = (
   // The peak strain will not be saved for the last section in the above loop
   skills.forEach((s) => s.saveCurrentPeak())
 
-  const attr = createDifficultyAttributes(map, mods, skills, clockRate)
+  const attr = createDifficultyAttributes(
+    map,
+    mods,
+    skills,
+    clockRate,
+    difficultyHitObjects.rawObjects
+  )
   map.od = originalOverallDifficulty
   return attr
 }
 
-/**
- * @param {ojsama.beatmap} map
- * @param {ojsama.modbits | number} mods
- * @param {Skill[]} skills
- * @param {number} clockRate
- */
 export const createDifficultyAttributes = (
   map: beatmap,
   mods: number,
   skills: Array<Skill<TaikoDifficultyHitObject>>,
-  clockRate: number
+  clockRate: number,
+  rawObjects: Array<TaikoObject>
 ): TaikoDifficultyAttributes => {
   if (map.objects.length === 0) {
     return new TaikoDifficultyAttributes(0, mods, 0, 0, 0, 0, 0, skills)
@@ -166,7 +181,7 @@ export const createDifficultyAttributes = (
   starRating = rescale(starRating)
 
   const greatHitWindow =
-    difficltyRange(map.od, GREAT_MIN, GREAT_MID, GREAT_MAX) | 0
+    Mth.difficultyRange(map.od, GREAT_MIN, GREAT_MID, GREAT_MAX) | 0
 
   return new TaikoDifficultyAttributes(
     starRating,
@@ -175,7 +190,7 @@ export const createDifficultyAttributes = (
     rhythmRating,
     colourRating,
     greatHitWindow / clockRate,
-    map.objects.filter((obj) => (obj.type & 1) !== 0).length, // max combo
+    rawObjects.filter((obj) => obj.objectType === ObjectType.Hit).length, // max combo
     skills
   )
 }
@@ -254,7 +269,7 @@ export const calculatePerformance = (
   const greatHitWindow =
     attr.greatHitWindow !== -1
       ? attr.greatHitWindow
-      : difficltyRange(map.od, GREAT_MIN, GREAT_MID, GREAT_MAX) | 0
+      : Mth.difficultyRange(map.od, GREAT_MIN, GREAT_MID, GREAT_MAX) | 0
   const accuracyValue = calculateAccuracyPerformance(
     greatHitWindow,
     accuracy / 100,

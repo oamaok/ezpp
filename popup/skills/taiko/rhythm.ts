@@ -1,6 +1,7 @@
 import { ObjectType } from '../../objects/taiko/objectType'
 import TaikoDifficultyHitObject from '../../objects/taiko/taikoDifficultyHitObject'
 import LimitedCapacityQueue from '../../util/limitedCapacityQueue'
+import Mth from '../../util/mth'
 import Skill from '../skill'
 
 export const STRAIN_DECAY = 0.96
@@ -24,13 +25,14 @@ export default class Rhythm extends Skill<TaikoDifficultyHitObject> {
       this.resetRhythmAndStrain()
       return 0.0
     }
+
     this.currentStrain *= STRAIN_DECAY
 
     this.notesSinceRhythmChange += 1
 
     // rhythm difficulty zero (due to rhythm not changing) => no rhythm strain.
     if (current.rhythm.difficulty === 0.0) {
-      return 0
+      return 0.0
     }
 
     let objectStrain = current.rhythm.difficulty
@@ -78,9 +80,9 @@ export default class Rhythm extends Skill<TaikoDifficultyHitObject> {
   ): boolean {
     for (let i = 0; i < mostRecentPatternsToCompare; i++) {
       if (
-        this.rhythmHistory.get(start + i).rhythm !==
+        this.rhythmHistory.get(start + i).rhythm !=
         this.rhythmHistory.get(
-          this.rhythmHistory.count - mostRecentPatternsToCompare + i
+          this.rhythmHistory.count - mostRecentPatternsToCompare + i + 1
         ).rhythm
       )
         return false
@@ -94,7 +96,7 @@ export default class Rhythm extends Skill<TaikoDifficultyHitObject> {
 
   private patternLengthPenalty(patternLength: number): number {
     const shortPatternPenalty = Math.min(0.15 * patternLength, 1.0)
-    const longPatternPenalty = this.clamp(2.5 - 0.15 * patternLength, 0.0, 1.0)
+    const longPatternPenalty = Mth.clamp(2.5 - 0.15 * patternLength, 0.0, 1.0)
     return Math.min(shortPatternPenalty, longPatternPenalty)
   }
 

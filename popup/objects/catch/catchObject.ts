@@ -1,33 +1,26 @@
 import { circle, hitobject, slider } from 'ojsama'
 import HitObject from '../hitObject'
-import { HitType } from './hitType'
 import { ObjectType } from './objectType'
 
-export default class TaikoObject extends HitObject {
+export default class CatchObject extends HitObject {
   public objectType: ObjectType
-  public hitType: HitType
+  public x: number
   public type: number
   public time: number
   public data?: circle | slider
-  public spinnerEndTime?: number
 
   public constructor(
     hitObject: hitobject,
     objectType: ObjectType,
-    hitType: HitType,
-    hitSounds: number
+    hitSounds: number,
+    x: number
   ) {
     super(hitObject, hitSounds)
     this.objectType = objectType
-    this.hitType = hitType
+    this.x = x
     this.type = this.hitObject.type
     this.time = this.hitObject.time
     this.data = this.hitObject.data
-  }
-
-  public setSpinnerEndTime(spinnerEndTime?: number): TaikoObject {
-    this.spinnerEndTime = spinnerEndTime
-    return this
   }
 
   public typestr(): string {

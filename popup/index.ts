@@ -5,11 +5,17 @@ import { setLanguage, createTextSetter } from './translations'
 import { loadSettings, onSettingsChange } from './settings'
 import { BEATMAP_URL_REGEX } from '../common/constants'
 import { loadAnalytics } from './analytics'
-import * as taiko from './calculators/taiko'
 import * as std from './calculators/standard'
+import * as taiko from './calculators/taiko'
+import * as ctb from './calculators/catch' // of course, 'catch' is reserved to we use 'ctb' here.
 import * as taikoReader from './objects/taiko/taikoReader'
-import TaikoDifficultyAttributes from './objects/taiko/taikoDifficultyAttributes'
-import ParsedTaikoResult from './objects/taiko/parsedTaikoResult'
+import * as catchReader from './objects/catch/catchReader'
+import * as timingsReader from './util/timingsReader'
+import { ParsedTaikoResult } from './objects/taiko/parsedTaikoResult'
+import { PageInfo } from './util/pageInfo'
+import { ParsedCatchResult } from './objects/catch/parsedCatchResult'
+import Mth from './util/mth'
+import { TimingPoint } from './util/timingPoint'
 
 require('./notifications')
 
@@ -46,56 +52,9 @@ versionElement.innerText = `ezpp! v${manifest.version}`
 let currentUrl: string
 let cleanBeatmap: ojsama.beatmap
 let parsedTaikoResult: ParsedTaikoResult
-let pageInfo: {
-  isOldSite: boolean
-  beatmapSetId: string
-  beatmapId: string
-  beatmap: {
-    accuracy: number
-    ar: number
-    beatmapset_id: number
-    bpm: number
-    checksum: string
-    convert: boolean
-    count_circles: number
-    count_sliders: number
-    count_spinners: number
-    cs: number
-    deleted_at?: Date
-    difficulty_rating: number
-    drain: number
-    failtimes: {
-      fail: Array<number> // length capped at 100
-      exit: Array<number> // length capped at 100
-    }
-    hit_length: number
-    id: number
-    is_scoreable: boolean
-    last_updated: string
-    max_combo: number | null // null for mania
-    mode: 'osu' | 'taiko' | 'fruits' | 'mania'
-    mode_int: 0 | 1 | 2 | 3
-    passcount: number
-    playcount: number
-    ranked: number
-    status:
-      | 'ranked'
-      | 'loved'
-      | 'graveyard'
-      | 'wip'
-      | 'pending'
-      | 'qualified'
-      | 'approved'
-    total_length: 0
-    url: ''
-    version: ''
-  }
-  convert?: {
-    difficulty_rating: 0
-    mode: 'taiko'
-  }
-  mode: null
-}
+let parsedCatchResult: ParsedCatchResult
+let timingPoints: Array<TimingPoint>
+let pageInfo: PageInfo
 
 const keyModMap: { [key: string]: string } = {
   Q: 'mod-ez',
@@ -110,9 +69,8 @@ const keyModMap: { [key: string]: string } = {
 
 const MODE_STANDARD = 0
 const MODE_TAIKO = 1
-
-const clamp = (x: number, min: number, max: number): number =>
-  Math.min(Math.max(x, min), max)
+const MODE_CATCH = 2
+const MODE_MANIA = 3
 
 const setSongDetails = (metadataInOriginalLanguage: boolean) => {
   if (!cleanBeatmap) return
@@ -146,17 +104,17 @@ const getCalculationSettings = () => {
   // An error might be reported before the beatmap is loaded.
   const maxCombo = getMaxCombo()
 
-  const accuracy = clamp(
+  const accuracy = Mth.clamp(
     parseFloat(accuracyElement.value.replace(',', '.')),
     0,
     100
   )
-  const combo = clamp(
+  const combo = Mth.clamp(
     parseInt(comboElement.value) || maxCombo,
     0,
     maxCombo || 0
   )
-  const misses = clamp(parseInt(missesElement.value) || 0, 0, maxCombo)
+  const misses = Mth.clamp(parseInt(missesElement.value) || 0, 0, maxCombo)
 
   return {
     modifiers,
@@ -273,30 +231,16 @@ const calculate = () => {
 
       case MODE_TAIKO:
         document.documentElement.classList.add('mode-taiko')
-        let attr = new TaikoDifficultyAttributes(
-          pageInfo.beatmap.difficulty_rating,
+        const attr = taiko.calculate(
+          cleanBeatmap,
           modifiers,
-          0,
-          0,
-          0,
-          -1,
-          getMaxCombo(),
-          []
+          parsedTaikoResult,
+          !!pageInfo.convert
         )
-        if (pageInfo.convert) {
-          // TODO: implement hit objects converter for conversion maps
-          document.documentElement.classList.add('mode-taiko-converted')
-          stars = { total: pageInfo.convert.difficulty_rating }
-          attr.starRating = pageInfo.convert.difficulty_rating
-        } else {
-          attr = taiko.calculate(
-            cleanBeatmap,
-            modifiers,
-            parsedTaikoResult,
-            !!pageInfo.convert
-          )
-          stars = { total: attr.starRating }
-        }
+        // console.log(attr) // TODO: uncomment me if you're debugging for ezpp#103
+        pageInfo.beatmap.max_combo = attr.maxCombo
+        resetCombo() // we changed max combo above, so we need to apply changes here.
+        stars = { total: attr.starRating }
         pp = taiko.calculatePerformance(
           cleanBeatmap,
           attr,
@@ -359,60 +303,7 @@ const fetchBeatmapById = (id: number) =>
     credentials: 'include',
   }).then((res) => res.text())
 
-const getPageInfo = (
-  url: string,
-  tabId: number
-): Promise<{
-  // TODO: maybe create a class that holds pageInfo?
-  isOldSite: boolean
-  beatmapSetId: string
-  beatmapId: string
-  beatmap: {
-    accuracy: number
-    ar: number
-    beatmapset_id: number
-    bpm: number
-    checksum: string
-    convert: boolean
-    count_circles: number
-    count_sliders: number
-    count_spinners: number
-    cs: number
-    deleted_at?: Date
-    difficulty_rating: number
-    drain: number
-    failtimes: {
-      fail: Array<number>
-      exit: Array<number>
-    }
-    hit_length: number
-    id: number
-    is_scoreable: boolean
-    last_updated: string
-    max_combo: number | null
-    mode: 'osu' | 'taiko' | 'fruits' | 'mania'
-    mode_int: 0 | 1 | 2 | 3
-    passcount: number
-    playcount: number
-    ranked: number
-    status:
-      | 'ranked'
-      | 'loved'
-      | 'graveyard'
-      | 'wip'
-      | 'pending'
-      | 'qualified'
-      | 'approved'
-    total_length: 0
-    url: ''
-    version: ''
-  }
-  convert?: {
-    difficulty_rating: 0
-    mode: 'taiko'
-  }
-  mode: null
-}> =>
+const getPageInfo = (url: string, tabId: number): Promise<PageInfo> =>
   new Promise((resolve, reject) => {
     const info = {
       isOldSite: false,
@@ -489,16 +380,22 @@ const attemptToFetchBeatmap = (id: number, attempts: number): Promise<string> =>
 const processBeatmap = (rawBeatmap: string) => {
   const { map } = new ojsama.parser().feed(rawBeatmap)
   parsedTaikoResult = taikoReader.feed(rawBeatmap)
+  parsedCatchResult = catchReader.feed(rawBeatmap)
+  timingPoints = timingsReader.feed(rawBeatmap)
 
   cleanBeatmap = map
 
   // Support old beatmaps
   cleanBeatmap.mode = Number(cleanBeatmap.mode || MODE_STANDARD)
   if (pageInfo.mode === 'taiko') cleanBeatmap.mode = MODE_TAIKO
-  if (pageInfo.mode === 'fruits') cleanBeatmap.mode = 2
-  if (pageInfo.mode === 'mania') cleanBeatmap.mode = 3
+  if (pageInfo.mode === 'fruits') cleanBeatmap.mode = MODE_CATCH
+  if (pageInfo.mode === 'mania') cleanBeatmap.mode = MODE_MANIA
 
-  if (cleanBeatmap.mode !== 0 && cleanBeatmap.mode !== 1) {
+  if (
+    cleanBeatmap.mode !== MODE_STANDARD &&
+    cleanBeatmap.mode !== MODE_TAIKO
+    //cleanBeatmap.mode !== MODE_CATCH
+  ) {
     throw Error(UNSUPPORTED_GAMEMODE)
   }
 }

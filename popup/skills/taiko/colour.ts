@@ -18,6 +18,8 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
   }
 
   public strainValueOf(current: TaikoDifficultyHitObject): number {
+    // changing from/to a drum roll or a swell does not constitute a colour change.
+    // hits spaced more than a second apart are also exempt from colour strain.
     if (
       !(
         current.lastObject.objectType === ObjectType.Hit &&
@@ -26,18 +28,24 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
       )
     ) {
       this.monoHistory.clear()
+
       const currentHit = current.baseObject
       this.currentMonoLength = currentHit != null ? 1 : 0
       this.previousHitType = currentHit.hitType
+
       return 0.0
     }
+
     let objectStrain = 0.0
+
     if (
       this.previousHitType !== undefined &&
       current.hitType !== this.previousHitType
     ) {
       objectStrain = 1.0
+
       if (this.monoHistory.count < 2) {
+        // There needs to be at least two streaks to determine a strain.
         objectStrain = 0.0
       } else if (
         (this.monoHistory.get(this.monoHistory.count - 1) +
@@ -45,13 +53,17 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
           2 ==
         0
       ) {
+        // The last streak in the history is guaranteed to be a different type to the current streak.
+        // If the total number of notes in the two streaks is even, nullify this object's strain.
         objectStrain = 0.0
       }
+
       objectStrain *= this.repetitionPenalties()
       this.currentMonoLength = 1
     } else {
       this.currentMonoLength += 1
     }
+
     this.previousHitType = current.hitType
     return objectStrain
   }
@@ -59,13 +71,16 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
   private repetitionPenalties(): number {
     const mostRecentPatternsToCompare = 2
     let penalty = 1.0
+
     this.monoHistory.enqueue(this.currentMonoLength)
+
     for (
       let start = this.monoHistory.count - mostRecentPatternsToCompare - 1;
       start >= 0;
       start--
     ) {
       if (!this.isSamePattern(start, mostRecentPatternsToCompare)) continue
+
       let notesSince = 0
       this.monoHistory.array.forEach((num, i) => {
         if (i >= start) notesSince += num
@@ -73,6 +88,7 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
       penalty *= this.repetitionPenalty(notesSince)
       break
     }
+
     return penalty
   }
 
@@ -89,6 +105,7 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
       )
         return false
     }
+
     return true
   }
 
