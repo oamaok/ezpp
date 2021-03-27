@@ -76,11 +76,9 @@ const MODE_MANIA = 3
 const setSongDetails = (metadataInOriginalLanguage: boolean) => {
   if (!cleanBeatmap) return
 
-  const unicode = metadataInOriginalLanguage ? '_unicode' : ''
-  // @ts-expect-error
-  titleElement.innerText = cleanBeatmap['title' + unicode]
-  // @ts-expect-error
-  artistElement.innerText = cleanBeatmap['artist' + unicode]
+  const { artist, artist_unicode, title, title_unicode } = cleanBeatmap
+  titleElement.innerText = metadataInOriginalLanguage ? (title_unicode || title) : title
+  artistElement.innerText = metadataInOriginalLanguage ? (artist_unicode || artist) : artist
 }
 
 const getMaxCombo = () => {
