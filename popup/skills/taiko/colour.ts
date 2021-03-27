@@ -5,23 +5,23 @@ import LimitedCapacityQueue from '../../util/limitedCapacityQueue'
 import Skill from '../skill'
 
 export const MONO_HISTORY_MAX_LENGTH = 5
+export const MOST_RECENT_PATTERNS_TO_COMPARE = 2
 
 export default class Colour extends Skill<TaikoDifficultyHitObject> {
+  public skillMultiplier = 1
+  public strainDecayBase = 0.4
   private readonly monoHistory = new LimitedCapacityQueue<number>(
     MONO_HISTORY_MAX_LENGTH
   )
   private previousHitType?: HitType
-  private currentMonoLength = 0
-  public skillMultiplier = 1.0
-  public strainDecayBase = 0.4
+  private currentMonoLength: number = 0
+  private index = 0
 
   public constructor(mods: number) {
     super(mods)
   }
 
   public strainValueOf(current: TaikoDifficultyHitObject): number {
-    // changing from/to a drum roll or a swell does not constitute a colour change.
-    // hits spaced more than a second apart are also exempt from colour strain.
     if (
       !(
         current.lastObject.objectType === ObjectType.Hit &&
@@ -46,8 +46,8 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
     let objectStrain = 0.0
 
     if (
-      this.previousHitType !== undefined &&
-      current.hitType !== this.previousHitType
+      this.previousHitType != undefined &&
+      current.hitType != this.previousHitType
     ) {
       // The colour has changed.
       objectStrain = 1.0
@@ -61,33 +61,40 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
           2 ==
         0
       ) {
-        // The last streak in the history is guaranteed to be a different type to the current streak.
-        // If the total number of notes in the two streaks is even, nullify this object's strain.
         objectStrain = 0.0
       }
 
       objectStrain *= this.repetitionPenalties()
       this.currentMonoLength = 1
     } else {
+      if (this.index < 300) {
+        //console.log('Index: ' + this.index + '-1, not calculating objectStrain: matches prevHitType: ' + this.previousHitType + ' vs. ' + current.hitType)
+      }
       this.currentMonoLength += 1
     }
 
+    if (objectStrain !== 0 && this.index < 300) {
+      //console.log('Index: ' + this.index + '-2, objStrain: ' + objectStrain + ', currentStrain: ' + this.currentStrain + ', curML: ' + this.currentMonoLength + ', peak: ' + this.currentSectionPeak + ', prev: ' + this.previousHitType, JSON.stringify(this.monoHistory.getArray()))
+    }
+    if (this.index < 300) {
+      //console.log('Index: ' + this.index + '-3, obj: ' + JSON.stringify(current))
+    }
     this.previousHitType = current.hitType
+    this.index++
     return objectStrain
   }
 
   private repetitionPenalties(): number {
-    const mostRecentPatternsToCompare = 2
     let penalty = 1.0
 
     this.monoHistory.enqueue(this.currentMonoLength)
 
     for (
-      let start = this.monoHistory.count - mostRecentPatternsToCompare - 1;
+      let start = this.monoHistory.count - MOST_RECENT_PATTERNS_TO_COMPARE - 1;
       start >= 0;
       start--
     ) {
-      if (!this.isSamePattern(start, mostRecentPatternsToCompare)) continue
+      if (!this.isSamePattern(start, MOST_RECENT_PATTERNS_TO_COMPARE)) continue
 
       let notesSince = 0
       for (let i = start; i < this.monoHistory.count; i++) {
@@ -100,25 +107,22 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
     return penalty
   }
 
-  private isSamePattern(
-    start: number,
-    mostRecentPatternsToCompare: number
-  ): boolean {
+  private isSamePattern(start: number, mostRecentPatternsToCompare: number) {
     for (let i = 0; i < mostRecentPatternsToCompare; i++) {
       if (
-        (this.monoHistory.get(start + i) | 0) !==
-        (this.monoHistory.get(
+        this.monoHistory.get(start + i) !=
+        this.monoHistory.get(
           this.monoHistory.count - mostRecentPatternsToCompare + i
-        ) |
-          0)
-      )
+        )
+      ) {
         return false
+      }
     }
 
     return true
   }
 
-  private repetitionPenalty(notesSince: number): number {
+  private repetitionPenalty(notesSince: number) {
     return Math.min(1.0, 0.032 * notesSince)
   }
 }

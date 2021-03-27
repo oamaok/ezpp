@@ -30,7 +30,7 @@ export default class StaminaCheeseDetector {
     let lastMarkEnd = 0
     this.objects.forEach((obj, i) => {
       history.enqueue(obj)
-      if (!history.isFull()) return
+      if (!history.full) return
       if (!this.containsPatternRepeat(history, patternLength)) {
         indexBeforeLastRepeat = i - history.count + 1
         return

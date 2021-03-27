@@ -16,6 +16,7 @@ import { PageInfo } from './util/pageInfo'
 import { ParsedCatchResult } from './objects/catch/parsedCatchResult'
 import Mth from './util/mth'
 import { TimingPoint } from './util/timingPoint'
+import Console from './util/console'
 
 require('./notifications')
 
@@ -131,6 +132,7 @@ const trackError = (error: ErrorEvent | Error): any => {
   }
   const name = error instanceof ErrorEvent ? error.error.name : error.name
   const stack = error instanceof ErrorEvent ? error.error.stack : error.stack
+  Console.error(stack)
 
   const report = {
     version: manifest.version,
@@ -237,6 +239,7 @@ const calculate = () => {
           parsedTaikoResult,
           !!pageInfo.convert
         )
+        Console.log('osu!taiko star rating calculation result:', attr)
         pageInfo.beatmap.max_combo = attr.maxCombo
         resetCombo() // we changed max combo above, so we need to apply changes here.
         stars = { total: attr.starRating }
@@ -378,7 +381,7 @@ const attemptToFetchBeatmap = (id: number, attempts: number): Promise<string> =>
 
 const processBeatmap = (rawBeatmap: string) => {
   const { map } = new ojsama.parser().feed(rawBeatmap)
-  parsedTaikoResult = taikoReader.feed(rawBeatmap)
+  parsedTaikoResult = taikoReader.feed(rawBeatmap, map.mode !== MODE_TAIKO)
   parsedCatchResult = catchReader.feed(rawBeatmap)
   timingPoints = timingsReader.feed(rawBeatmap)
 

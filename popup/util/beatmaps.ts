@@ -37,7 +37,7 @@ export namespace beatmaps {
     return theTiming.ms_per_beat
   }
 
-  // TODO: i think it's ok, but it may be wrong
+  // TODO(acrylic-style): i think it's ok, but it may be wrong
   export const getSpeedMultiplierAt = (map: beatmap, time: number): number => {
     let i = Number.MAX_VALUE
     let value: timing = map.timing_points[0] // default

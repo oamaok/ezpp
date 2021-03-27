@@ -5,6 +5,7 @@ import { Precision } from '../util/precision'
 import { ObjectType } from '../objects/taiko/objectType'
 import Mth from '../util/mth'
 import Swell from '../objects/taiko/swell'
+import { HitType } from '../objects/taiko/hitType'
 
 // Do NOT remove Math.fround, this is VERY IMPORTANT.
 // taiko conversion will fail if you remove Math.fround.
@@ -35,12 +36,15 @@ export const convertHitObject = (
   if (obj.type & ojsama.objtypes.slider) {
     const res = shouldConvertSliderToHits(obj, map, mods, isForCurrentRuleset)
     if (res.shouldConvertSliderToHits) {
-      // int i = 0; here on osu!lazer, but not required because we have hitsounds property on TaikoObject.
+      let i = 0
       for (
         let j = obj.time;
         j <= obj.time + res.taikoDuration + res.tickSpacing / 8;
         j += res.tickSpacing
       ) {
+        let hitSounds = obj.edgeSounds[i] || 0
+        const hitType =
+          hitSounds & 8 || hitSounds & 2 ? HitType.Rim : HitType.Centre
         const taikoObject = new TaikoObject(
           {
             time: j,
@@ -48,11 +52,15 @@ export const convertHitObject = (
             typestr: obj.typestr,
           },
           ObjectType.Hit,
-          obj.hitType,
-          obj.hitSounds
+          hitType,
+          obj.hitSounds,
+          []
         )
         taikoObject.time = j
         result.push(taikoObject)
+
+        i = (i + 1) % obj.edgeSounds.length
+
         if (Precision.almostEquals(0, res.tickSpacing)) break
       }
     } else {
@@ -60,7 +68,8 @@ export const convertHitObject = (
         obj.hitObject,
         ObjectType.DrumRoll,
         obj.hitType,
-        obj.hitSounds
+        obj.hitSounds,
+        []
       )
       const sl = obj.data as slider
       taikoObject.data = {
@@ -80,9 +89,7 @@ export const convertHitObject = (
       Math.max(1, (swell.duration / 1000) * hitMultiplier) | 0
     result.push(swell)
   } else {
-    result.push(
-      new TaikoObject(obj.hitObject, ObjectType.Hit, obj.hitType, obj.hitSounds)
-    )
+    result.push(obj) // obj type is circle
   }
   return result
 }

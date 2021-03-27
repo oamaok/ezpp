@@ -40,7 +40,8 @@ export const createDifficultyHitObjects = (
           beatmaps.getHitObjectOrDefaultAt(map, obj.time, obj),
           obj.objectType,
           obj.hitType,
-          obj.hitSounds
+          obj.hitSounds,
+          obj.edgeSounds
         ).setSpinnerEndTime(obj.spinnerEndTime)
       )
   } else {
@@ -49,7 +50,8 @@ export const createDifficultyHitObjects = (
         obj,
         parsedTaikoResult.objects[i].objectType,
         parsedTaikoResult.objects[i].hitType,
-        parsedTaikoResult.objects[i].hitSounds
+        parsedTaikoResult.objects[i].hitSounds,
+        parsedTaikoResult.objects[i].edgeSounds
       ).setSpinnerEndTime(parsedTaikoResult.objects[i].spinnerEndTime)
     )
   }

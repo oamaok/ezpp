@@ -8,5 +8,6 @@ export type ParsedTaikoObject = {
   objectType: ObjectType
   hitType: HitType
   spinnerEndTime?: number
+  edgeSounds: Array<number>
   typestr: () => string
 }

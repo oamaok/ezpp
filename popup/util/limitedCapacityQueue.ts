@@ -1,10 +1,10 @@
 export default class LimitedCapacityQueue<T> {
-  public capacity: number
-  public array: Array<T> = []
+  public readonly capacity: number
+  private readonly array: Array<T>
 
   // Markers tracking the queue's first and last element.
-  public start = 0
-  public end = -1
+  private start = 0
+  private end = -1
 
   /**
    * The number of elements in the queue.
@@ -17,6 +17,7 @@ export default class LimitedCapacityQueue<T> {
   constructor(capacity: number) {
     if (capacity < 0) throw new Error('Invalid capacity: ' + capacity)
     this.capacity = capacity
+    this.array = new Array(capacity)
     this.clear()
   }
 
@@ -32,7 +33,7 @@ export default class LimitedCapacityQueue<T> {
   /**
    * Whether the queue is full (adding any new items will cause removing existing ones).
    */
-  public isFull(): boolean {
+  public get full(): boolean {
     return this.count === this.capacity
   }
 
@@ -77,7 +78,7 @@ export default class LimitedCapacityQueue<T> {
   }
 
   public forEach(action: (value: T) => void): void {
-    this.array.forEach((e) => action(e))
+    this.getArray().forEach((e) => action(e))
   }
 
   // throws error if T isn't a number
@@ -85,8 +86,18 @@ export default class LimitedCapacityQueue<T> {
     let n = Number.MAX_VALUE
     this.forEach((e) => {
       const c = (e as unknown) as number
+      if (isNaN(c)) throw new Error(e + ' is not a number')
       if (n > c) n = c
     })
     return n
+  }
+
+  public getArray(): Array<T> {
+    if (this.count === 0) return []
+    const res: Array<T> = []
+    for (let i = 0; i < this.count; i++) {
+      res.push(this.array[(this.start + i) % this.capacity])
+    }
+    return res
   }
 }

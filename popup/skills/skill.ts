@@ -7,24 +7,24 @@ export default abstract class Skill<T extends DifficultyHitObject> {
   public abstract skillMultiplier: number
   public abstract strainDecayBase: number
   public decayWeight = 0.9
-  private currentStrain = 1 // it's protected in osu!lazer, but we don't need protected access for now (mania will use this field though)
+  #currentStrain = 1 // it's protected in osu!lazer, but we don't need protected access for now (mania will use this field though)
   public mods: number
-  private currentSectionPeak = 1
+  protected currentSectionPeak = 1
   protected readonly previous = new LimitedCapacityStack<T>(2)
 
   public constructor(mods: number) {
     this.strainPeaks = []
     this.decayWeight = 0.9
-    this.currentStrain = 1
+    this.#currentStrain = 1
     this.mods = mods
     this.currentSectionPeak = 1
   }
 
   public process(current: T): void {
-    this.currentStrain *= this.strainDecay(current.deltaTime)
-    this.currentStrain += this.strainValueOf(current) * this.skillMultiplier
+    this.#currentStrain *= this.strainDecay(current.deltaTime)
+    this.#currentStrain += this.strainValueOf(current) * this.skillMultiplier
     this.currentSectionPeak = Math.max(
-      this.currentStrain,
+      this.#currentStrain,
       this.currentSectionPeak
     )
     this.previous.push(current)
@@ -52,7 +52,7 @@ export default abstract class Skill<T extends DifficultyHitObject> {
    */
   protected getPeakStrain(time: number): number {
     return (
-      this.currentStrain *
+      this.#currentStrain *
       this.strainDecay(time - this.previous.get(0).baseObject.time)
     )
   }
@@ -73,5 +73,9 @@ export default abstract class Skill<T extends DifficultyHitObject> {
         weight *= this.decayWeight
       })
     return difficulty
+  }
+
+  public get currentStrain() {
+    return this.#currentStrain
   }
 }

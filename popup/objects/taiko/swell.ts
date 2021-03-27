@@ -12,7 +12,7 @@ export default class Swell extends TaikoObject {
     hitType: HitType,
     hitSounds: number
   ) {
-    super(hitObject, ObjectType.Swell, hitType, hitSounds)
+    super(hitObject, ObjectType.Swell, hitType, hitSounds, [])
   }
 
   public createNestedHitObjects(): void {
@@ -23,7 +23,8 @@ export default class Swell extends TaikoObject {
           this.hitObject,
           ObjectType.SwellTick,
           this.hitType,
-          this.hitSounds
+          this.hitSounds,
+          []
         )
       )
     }
