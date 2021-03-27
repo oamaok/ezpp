@@ -6,16 +6,16 @@ import Skill from '../skill'
 export const HISTORY_MAX_LENGTH = 2
 
 export default class Stamina extends Skill<TaikoDifficultyHitObject> {
-  public notePairDurationHistory = new LimitedCapacityQueue<number>(
+  private readonly notePairDurationHistory = new LimitedCapacityQueue<number>(
     HISTORY_MAX_LENGTH
   )
-  public offhandObjectDuration = Number.MAX_VALUE
-  public hand: number
+  private offhandObjectDuration = 1.7976931348623157e308
+  private readonly hand: number
+  public skillMultiplier = 1.0
+  public strainDecayBase = 0.4
 
   public constructor(mods: number, rightHand: boolean) {
     super(mods)
-    this.skillMultiplier = 1.0
-    this.strainDecayBase = 0.4
     this.hand = rightHand ? 1 : 0
   }
 
@@ -33,11 +33,9 @@ export default class Stamina extends Skill<TaikoDifficultyHitObject> {
         current.deltaTime + this.offhandObjectDuration
       )
 
-      let shortestRecentNote = Number.MAX_VALUE
-      this.notePairDurationHistory.forEach((n) => {
-        if (n < shortestRecentNote) shortestRecentNote = n
-      })
+      const shortestRecentNote = this.notePairDurationHistory.min()
       objectStrain += this.speedBonus(shortestRecentNote)
+
       if (current.staminaCheese) {
         objectStrain *= this.cheesePenalty(
           current.deltaTime + this.offhandObjectDuration
@@ -45,6 +43,8 @@ export default class Stamina extends Skill<TaikoDifficultyHitObject> {
       }
       return objectStrain
     }
+
+    this.offhandObjectDuration = current.deltaTime
     return 0
   }
 
@@ -56,6 +56,7 @@ export default class Stamina extends Skill<TaikoDifficultyHitObject> {
 
   private speedBonus(notePairDuration: number): number {
     if (notePairDuration >= 200) return 0
+
     let bonus = 200 - notePairDuration
     bonus *= bonus
     return bonus / 100000

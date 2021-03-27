@@ -237,7 +237,6 @@ const calculate = () => {
           parsedTaikoResult,
           !!pageInfo.convert
         )
-        // console.log(attr) // TODO: uncomment me if you're debugging for ezpp#103
         pageInfo.beatmap.max_combo = attr.maxCombo
         resetCombo() // we changed max combo above, so we need to apply changes here.
         stars = { total: attr.starRating }

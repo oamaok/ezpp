@@ -3,19 +3,17 @@ import Arrays from '../util/arrays'
 import LimitedCapacityStack from '../util/limitedCapacityStack'
 
 export default abstract class Skill<T extends DifficultyHitObject> {
-  public strainPeaks: Array<number> = []
-  public skillMultiplier = 1.0
-  public strainDecayBase = 1.0
+  public readonly strainPeaks: Array<number> = []
+  public abstract skillMultiplier: number
+  public abstract strainDecayBase: number
   public decayWeight = 0.9
-  private currentStrain = 1
+  private currentStrain = 1 // it's protected in osu!lazer, but we don't need protected access for now (mania will use this field though)
   public mods: number
-  public currentSectionPeak = 1
+  private currentSectionPeak = 1
   protected readonly previous = new LimitedCapacityStack<T>(2)
 
   public constructor(mods: number) {
     this.strainPeaks = []
-    this.skillMultiplier = 1.0
-    this.strainDecayBase = 1.0
     this.decayWeight = 0.9
     this.currentStrain = 1
     this.mods = mods

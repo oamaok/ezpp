@@ -79,4 +79,14 @@ export default class LimitedCapacityQueue<T> {
   public forEach(action: (value: T) => void): void {
     this.array.forEach((e) => action(e))
   }
+
+  // throws error if T isn't a number
+  public min(): number {
+    let n = Number.MAX_VALUE
+    this.forEach((e) => {
+      const c = (e as unknown) as number
+      if (n > c) n = c
+    })
+    return n
+  }
 }

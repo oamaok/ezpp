@@ -7,14 +7,16 @@ import Skill from '../skill'
 export const MONO_HISTORY_MAX_LENGTH = 5
 
 export default class Colour extends Skill<TaikoDifficultyHitObject> {
-  public monoHistory = new LimitedCapacityQueue<number>(MONO_HISTORY_MAX_LENGTH)
-  public previousHitType?: HitType
-  public currentMonoLength = 0
+  private readonly monoHistory = new LimitedCapacityQueue<number>(
+    MONO_HISTORY_MAX_LENGTH
+  )
+  private previousHitType?: HitType
+  private currentMonoLength = 0
+  public skillMultiplier = 1.0
+  public strainDecayBase = 0.4
 
   public constructor(mods: number) {
     super(mods)
-    this.skillMultiplier = 1.0
-    this.strainDecayBase = 0.4
   }
 
   public strainValueOf(current: TaikoDifficultyHitObject): number {
@@ -30,8 +32,13 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
       this.monoHistory.clear()
 
       const currentHit = current.baseObject
-      this.currentMonoLength = currentHit != null ? 1 : 0
-      this.previousHitType = currentHit.hitType
+      if (currentHit.objectType === ObjectType.Hit) {
+        this.currentMonoLength = 1
+        this.previousHitType = currentHit.hitType
+      } else {
+        this.currentMonoLength = 0
+        this.previousHitType = undefined
+      }
 
       return 0.0
     }
@@ -42,6 +49,7 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
       this.previousHitType !== undefined &&
       current.hitType !== this.previousHitType
     ) {
+      // The colour has changed.
       objectStrain = 1.0
 
       if (this.monoHistory.count < 2) {
@@ -82,9 +90,9 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
       if (!this.isSamePattern(start, mostRecentPatternsToCompare)) continue
 
       let notesSince = 0
-      this.monoHistory.array.forEach((num, i) => {
-        if (i >= start) notesSince += num
-      })
+      for (let i = start; i < this.monoHistory.count; i++) {
+        notesSince += this.monoHistory.get(i)
+      }
       penalty *= this.repetitionPenalty(notesSince)
       break
     }
@@ -98,10 +106,11 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
   ): boolean {
     for (let i = 0; i < mostRecentPatternsToCompare; i++) {
       if (
-        this.monoHistory.get(start + i) !==
-        this.monoHistory.get(
+        (this.monoHistory.get(start + i) | 0) !==
+        (this.monoHistory.get(
           this.monoHistory.count - mostRecentPatternsToCompare + i
-        )
+        ) |
+          0)
       )
         return false
     }

@@ -14,11 +14,11 @@ export default class Rhythm extends Skill<TaikoDifficultyHitObject> {
   )
   public notesSinceRhythmChange = 0
   public localCurrentStrain = 0
+  public skillMultiplier = 10
+  public strainDecayBase = 0
 
   public constructor(mods: number) {
     super(mods)
-    this.skillMultiplier = 10
-    this.strainDecayBase = 0
   }
 
   public strainValueOf(current: TaikoDifficultyHitObject): number {
