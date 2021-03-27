@@ -82,7 +82,7 @@ export default class Rhythm extends Skill<TaikoDifficultyHitObject> {
       if (
         this.rhythmHistory.get(start + i).rhythm !=
         this.rhythmHistory.get(
-          this.rhythmHistory.count - mostRecentPatternsToCompare + i + 1
+          this.rhythmHistory.count - mostRecentPatternsToCompare + i
         ).rhythm
       )
         return false
