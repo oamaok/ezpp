@@ -13,6 +13,7 @@ export default class Rhythm extends Skill<TaikoDifficultyHitObject> {
     RHYTHM_HISTORY_MAX_LENGTH
   )
   public notesSinceRhythmChange = 0
+  public localCurrentStrain = 0
 
   public constructor(mods: number) {
     super(mods)
@@ -26,7 +27,7 @@ export default class Rhythm extends Skill<TaikoDifficultyHitObject> {
       return 0.0
     }
 
-    this.currentStrain *= STRAIN_DECAY
+    this.localCurrentStrain *= STRAIN_DECAY
 
     this.notesSinceRhythmChange += 1
 
@@ -44,8 +45,8 @@ export default class Rhythm extends Skill<TaikoDifficultyHitObject> {
     // careful - needs to be done here since calls above read this value
     this.notesSinceRhythmChange = 0
 
-    this.currentStrain += objectStrain
-    return this.currentStrain
+    this.localCurrentStrain += objectStrain
+    return this.localCurrentStrain
   }
 
   private repetitionPenalties(hitObject: TaikoDifficultyHitObject): number {
@@ -109,7 +110,7 @@ export default class Rhythm extends Skill<TaikoDifficultyHitObject> {
   }
 
   private resetRhythmAndStrain(): void {
-    this.currentStrain = 0.0
+    this.localCurrentStrain = 0.0
     this.notesSinceRhythmChange = 0
   }
 }

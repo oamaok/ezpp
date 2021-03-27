@@ -7,7 +7,7 @@ export default abstract class Skill<T extends DifficultyHitObject> {
   public skillMultiplier = 1.0
   public strainDecayBase = 1.0
   public decayWeight = 0.9
-  public currentStrain = 1
+  private currentStrain = 1
   public mods: number
   public currentSectionPeak = 1
   protected readonly previous = new LimitedCapacityStack<T>(2)
