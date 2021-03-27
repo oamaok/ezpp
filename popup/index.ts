@@ -77,8 +77,12 @@ const setSongDetails = (metadataInOriginalLanguage: boolean) => {
   if (!cleanBeatmap) return
 
   const { artist, artist_unicode, title, title_unicode } = cleanBeatmap
-  titleElement.innerText = metadataInOriginalLanguage ? (title_unicode || title) : title
-  artistElement.innerText = metadataInOriginalLanguage ? (artist_unicode || artist) : artist
+  titleElement.innerText = metadataInOriginalLanguage
+    ? title_unicode || title
+    : title
+  artistElement.innerText = metadataInOriginalLanguage
+    ? artist_unicode || artist
+    : artist
 }
 
 const getMaxCombo = () => {
