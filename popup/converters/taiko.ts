@@ -23,11 +23,6 @@ export const convertHitObjects = (
   const result = objects.flatMap((obj) =>
     convertHitObject(obj, map, mods, isForCurrentRuleset)
   )
-  Console.log(
-    'Sliders:',
-    result.filter((e) => e.objectType === ObjectType.DrumRoll)
-  )
-  Console.log('All objects:', result)
   return result.sort((a, b) => a.time - b.time)
 }
 
@@ -148,14 +143,6 @@ export const shouldConvertSliderToHits = (
     beatLength / map.tick_rate,
     taikoDuration / spans
   )
-
-  /*
-  Console.log(
-    `${obj.time}: s: ${spans}, d: ${distance}, bL: ${beatLength}, bL2: ${bL2}, bbL: ${ms_per_beat}, tV: ${taikoVelocity}, tD: ${taikoDuration}, sspd: ${sliderScoringPointDistance}, oV: ${osuVelocity}, tS: ${tickSpacing}, spMul: ${speedMultiplier}, data:`,
-    obj,
-    ', timings:'
-  )
-  */
 
   return {
     shouldConvertSliderToHits:

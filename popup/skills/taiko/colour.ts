@@ -15,7 +15,6 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
   )
   private previousHitType?: HitType
   private currentMonoLength: number = 0
-  private index = 0
 
   public constructor(mods: number) {
     super(mods)
@@ -67,20 +66,10 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
       objectStrain *= this.repetitionPenalties()
       this.currentMonoLength = 1
     } else {
-      if (this.index < 300) {
-        //console.log('Index: ' + this.index + '-1, not calculating objectStrain: matches prevHitType: ' + this.previousHitType + ' vs. ' + current.hitType)
-      }
       this.currentMonoLength += 1
     }
 
-    if (objectStrain !== 0 && this.index < 300) {
-      //console.log('Index: ' + this.index + '-2, objStrain: ' + objectStrain + ', currentStrain: ' + this.currentStrain + ', curML: ' + this.currentMonoLength + ', peak: ' + this.currentSectionPeak + ', prev: ' + this.previousHitType, JSON.stringify(this.monoHistory.getArray()))
-    }
-    if (this.index < 300) {
-      //console.log('Index: ' + this.index + '-3, obj: ' + JSON.stringify(current))
-    }
     this.previousHitType = current.hitType
-    this.index++
     return objectStrain
   }
 
