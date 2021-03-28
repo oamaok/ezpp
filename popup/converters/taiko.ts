@@ -41,7 +41,6 @@ export const convertHitObject = (
   // const strong = obj.hitSounds & 4 // we don't need this thing
   if (obj.type & ojsama.objtypes.slider) {
     const res = shouldConvertSliderToHits(obj, map, mods, isForCurrentRuleset)
-    Console.log(`${obj.time}:`, res)
     if (res.shouldConvertSliderToHits) {
       let i = 0
       for (
