@@ -32,7 +32,16 @@ export namespace beatmaps {
     const theTiming = getNearestTimingPointAt(map, time)
     if (theTiming.ms_per_beat < 0) {
       const uninheritedTiming = getTimingPointAt(map, time)
-      return uninheritedTiming.ms_per_beat * (-100 / theTiming.ms_per_beat)
+      return uninheritedTiming.ms_per_beat / getSpeedMultiplierAt(map, time)
+    }
+    return theTiming.ms_per_beat
+  }
+
+  export const getMsPerBeatAt = (map: beatmap, time: number): number => {
+    const theTiming = getNearestTimingPointAt(map, time)
+    if (theTiming.ms_per_beat < 0) {
+      const uninheritedTiming = getTimingPointAt(map, time)
+      return uninheritedTiming.ms_per_beat
     }
     return theTiming.ms_per_beat
   }
@@ -41,13 +50,20 @@ export namespace beatmaps {
   export const getSpeedMultiplierAt = (map: beatmap, time: number): number => {
     let i = Number.MAX_VALUE
     let value: timing = map.timing_points[0] // default
+    let exactMatch: timing | undefined
     map.timing_points.forEach((timing) => {
-      let n = timing.time - time
-      if (n < i) {
+      if (exactMatch) return
+      if (timing.time === time) {
+        exactMatch = timing
+        return
+      }
+      let n = time - timing.time
+      if (n > 0 && n < i && timing.time <= time) {
         i = n
         value = timing
       }
     })
+    if (exactMatch) value = exactMatch
     return value.ms_per_beat > 0 ? 1 : -100 / value.ms_per_beat
   }
 

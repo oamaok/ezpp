@@ -6,6 +6,7 @@ import { ObjectType } from '../objects/taiko/objectType'
 import Mth from '../util/mth'
 import Swell from '../objects/taiko/swell'
 import { HitType } from '../objects/taiko/hitType'
+import Console from '../util/console'
 
 // Do NOT remove Math.fround, this is VERY IMPORTANT.
 // taiko conversion will fail if you remove Math.fround.
@@ -22,6 +23,11 @@ export const convertHitObjects = (
   const result = objects.flatMap((obj) =>
     convertHitObject(obj, map, mods, isForCurrentRuleset)
   )
+  Console.log(
+    'Sliders:',
+    result.filter((e) => e.objectType === ObjectType.DrumRoll)
+  )
+  Console.log('All objects:', result)
   return result.sort((a, b) => a.time - b.time)
 }
 
@@ -35,6 +41,7 @@ export const convertHitObject = (
   // const strong = obj.hitSounds & 4 // we don't need this thing
   if (obj.type & ojsama.objtypes.slider) {
     const res = shouldConvertSliderToHits(obj, map, mods, isForCurrentRuleset)
+    Console.log(`${obj.time}:`, res)
     if (res.shouldConvertSliderToHits) {
       let i = 0
       for (
@@ -111,7 +118,7 @@ export const shouldConvertSliderToHits = (
   const spans = slider.repetitions ?? 1
   const distance = slider.distance * spans * LEGACY_VELOCITY_MULTIPLIER
 
-  const ms_per_beat = beatmaps.getAdjustedMsPerBeatAt(map, obj.time)
+  const ms_per_beat = beatmaps.getMsPerBeatAt(map, obj.time)
   const speedMultiplier = beatmaps.getSpeedMultiplierAt(map, obj.time)
 
   let beatLength = ms_per_beat / speedMultiplier
@@ -133,6 +140,7 @@ export const shouldConvertSliderToHits = (
 
   const osuVelocity = taikoVelocity * (1000 / beatLength)
 
+  const bL2 = beatLength
   if (map.format_version >= 8) {
     beatLength = ms_per_beat
   }
@@ -141,6 +149,14 @@ export const shouldConvertSliderToHits = (
     beatLength / map.tick_rate,
     taikoDuration / spans
   )
+
+  /*
+  Console.log(
+    `${obj.time}: s: ${spans}, d: ${distance}, bL: ${beatLength}, bL2: ${bL2}, bbL: ${ms_per_beat}, tV: ${taikoVelocity}, tD: ${taikoDuration}, sspd: ${sliderScoringPointDistance}, oV: ${osuVelocity}, tS: ${tickSpacing}, spMul: ${speedMultiplier}, data:`,
+    obj,
+    ', timings:'
+  )
+  */
 
   return {
     shouldConvertSliderToHits:
