@@ -7,13 +7,10 @@ import { BEATMAP_URL_REGEX } from '../common/constants'
 import { loadAnalytics } from './analytics'
 import * as std from './calculators/standard'
 import * as taiko from './calculators/taiko'
-import * as ctb from './calculators/catch' // of course, 'catch' is reserved to we use 'ctb' here.
 import * as taikoReader from './objects/taiko/taikoReader'
-import * as catchReader from './objects/catch/catchReader'
 import * as timingsReader from './util/timingsReader'
 import { ParsedTaikoResult } from './objects/taiko/parsedTaikoResult'
 import { PageInfo } from './util/pageInfo'
-import { ParsedCatchResult } from './objects/catch/parsedCatchResult'
 import Mth from './util/mth'
 import { TimingPoint } from './util/timingPoint'
 import Console from './util/console'
@@ -53,7 +50,6 @@ versionElement.innerText = `ezpp! v${manifest.version}`
 let currentUrl: string
 let cleanBeatmap: ojsama.beatmap
 let parsedTaikoResult: ParsedTaikoResult
-let parsedCatchResult: ParsedCatchResult
 let timingPoints: Array<TimingPoint>
 let pageInfo: PageInfo
 
@@ -384,7 +380,6 @@ const attemptToFetchBeatmap = (id: number, attempts: number): Promise<string> =>
 const processBeatmap = (rawBeatmap: string) => {
   const { map } = new ojsama.parser().feed(rawBeatmap)
   parsedTaikoResult = taikoReader.feed(rawBeatmap, map.mode !== MODE_TAIKO)
-  parsedCatchResult = catchReader.feed(rawBeatmap)
   timingPoints = timingsReader.feed(rawBeatmap)
 
   cleanBeatmap = map
@@ -395,11 +390,7 @@ const processBeatmap = (rawBeatmap: string) => {
   if (pageInfo.mode === 'fruits') cleanBeatmap.mode = MODE_CATCH
   if (pageInfo.mode === 'mania') cleanBeatmap.mode = MODE_MANIA
 
-  if (
-    cleanBeatmap.mode !== MODE_STANDARD &&
-    cleanBeatmap.mode !== MODE_TAIKO
-    //cleanBeatmap.mode !== MODE_CATCH
-  ) {
+  if (cleanBeatmap.mode !== MODE_STANDARD && cleanBeatmap.mode !== MODE_TAIKO) {
     throw Error(UNSUPPORTED_GAMEMODE)
   }
 }
