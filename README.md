@@ -3,7 +3,14 @@
 ezpp! is a browser extension that allows you to calculate pp
 values for a beatmap without manually downloading the beatmap.
 
-## Prerequisities
+
+## Translating
+
+All translation efforts are warmly welcome! The base English translations can be found [here](https://github.com/oamaok/ezpp/blob/master/translations/en.json). After translating the file you should also add relevant information to [this file](https://github.com/oamaok/ezpp/blob/master/translations/languages.json), where the `code` field should match with the `.json` file you created. If you are unsure on how to edit the files, feel free to [raise an issue](https://github.com/oamaok/ezpp/issues/new) or ask away in the pull request.
+
+## Developing
+
+### Prerequisities
 
 Versions of software used at the time of writing:
 
@@ -14,14 +21,9 @@ v14.15.4
 1.22.4
 ```
 
-## Translating
+### Setup
 
-All translation efforts are warmly welcome! The base English translations can be found [here](https://github.com/oamaok/ezpp/blob/master/translations/en.json). After translating the file you should also add relevant information to [this file](https://github.com/oamaok/ezpp/blob/master/translations/languages.json), where the `code` field should match with the `.json` file you created. If you are unsure on how to edit the files, feel free to [raise an issue](https://github.com/oamaok/ezpp/issues/new) or ask away in the pull request.
-
-## Developing
-
-Setup after cloning the repository:
-
+Clone the repository and run the following commands.
 ```
 yarn
 ```
