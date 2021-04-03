@@ -1,38 +1,37 @@
-import ojsama from 'ojsama'
-import DifficultyHitObject from '../objects/difficultyHitObject.js'
+import DifficultyHitObject from '../objects/difficultyHitObject'
+import Arrays from '../util/arrays'
+import LimitedCapacityStack from '../util/limitedCapacityStack'
 
 export default abstract class Skill<T extends DifficultyHitObject> {
-  public strainPeaks: Array<number> = []
-  public skillMultiplier = 1.0
-  public strainDecayBase = 1.0
+  public readonly strainPeaks: Array<number> = []
+  public abstract skillMultiplier: number
+  public abstract strainDecayBase: number
   public decayWeight = 0.9
-  public currentStrain = 1
+  #currentStrain = 1 // it's protected in osu!lazer, but we don't need protected access for now (mania will use this field though)
   public mods: number
-  public currentSectionPeak = 1
-  public previous?: T
+  protected currentSectionPeak = 1
+  protected readonly previous = new LimitedCapacityStack<T>(2)
 
   public constructor(mods: number) {
     this.strainPeaks = []
-    this.skillMultiplier = 1.0
-    this.strainDecayBase = 1.0
     this.decayWeight = 0.9
-    this.currentStrain = 1
+    this.#currentStrain = 1
     this.mods = mods
     this.currentSectionPeak = 1
   }
 
   public process(current: T): void {
-    this.currentStrain *= this.strainDecay(current.deltaTime)
-    this.currentStrain += this.strainValueOf(current) * this.skillMultiplier
+    this.#currentStrain *= this.strainDecay(current.deltaTime)
+    this.#currentStrain += this.strainValueOf(current) * this.skillMultiplier
     this.currentSectionPeak = Math.max(
-      this.currentStrain,
+      this.#currentStrain,
       this.currentSectionPeak
     )
-    this.previous = current
+    this.previous.push(current)
   }
 
   public saveCurrentPeak(): void {
-    if (this.previous) {
+    if (this.previous.count > 0) {
       this.strainPeaks.push(this.currentSectionPeak)
     }
   }
@@ -42,7 +41,7 @@ export default abstract class Skill<T extends DifficultyHitObject> {
    * @param time The beginning of the new section in milliseconds.
    */
   public startNewSectionFrom(time: number): void {
-    if (this.previous) {
+    if (this.previous.count > 0) {
       this.currentSectionPeak = this.getPeakStrain(time)
     }
   }
@@ -51,11 +50,10 @@ export default abstract class Skill<T extends DifficultyHitObject> {
    * Retrieves the peak strain at a point in time.
    * @param time The time to retrieve the peak strain at.
    */
-  public getPeakStrain(time: number): number {
-    if (!this.previous) return 0
+  protected getPeakStrain(time: number): number {
     return (
-      this.currentStrain *
-      this.strainDecay(time - this.previous.baseObject.time)
+      this.#currentStrain *
+      this.strainDecay(time - this.previous.get(0).baseObject.time)
     )
   }
 
@@ -68,7 +66,7 @@ export default abstract class Skill<T extends DifficultyHitObject> {
   public getDifficultyValue(): number {
     let difficulty = 0
     let weight = 1
-    this.copyArray(this.strainPeaks)
+    Arrays.copyArray(this.strainPeaks)
       .sort((a, b) => b - a)
       .forEach((strain) => {
         difficulty += strain * weight
@@ -77,17 +75,7 @@ export default abstract class Skill<T extends DifficultyHitObject> {
     return difficulty
   }
 
-  /* utility methods */
-  public clamp(num: number, min: number, max: number): number {
-    if (num > max) return max
-    if (num < min) return min
-    return num
-  }
-
-  /**
-   * Creates a shallow copy of an array and returns it.
-   */
-  copyArray<E>(array: E[]): E[] {
-    return [...array]
+  public get currentStrain() {
+    return this.#currentStrain
   }
 }

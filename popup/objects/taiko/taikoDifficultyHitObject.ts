@@ -2,6 +2,7 @@ import DifficultyHitObject from '../difficultyHitObject'
 import TaikoDifficultyHitObjectRhythm from './taikoDifficultyHitObjectRhythm'
 import TaikoObject from './taikoObject'
 import { HitType } from './hitType'
+import Arrays from '../../util/arrays'
 
 export const COMMON_RHYTHMS = [
   new TaikoDifficultyHitObjectRhythm(1, 1, 0.0),
@@ -53,14 +54,9 @@ export default class TaikoDifficultyHitObject extends DifficultyHitObject {
   ) {
     const prevLength = (lastObject.time - lastLastObject.time) / clockRate
     const ratio = this.deltaTime / prevLength
-    let currentRhythm: TaikoDifficultyHitObjectRhythm = COMMON_RHYTHMS[0] // fallback
-    let currentRatio = Number.MAX_VALUE
-    COMMON_RHYTHMS.forEach((r) => {
-      if (Math.abs(r.ratio - ratio) < currentRatio) {
-        currentRatio = Math.abs(r.ratio - ratio)
-        currentRhythm = r
-      }
-    })
-    return currentRhythm
+
+    return Arrays.copyArray(COMMON_RHYTHMS).sort(
+      (a, b) => Math.abs(a.ratio - ratio) - Math.abs(b.ratio - ratio)
+    )[0]
   }
 }

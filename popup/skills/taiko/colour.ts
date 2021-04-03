@@ -5,16 +5,19 @@ import LimitedCapacityQueue from '../../util/limitedCapacityQueue'
 import Skill from '../skill'
 
 export const MONO_HISTORY_MAX_LENGTH = 5
+export const MOST_RECENT_PATTERNS_TO_COMPARE = 2
 
 export default class Colour extends Skill<TaikoDifficultyHitObject> {
-  public monoHistory = new LimitedCapacityQueue<number>(MONO_HISTORY_MAX_LENGTH)
-  public previousHitType?: HitType
-  public currentMonoLength = 0
+  public skillMultiplier = 1
+  public strainDecayBase = 0.4
+  private readonly monoHistory = new LimitedCapacityQueue<number>(
+    MONO_HISTORY_MAX_LENGTH
+  )
+  private previousHitType?: HitType
+  private currentMonoLength: number = 0
 
   public constructor(mods: number) {
     super(mods)
-    this.skillMultiplier = 1.0
-    this.strainDecayBase = 0.4
   }
 
   public strainValueOf(current: TaikoDifficultyHitObject): number {
@@ -26,18 +29,30 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
       )
     ) {
       this.monoHistory.clear()
+
       const currentHit = current.baseObject
-      this.currentMonoLength = currentHit != null ? 1 : 0
-      this.previousHitType = currentHit.hitType
+      if (currentHit.objectType === ObjectType.Hit) {
+        this.currentMonoLength = 1
+        this.previousHitType = currentHit.hitType
+      } else {
+        this.currentMonoLength = 0
+        this.previousHitType = undefined
+      }
+
       return 0.0
     }
+
     let objectStrain = 0.0
+
     if (
-      this.previousHitType !== undefined &&
-      current.hitType !== this.previousHitType
+      this.previousHitType != undefined &&
+      current.hitType != this.previousHitType
     ) {
+      // The colour has changed.
       objectStrain = 1.0
+
       if (this.monoHistory.count < 2) {
+        // There needs to be at least two streaks to determine a strain.
         objectStrain = 0.0
       } else if (
         (this.monoHistory.get(this.monoHistory.count - 1) +
@@ -47,52 +62,56 @@ export default class Colour extends Skill<TaikoDifficultyHitObject> {
       ) {
         objectStrain = 0.0
       }
+
       objectStrain *= this.repetitionPenalties()
       this.currentMonoLength = 1
     } else {
       this.currentMonoLength += 1
     }
+
     this.previousHitType = current.hitType
     return objectStrain
   }
 
   private repetitionPenalties(): number {
-    const mostRecentPatternsToCompare = 2
     let penalty = 1.0
+
     this.monoHistory.enqueue(this.currentMonoLength)
+
     for (
-      let start = this.monoHistory.count - mostRecentPatternsToCompare - 1;
+      let start = this.monoHistory.count - MOST_RECENT_PATTERNS_TO_COMPARE - 1;
       start >= 0;
       start--
     ) {
-      if (!this.isSamePattern(start, mostRecentPatternsToCompare)) continue
+      if (!this.isSamePattern(start, MOST_RECENT_PATTERNS_TO_COMPARE)) continue
+
       let notesSince = 0
-      this.monoHistory.array.forEach((num, i) => {
-        if (i >= start) notesSince += num
-      })
+      for (let i = start; i < this.monoHistory.count; i++) {
+        notesSince += this.monoHistory.get(i)
+      }
       penalty *= this.repetitionPenalty(notesSince)
       break
     }
+
     return penalty
   }
 
-  private isSamePattern(
-    start: number,
-    mostRecentPatternsToCompare: number
-  ): boolean {
+  private isSamePattern(start: number, mostRecentPatternsToCompare: number) {
     for (let i = 0; i < mostRecentPatternsToCompare; i++) {
       if (
-        this.monoHistory.get(start + i) !==
+        this.monoHistory.get(start + i) !=
         this.monoHistory.get(
           this.monoHistory.count - mostRecentPatternsToCompare + i
         )
-      )
+      ) {
         return false
+      }
     }
+
     return true
   }
 
-  private repetitionPenalty(notesSince: number): number {
+  private repetitionPenalty(notesSince: number) {
     return Math.min(1.0, 0.032 * notesSince)
   }
 }
