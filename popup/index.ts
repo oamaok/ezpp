@@ -194,7 +194,7 @@ const trackCalculate = (() => {
 
 const trackCalculateDebounced = debounce(trackCalculate, 500)
 
-const calculate = () => {
+const calculate = (first: boolean = false) => {
   try {
     const { modifiers, accuracy, combo, misses } = getCalculationSettings()
 
@@ -239,7 +239,9 @@ const calculate = () => {
         )
         Console.log('osu!taiko star rating calculation result:', attr)
         pageInfo.beatmap.max_combo = attr.maxCombo
-        resetCombo() // we changed max combo above, so we need to apply changes here.
+        if (first) {
+          resetCombo() // we changed max combo above, so we need to apply changes here.
+        }
         stars = { total: attr.starRating }
         pp = taiko.calculatePerformance(
           cleanBeatmap,
@@ -476,9 +478,9 @@ const initializeExtension = async ({
       }
     })
 
-    accuracyElement.addEventListener('input', calculate)
-    comboElement.addEventListener('input', calculate)
-    missesElement.addEventListener('input', calculate)
+    accuracyElement.addEventListener('input', () => calculate())
+    comboElement.addEventListener('input', () => calculate())
+    missesElement.addEventListener('input', () => calculate())
 
     fcResetButton.addEventListener('click', () => {
       resetCombo()
@@ -488,7 +490,7 @@ const initializeExtension = async ({
     // Set the combo to the max combo by default
     resetCombo()
 
-    calculate()
+    calculate(true)
   } catch (err) {
     displayError(err)
   }
