@@ -1,9 +1,9 @@
-import { BEATMAP_URL_REGEX } from '../common/constants'
+import { testRegex } from '../common/constants'
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.url!.match(BEATMAP_URL_REGEX)) {
+  if (changeInfo.status === 'complete' && testRegex(tab.url!)) {
     chrome.action.enable(tabId)
-  } else if (!tab.url!.match(BEATMAP_URL_REGEX)) {
+  } else if (!testRegex(tab.url!)) {
     chrome.action.disable(tabId)
   }
 })

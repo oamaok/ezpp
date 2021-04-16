@@ -38,3 +38,42 @@ export type Beatmap = {
   url: string
   version: string
 }
+
+// does not contain "convert" or something
+export type PartialBeatmapset = {
+  artist: string
+  artist_unicode: string // note: it was nullable but it is now non-null since https://osu.ppy.sh/home/changelog/web/2021.330.0
+  covers: {
+    'card': string
+    'card@2x': string
+    'cover': string
+    'cover@2x': string
+    'list': string
+    'list@2x': string
+    'slimcover': string
+    'slimcover@2x': string
+  }
+  creator: string
+  favourite_count: number
+  hype: {
+    current: number
+    required: number
+  } | null
+  id: number
+  nsfw: boolean
+  play_count: number
+  preview_url: string // equivalent to `//b.ppy.sh/preview/${id}.mp3`
+  source: string
+  status:
+    | 'ranked'
+    | 'loved'
+    | 'graveyard'
+    | 'wip'
+    | 'pending'
+    | 'qualified'
+    | 'approved'
+  title: string
+  title_unicode: string
+  user_id: number
+  video: boolean
+}
