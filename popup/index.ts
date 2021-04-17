@@ -41,6 +41,13 @@ const resultElement = document.getElementById('result') as HTMLElement
 const errorElement = document.getElementById('error') as HTMLElement
 const bpmElement = document.getElementById('bpm') as HTMLElement
 const arElement = document.getElementById('ar') as HTMLElement
+const resultDetailsElement = document.getElementById('result-details')!
+const resultDetailsContainerElement = document.getElementById(
+  'result-details-container'
+)!
+const resultDetailsToggleElement = document.getElementById(
+  'result-details-toggle'
+)!
 
 const setResultText = createTextSetter(resultElement, 'result')
 
@@ -79,6 +86,15 @@ const setSongDetails = (metadataInOriginalLanguage: boolean) => {
   artistElement.innerText = metadataInOriginalLanguage
     ? artist_unicode || artist
     : artist
+}
+
+const setDetails = (...details: Array<string>) => {
+  resultDetailsElement.innerHTML = ''
+  details.forEach((s) => {
+    const pElement = document.createElement('p')
+    pElement.textContent = s
+    resultDetailsElement.appendChild(pElement)
+  })
 }
 
 const getMaxCombo = () => {
@@ -219,6 +235,11 @@ const calculate = () => {
         )
         pp = stdResult.pp
         stars = stdResult.stars
+        setDetails(
+          `Aim: ${Mth.round(pp.aim)}`,
+          `Speed: ${Mth.round(pp.speed)}`,
+          `Accuracy: ${Mth.round(pp.acc)}`
+        )
         arElement.innerText =
           cleanBeatmap.ar === undefined
             ? '?'
@@ -249,6 +270,7 @@ const calculate = () => {
           misses,
           accuracy
         )
+        setDetails(`Accuracy: ${pp.accuracy}`, `Strain: ${pp.strain}`)
         break
 
       default:
@@ -483,6 +505,18 @@ const initializeExtension = async ({
     fcResetButton.addEventListener('click', () => {
       resetCombo()
       calculate()
+    })
+
+    resultDetailsToggleElement.addEventListener('click', () => {
+      resultDetailsToggleElement.classList.toggle('active')
+      if (resultDetailsElement.classList.toggle('active')) {
+        resultDetailsContainerElement.style.setProperty(
+          'height',
+          `${resultDetailsElement.scrollHeight}px`
+        )
+      } else {
+        resultDetailsContainerElement.style.setProperty('height', '0px')
+      }
     })
 
     // Set the combo to the max combo by default
