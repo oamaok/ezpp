@@ -12,6 +12,7 @@ import { ParsedTaikoResult } from '../objects/taiko/parsedTaikoResult'
 import Mth from '../util/mth'
 import { beatmaps } from '../util/beatmaps'
 import { ObjectType } from '../objects/taiko/objectType'
+import Console from '../util/console'
 
 export const GREAT_MIN = 50
 export const GREAT_MID = 35
@@ -20,6 +21,9 @@ export const GREAT_MAX = 20
 export const COLOUR_SKILL_MULTIPLIER = 0.01
 export const RHYTHM_SKILL_MULTIPLIER = 0.014
 export const STAMINA_SKILL_MULTIPLIER = 0.02
+
+// Used in hard rock
+export const SLIDER_MULTIPLIER = (1.4 * 4) / 3
 
 export const createDifficultyHitObjects = (
   map: beatmap,
@@ -87,17 +91,24 @@ export const calculate = (
   parsedTaikoResult: ParsedTaikoResult,
   convert: boolean
 ) => {
+  const originalSV = map.sv
   const originalOverallDifficulty = map.od
   let clockRate = 1
+  map.sv *= taikoConverter.LEGACY_VELOCITY_MULTIPLIER
   if (mods & ojsama.modbits.dt) clockRate = 1.5
   if (mods & ojsama.modbits.ht) clockRate = 0.75
   if (mods & ojsama.modbits.hr) {
     const ratio = 1.4
-    map.od = Math.min(map.od * ratio, 10.0)
+    map.cs = Math.min(map.cs * 1.3, 10)
+    if (map.ar) map.ar = Math.min(map.ar * ratio, 10)
+    map.od = Math.min(map.od * ratio, 10)
+    map.hp = Math.min(map.hp * ratio, 10)
+    map.sv *= SLIDER_MULTIPLIER
   }
   if (mods & ojsama.modbits.ez) {
     const ratio = 0.5
     map.od *= ratio
+    map.sv *= 0.8
   }
 
   const skills = [
@@ -143,6 +154,7 @@ export const calculate = (
     clockRate,
     difficultyHitObjects.rawObjects
   )
+  map.sv = originalSV
   map.od = originalOverallDifficulty
   return attr
 }

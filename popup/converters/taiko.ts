@@ -118,8 +118,7 @@ export const shouldConvertSliderToHits = (
   let beatLength = ms_per_beat / speedMultiplier
 
   let sliderScoringPointDistance =
-    (BASE_SCORING_DISTANCE * (map.sv * LEGACY_VELOCITY_MULTIPLIER)) /
-    map.tick_rate
+    (BASE_SCORING_DISTANCE * map.sv) / map.tick_rate
 
   const taikoVelocity = sliderScoringPointDistance * map.tick_rate
   const taikoDuration = ((distance / taikoVelocity) * beatLength) | 0
