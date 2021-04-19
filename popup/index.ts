@@ -236,9 +236,9 @@ const calculate = () => {
         pp = stdResult.pp
         stars = stdResult.stars
         setDetails(
-          `Aim: ${Mth.round(pp.aim)}`,
-          `Speed: ${Mth.round(pp.speed)}`,
-          `Accuracy: ${Mth.round(pp.acc)}`
+          `${Mth.round(pp.aim)} aim`,
+          `${Mth.round(pp.speed)} speed`,
+          `${Mth.round(pp.acc)} accuracy`
         )
         arElement.innerText =
           cleanBeatmap.ar === undefined
@@ -270,7 +270,10 @@ const calculate = () => {
           misses,
           accuracy
         )
-        setDetails(`Accuracy: ${pp.accuracy}`, `Strain: ${pp.strain}`)
+        setDetails(
+          `${Mth.round(pp.accuracy)} accuracy`,
+          `${Mth.round(pp.strain)} strain`
+        )
         break
 
       default:
