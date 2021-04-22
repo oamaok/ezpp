@@ -103,7 +103,7 @@ export const calculate = (
     if (map.ar) map.ar = Math.min(map.ar * ratio, 10)
     map.od = Math.min(map.od * ratio, 10)
     map.hp = Math.min(map.hp * ratio, 10)
-    map.sv *= SLIDER_MULTIPLIER
+    //map.sv *= SLIDER_MULTIPLIER
   }
   if (mods & ojsama.modbits.ez) {
     const ratio = 0.5
