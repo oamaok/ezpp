@@ -19,5 +19,6 @@
   "analytics": "Send anonymous analytics data",
   "result": "That's about {0}pp.",
   "darkmode": "Enable darkmode",
-  "metadata-in-original-language": "Show beatmap metadata in original language"
+  "metadata-in-original-language": "Show beatmap metadata in original language",
+  "total-hits": "Total Hits"
 }
