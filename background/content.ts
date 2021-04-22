@@ -44,6 +44,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
       sendResponse({
         status: 'SUCCESS',
+        beatmapSet,
         beatmap,
         convert,
       })
