@@ -485,7 +485,22 @@ const initializeExtension = async ({
 
     accuracyElement.addEventListener('input', () => calculate())
     comboElement.addEventListener('input', () => calculate())
-    missesElement.addEventListener('input', () => calculate())
+    missesElement.addEventListener('input', () => {
+      if (cleanBeatmap.mode === MODE_TAIKO) {
+        // in taiko, the combo element transforms into 'total hits' and filling it by hand is such a pain, so let's auto fill it.
+        // this cannot be applied for std, because std is just a max combo rather than total hits.
+        // total hits = (300s + 100s + 50s), or (max combo - misses)
+        const totalHits =
+          pageInfo.beatmap.max_combo! -
+          Mth.clamp(
+            parseInt(missesElement.value) || 0,
+            0,
+            pageInfo.beatmap.max_combo!
+          )
+        comboElement.value = totalHits.toString()
+      }
+      calculate()
+    })
 
     fcResetButton.addEventListener('click', () => {
       resetCombo()
