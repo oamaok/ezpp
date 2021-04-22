@@ -1,7 +1,7 @@
 import ojsama from 'ojsama'
 
 import manifest from '../static/manifest.json'
-import { setLanguage, createTextSetter } from './translations'
+import { setLanguage, createTextSetter, resetTranslation } from './translations'
 import { loadSettings, onSettingsChange } from './settings'
 import { BEATMAP_URL_REGEX } from '../common/constants'
 import { loadAnalytics } from './analytics'
@@ -41,6 +41,7 @@ const resultElement = document.getElementById('result') as HTMLElement
 const errorElement = document.getElementById('error') as HTMLElement
 const bpmElement = document.getElementById('bpm') as HTMLElement
 const arElement = document.getElementById('ar') as HTMLElement
+const comboLabelElement = document.getElementById('combo-label') as HTMLElement
 
 const setResultText = createTextSetter(resultElement, 'result')
 
@@ -209,6 +210,8 @@ const calculate = (first: boolean = false) => {
 
     switch (cleanBeatmap.mode) {
       case MODE_STANDARD:
+        comboLabelElement.setAttribute('data-t', 'combo')
+        resetTranslation(comboLabelElement)
         document.documentElement.classList.add('mode-standard')
         const stdResult = std.calculatePerformance(
           cleanBeatmap,
@@ -230,6 +233,8 @@ const calculate = (first: boolean = false) => {
         break
 
       case MODE_TAIKO:
+        comboLabelElement.setAttribute('data-t', 'total-hits')
+        resetTranslation(comboLabelElement)
         document.documentElement.classList.add('mode-taiko')
         const attr = taiko.calculate(
           cleanBeatmap,

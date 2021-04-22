@@ -19,5 +19,6 @@
   "analytics": "匿名のアナリティクスデータを送信",
   "result": "およそ {0}pp.",
   "darkmode": "ダークモードを有効",
-  "metadata-in-original-language": "ビートマップのメタデータを元の言語で表示"
+  "metadata-in-original-language": "ビートマップのメタデータを元の言語で表示",
+  "total-hits": "総ヒット数"
 }
