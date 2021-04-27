@@ -70,5 +70,9 @@
   {
     "name": "Svenska",
     "code": "sv"
+  },
+  {
+    "name": "Български",
+    "code": "bg"
   }
 ]

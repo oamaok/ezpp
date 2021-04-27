@@ -1,0 +1,23 @@
+{
+  "error-occured": "Грешка предотврати разширението да функтионира: ",
+  "version-update-message": "Вече ползвате ezpp! v{0}",
+  "changelog": "Списък на промени",
+  "accuracy": "Точност",
+  "combo": "Комбо",
+  "empty-fc": "(празно = FC)",
+  "misses": "Пропуски",
+  "mod-hidden": "Hidden",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "DoubleTime",
+  "mod-flashlight": "Flashlight",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Easy",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut",
+  "language": "Език",
+  "settings": "Настройки",
+  "analytics": "Отправяне на анонимни аналитични данни",
+  "result": "Това са около {0}pp.",
+  "darkmode": "Включване на тъмен режим",
+  "metadata-in-original-language": "Показване на метаданни за бийтмапа в оригинален език"
+}
