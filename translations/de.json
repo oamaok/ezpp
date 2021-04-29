@@ -17,5 +17,7 @@
   "language": "Sprache",
   "settings": "Einstellungen",
   "analytics": "Sende anonyme analytische Daten",
-  "result": "Das sind ungefähr {0}pp."
+  "result": "Das sind ungefähr {0}pp.",
+  "darkmode": "Aktiviere Dunkelmodus",
+  "metadata-in-original-language": "Zeige Beatmap-Metadaten in Originalsprache an"
 }
