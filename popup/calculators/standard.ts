@@ -1,16 +1,6 @@
 import ojsama, { modbits } from 'ojsama'
 import Mth from '../util/mth'
 
-const calculateDTAR = (ms: number): number => {
-  if (ms < 300) {
-    return 11 // with DT, the AR is capped at 11
-  }
-  if (ms < 1200) {
-    return 11 - (ms - 300) / 150
-  }
-  return 5 - (ms - 1200) / 120
-}
-
 export const calculateRawApproachRate = (ar: number, clockRate: number = 1) => {
   const p = Mth.difficultyRange(ar, 1800, 1200, 450) / clockRate
   return p > 1200 ? (1800 - p) / 120 : (1200 - p) / 150 + 5
