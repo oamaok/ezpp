@@ -208,6 +208,7 @@ const calculate = (first: boolean = false) => {
     let stars = { total: 0 }
     let pp
 
+    cleanBeatmap.objects.sort((a, b) => a.time - b.time) // TODO: remove this after ojsama#27 is merged
     switch (cleanBeatmap.mode) {
       case MODE_STANDARD:
         comboLabelElement.setAttribute('data-t', 'combo')
