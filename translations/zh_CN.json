@@ -4,7 +4,7 @@
   "changelog": "更新日志",
   "accuracy": "准确率",
   "combo": "最大连击",
-  "empty-fc": "(留空 = 全连击)",
+  "empty-fc": "(留空 = FC)",
   "misses": "失误数",
   "mod-hidden": "Hidden",
   "mod-hardrock": "HardRock",
@@ -17,5 +17,7 @@
   "language": "语言",
   "settings": "设定",
   "analytics": "发送匿名分析数据",
-  "result": "约 {0}pp."
+  "result": "约 {0}pp.",
+  "darkmode": "打开深色模式",
+  "metadata-in-original-language": "以原语言显示谱面信息"
 }
