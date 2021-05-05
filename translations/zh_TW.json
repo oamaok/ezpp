@@ -17,5 +17,7 @@
   "language": "選擇語言",
   "settings": "設定",
   "analytics": "發送匿名分析資料",
-  "result": "約略 {0}pp."
+  "result": "約略 {0}pp.",
+  "darkmode": "開啟深色模式",
+  "metadata-in-original-language": "以原語言顯示圖譜資料"
 }
