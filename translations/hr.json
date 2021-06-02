@@ -1,0 +1,23 @@
+{
+  "error-occured": "Greška je spriječila proširenje da se učita pravilno: ",
+  "version-update-message": "Sada koristite ezpp! v{0}",
+  "changelog": "zapisnik o promjenama",
+  "accuracy": "Preciznost",
+  "combo": "Kombo",
+  "empty-fc": "(prazno = FC)",
+  "misses": "Promašaji",
+  "mod-hidden": "Skriveno",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "DoubleTime",
+  "mod-flashlight": "Svjetiljka",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Lako",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut",
+  "language": "Jezik",
+  "settings": "Postavke",
+  "analytics": "Pošalji anonimne analitičke podatke",
+  "result": "Toje oko prilike {0}pp.",
+  "darkmode": "Omogući Tamnu Temu",
+  "metadata-in-original-language": "Pokaži beatmap metapodatke u originalnom jeziku"
+}
