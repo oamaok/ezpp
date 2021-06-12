@@ -1,5 +1,5 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "ezpp!",
   "description": "Calculate pp for a beatmap directly in your browser.",
   "version": "1.10.2",
@@ -13,20 +13,19 @@
     }
   },
   "background": {
-    "service_worker": "background.js"
+    "scripts": ["background.js"]
   },
   "content_scripts": [{
     "matches": ["*://osu.ppy.sh/*"],
     "js": ["content.js"]
   }],
-  "action": {
+  "page_action": {
     "default_icon": "icon48.png",
     "default_popup": "popup.html"
   },
   "permissions": [
-    "tabs", "storage"
-  ],
-  "host_permissions": [
-    "*://*.ppy.sh/"
+    "tabs", "storage",
+    "https://*.ppy.sh/",
+    "http://*.ppy.sh/"
   ]
 }
