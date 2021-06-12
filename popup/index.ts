@@ -358,7 +358,9 @@ const getPageInfo = (url: string, tabId: number): Promise<PageInfo> =>
             defaultValue.combo = score.max_combo
           }
           defaultValue.miss = score.statistics.count_miss
-          defaultValue.mods = score.mods
+          defaultValue.mods = score.mods.map((mod) =>
+            mod.toUpperCase() === 'NC' ? 'DT' : mod
+          )
           // @ts-ignore
           resolve(info)
         }
