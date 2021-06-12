@@ -74,5 +74,9 @@
   {
     "name": "Български",
     "code": "bg"
+  },
+  {
+    "name": "Hrvatski",
+    "code": "hr"
   }
 ]
