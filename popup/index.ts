@@ -272,8 +272,9 @@ const calculate = () => {
 
     difficultyStarsElement.innerText = stars.total.toFixed(2)
     bpmElement.innerText = (Math.round(bpm * 10) / 10).toString()
-
-    setResultText(Math.round(pp.total))
+    
+    let total_pp = Math.round(pp.total)
+    setResultText(Number.isNaN(total_pp) ? 0 : total_pp)
   } catch (error) {
     displayError(error)
   }
