@@ -3,7 +3,7 @@ import ojsama from 'ojsama'
 import manifest from '../static/manifest.json'
 import { setLanguage, createTextSetter } from './translations'
 import { loadSettings, onSettingsChange } from './settings'
-import { BEATMAP_URL_REGEX } from '../common/constants'
+import { matchRegex, pageType } from '../common/constants'
 import { loadAnalytics } from './analytics'
 import * as std from './calculators/standard'
 import * as taiko from './calculators/taiko'
@@ -14,6 +14,7 @@ import { PageInfo } from './util/pageInfo'
 import Mth from './util/mth'
 import { TimingPoint } from './util/timingPoint'
 import Console from './util/console'
+import { Mod, ScoreData } from './util/score'
 
 require('./notifications')
 
@@ -26,6 +27,9 @@ const versionElement = document.querySelector('.version') as HTMLElement
 const titleElement = document.querySelector('.song-title') as HTMLElement
 const artistElement = document.querySelector('.artist') as HTMLElement
 const fcResetButton = document.querySelector('.fc-reset') as HTMLElement
+const accuracyResetButton = document.querySelector(
+  '.accuracy-reset'
+) as HTMLElement
 const difficultyNameElement = document.getElementById(
   'difficulty-name'
 ) as HTMLElement
@@ -52,6 +56,12 @@ let cleanBeatmap: ojsama.beatmap
 let parsedTaikoResult: ParsedTaikoResult
 let timingPoints: Array<TimingPoint>
 let pageInfo: PageInfo
+const defaultValue = {
+  accuracy: 0,
+  combo: -1,
+  miss: 0,
+  mods: new Array<Mod>(),
+}
 
 const keyModMap: { [key: string]: string } = {
   Q: 'mod-ez',
@@ -315,7 +325,48 @@ const getPageInfo = (url: string, tabId: number): Promise<PageInfo> =>
       convert: {},
     }
 
-    const match = url.match(BEATMAP_URL_REGEX)!
+    const result = matchRegex(url)!
+    if (result.pageType === pageType.Score) {
+      chrome.tabs.sendMessage(
+        tabId,
+        {
+          action: 'GET_SCORE_DATA',
+        },
+        (response) => {
+          if (!response) {
+            reject(new Error('Empty response from content script'))
+            return
+          }
+
+          if (response.status === 'ERROR') {
+            reject(response.error)
+            return
+          }
+
+          const score = response.score as ScoreData
+          info.mode = score.beatmap.mode
+          info.beatmapId = score.beatmap.id.toString()
+          info.beatmapSetId = score.beatmapset.id.toString()
+          info.beatmap = score.beatmap
+          defaultValue.accuracy = Math.round(score.accuracy * 10000) / 100
+          if (score.beatmap.mode === 'taiko') {
+            defaultValue.combo =
+              score.statistics.count_300 +
+              score.statistics.count_100 +
+              score.statistics.count_50
+          } else {
+            defaultValue.combo = score.max_combo
+          }
+          defaultValue.miss = score.statistics.count_miss
+          defaultValue.mods = score.mods.map((mod) =>
+            mod.toUpperCase() === 'NC' ? 'DT' : mod
+          )
+          // @ts-ignore
+          resolve(info)
+        }
+      )
+    }
+    const match = result.result
     info.isOldSite = match[2] !== 'beatmapsets'
 
     if (!info.isOldSite) {
@@ -482,11 +533,32 @@ const initializeExtension = async ({
 
     fcResetButton.addEventListener('click', () => {
       resetCombo()
+      missesElement.value = 0
+      calculate()
+    })
+
+    accuracyResetButton.addEventListener('click', () => {
+      accuracyElement.value = 100.0
       calculate()
     })
 
     // Set the combo to the max combo by default
     resetCombo()
+
+    // Set default values if from score page
+    if (defaultValue.combo !== -1) {
+      accuracyElement.value = defaultValue.accuracy
+      comboElement.value = defaultValue.combo
+      missesElement.value = defaultValue.miss
+      defaultValue.mods.forEach((mod) => {
+        const element = modifierElements.find(
+          ({ id }) => id === `mod-${mod.toLowerCase()}`
+        )
+        if (element) {
+          element.checked = true
+        }
+      })
+    }
 
     calculate()
   } catch (err) {

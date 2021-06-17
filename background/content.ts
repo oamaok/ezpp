@@ -27,6 +27,25 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
     }
   }
+  if (request.action === 'GET_SCORE_DATA') {
+    try {
+      sendResponse({
+        status: 'SUCCESS',
+        score: JSON.parse(document.getElementById('json-show')!.textContent!),
+      })
+    } catch (error) {
+      sendResponse({
+        status: 'ERROR',
+        error: {
+          message: error.message,
+          arguments: error.arguments,
+          type: error.type,
+          name: error.name,
+          stack: error.stack,
+        },
+      })
+    }
+  }
   if (request.action === 'GET_BEATMAP_STATS') {
     try {
       const beatmapSet = JSON.parse(
