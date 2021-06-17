@@ -21,7 +21,7 @@ const FETCH_ATTEMPTS = 3
 const UNSUPPORTED_GAMEMODE = 'Unsupported gamemode!' // TODO: Add to translations
 
 const containerElement = document.getElementById('container')!
-const headerElement = document.getElementById('header')!
+const headerElement = document.getElementById('header') as HTMLDivElement
 const versionElement = document.querySelector('.version') as HTMLElement
 const titleElement = document.querySelector('.song-title') as HTMLElement
 const artistElement = document.querySelector('.artist') as HTMLElement
@@ -79,6 +79,15 @@ const setSongDetails = (metadataInOriginalLanguage: boolean) => {
   artistElement.innerText = metadataInOriginalLanguage
     ? artist_unicode || artist
     : artist
+}
+
+const getColorForDifficulty = (sr: number): string => {
+  if (sr < 2) return '#88B300' // infinity - 1.99
+  if (sr < 2.7) return '#66CCFF' // 2 - 2.69
+  if (sr < 4) return '#FFCC22' // 2.7 - 3.99
+  if (sr < 5.3) return '#FF66AA' // 4.0 - 5.29
+  if (sr < 6.5) return '#8866EE' // 5.3 - 6.49
+  return '#000000' // 6.5+
 }
 
 const getMaxCombo = () => {
@@ -269,6 +278,11 @@ const calculate = () => {
 
     // Track results
     trackCalculateDebounced(analyticsData)
+
+    headerElement.style.setProperty(
+      'border-color',
+      getColorForDifficulty(stars.total)
+    )
 
     difficultyStarsElement.innerText = stars.total.toFixed(2)
     bpmElement.innerText = (Math.round(bpm * 10) / 10).toString()
