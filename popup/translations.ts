@@ -95,3 +95,10 @@ export const setLanguage = (language: string) => {
     ;(element as HTMLElement).innerText = getTranslation(translationKey)
   })
 }
+
+export const resetTranslation = (element: HTMLElement) => {
+  const translationKey = element.getAttribute('data-t')
+  if (translationKey) {
+    element.innerText = getTranslation(translationKey)
+  }
+}
