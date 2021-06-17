@@ -1,77 +1,32 @@
-import ojsama from 'ojsama'
+import ojsama, { modbits } from 'ojsama'
+import Mth from '../util/mth'
 
-const calculateDTAR = (ms: number): number => {
-  if (ms < 300) {
-    return 11 // with DT, the AR is capped at 11
-  }
-  if (ms < 1200) {
-    return 11 - (ms - 300) / 150
-  }
-  return 5 - (ms - 1200) / 120
+export const calculateRawApproachRate = (ar: number, clockRate: number = 1) => {
+  const p = Mth.difficultyRange(ar, 1800, 1200, 450) / clockRate
+  return p > 1200 ? (1800 - p) / 120 : (1200 - p) / 150 + 5
 }
 
 export const calculateApproachRate = (
   modifiers: number,
   ar: number
 ): number => {
-  let ms: number
-  switch (
-    modifiers &
-    (ojsama.modbits.ht |
-      ojsama.modbits.dt |
-      ojsama.modbits.ez |
-      ojsama.modbits.hr)
-  ) {
-    case ojsama.modbits.hr:
-      return Math.min(10, ar * 1.4)
-    case ojsama.modbits.ez:
-      return ar / 2
-
-    case ojsama.modbits.dt + ojsama.modbits.hr: {
-      if (ar < 4) {
-        ms = 1200 - 112 * ar
-      } else if (ar > 4) {
-        ms = 740 - 140 * (ar - 4)
-      } else {
-        ms = 864 - 124 * (ar - 3)
-      }
-      return calculateDTAR(ms)
-    }
-    case ojsama.modbits.dt + ojsama.modbits.ez:
-      return calculateDTAR(1200 - 40 * ar)
-
-    case ojsama.modbits.dt:
-      return calculateDTAR(ar > 5 ? 200 + (11 - ar) * 100 : 800 + (5 - ar) * 80)
-    case ojsama.modbits.ht: {
-      if (ar <= 5) return (1600 - (600 + 160 * (10 - ar))) / 120
-      ms = 600 + (10 - ar) * 200
-      if (ms >= 1200) return 15 - ms / 120
-      return 13 - ms / 150
-    }
-
-    case ojsama.modbits.ht + ojsama.modbits.hr: {
-      if (ar > 7) return 8.5
-      if (ar < 4) {
-        ms = 2700 - 252 * ar
-      } else if (ar < 5) {
-        ms = 1944 - 279 * (ar - 3)
-      } else {
-        ms = 1665 - 315 * (ar - 4)
-      }
-      if (ar < 6) {
-        return 15 - ms / 120
-      }
-      if (ar > 7) {
-        return 13 - ms / 150
-      }
-      return 15 - ms / 120
-    }
-    case ojsama.modbits.ht + ojsama.modbits.ez:
-      return (1800 - (1600 + 80 * (10 - ar))) / 120
-
-    default:
-      return ar
+  let adjustedAR = ar
+  let clockRate = 1
+  let max = Number.MAX_SAFE_INTEGER
+  if (modifiers & modbits.hr) {
+    adjustedAR *= 1.4
+    max = 10
   }
+  if (modifiers & modbits.ez) adjustedAR *= 0.5
+  if (modifiers & modbits.dt) {
+    clockRate = 1.5
+    max = 11
+  }
+  if (modifiers & modbits.ht) {
+    clockRate = 0.75
+    max = 9
+  }
+  return Math.min(calculateRawApproachRate(adjustedAR, clockRate), max)
 }
 
 export const calculatePerformance = (

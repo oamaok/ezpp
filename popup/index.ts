@@ -224,8 +224,8 @@ const calculate = () => {
             ? '?'
             : (
                 Math.round(
-                  std.calculateApproachRate(modifiers, cleanBeatmap.ar) * 10
-                ) / 10
+                  std.calculateApproachRate(modifiers, cleanBeatmap.ar) * 100
+                ) / 100
               ).toString()
         break
 
