@@ -16,4 +16,8 @@ export default class Mth {
     if (difficulty < 5) return mid - ((mid - min) * (5 - difficulty)) / 5
     return mid
   }
+
+  public static round(x: number): number {
+    return Math.round(x * 100) / 100
+  }
 }
