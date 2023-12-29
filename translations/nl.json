@@ -1,0 +1,23 @@
+{
+  "error-occured": "Een fout heeft ervoor gezorgd dat de extensie niet goed kan functioneren: ",
+  "version-update-message": "Je gebruikt nu ezpp! v{0}",
+  "changelog": "changelog",
+  "accuracy": "Nauwkeurigheid",
+  "combo": "Combo",
+  "empty-fc": "(leeg = FC)",
+  "misses": "Missers",
+  "mod-hidden": "Verborgen",
+  "mod-hardrock": "HardRock",
+  "mod-doubletime": "Hidden",
+  "mod-flashlight": "Flashlight",
+  "mod-nofail": "NoFail",
+  "mod-easy": "Easy",
+  "mod-halftime": "HalfTime",
+  "mod-spunout": "SpunOut",
+  "language": "Taal",
+  "settings": "Instellingen",
+  "analytics": "Stuur anonieme analytische data",
+  "result": "Dat is ongeveer {0}pp.",
+  "darkmode": "Darkmode inschakelen",
+  "metadata-in-original-language": "Toon beatmap metadata in originele taal"
+}
